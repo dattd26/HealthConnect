@@ -14,7 +14,7 @@ const AppointmentsPage = () => {
     const fetchUserData = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await axios.get("http://localhost:8080/api/auth/me", {
+        const response = await axios.get("http://localhost:8080/api/users/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUserId(response.data.id);

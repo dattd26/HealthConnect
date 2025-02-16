@@ -20,6 +20,10 @@ const Login = () => {
       localStorage.setItem('token', response.data);
       navigate('/dashboard'); // Chuyển hướng sau khi đăng nhập
     } catch (err) {
+      if (err.response && err.response.data) {
+        setError(err.response.data);
+      }
+      else
       setError('Tên đăng nhập hoặc mật khẩu không đúng!');
     }
   };

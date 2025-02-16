@@ -5,28 +5,22 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-@Entity
 @Table(name = "users")
+@Entity
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    private String fullName;
     private String username;
-
-    @Column(nullable = false)
+    private String email;
+    private String phone;
     private String password;
-
-    @Column(nullable = false)
     private String role; // PATIENT, DOCTOR, ADMIN
 
-    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Appointment> patientAppointments;
+    private String specialty;
+    private String license;
+    private boolean isVerified; // Admin xác thực
 
-    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Appointment> doctorAppointments;
-
-    // Constructors, Getters, and Setters
 }

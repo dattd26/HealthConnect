@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -22,5 +23,14 @@ public class UserService {
     }
     private String encodePassword(String password) {
         return new BCryptPasswordEncoder().encode(password);
+    }
+    public boolean checkExistsEmail(String email) {
+        return userRepository.existsByEmail(email);
+    }
+    public User saveUser(User user) {
+        return userRepository.save(user);
+    }
+    public List<User> getAllDoctors() {
+        return userRepository.findAllByRole("DOCTOR");
     }
 }

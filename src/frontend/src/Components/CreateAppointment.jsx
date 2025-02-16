@@ -13,9 +13,9 @@ const CreateAppointment = ({ doctors }) => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        "/api/appointments",
-        { doctorId, appointmentTime, notes },
-        { headers: { Authorization: `Bearer ${token}` } }
+        "http://localhost:8080/api/appointments",
+        { doctorId: parseInt(doctorId, 10), appointmentTime, notes },
+        { headers: { Authorization: `Bearer ${token}` , "Content-Type": "application/json"} }
       );
       alert("Lịch hẹn đã được tạo thành công!");
       navigate("/appointments");
@@ -32,7 +32,7 @@ const CreateAppointment = ({ doctors }) => {
           <label>Chọn bác sĩ:</label>
           <select
             value={doctorId}
-            onChange={(e) => setDoctorId(e.target.value)}
+            onChange={(e) => setDoctorId(parseInt(e.target.value))}
             required
           >
             <option value="">-- Chọn bác sĩ --</option>
