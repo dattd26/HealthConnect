@@ -3,6 +3,8 @@ package com.HealthConnect.Jwt;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import io.jsonwebtoken.Jwts;
 
@@ -10,7 +12,10 @@ import java.util.*;
 
 @Component
 public class JwtTokenProvider {
-    private final String SECRET_KEY = "thisisaverysecurejwtsecretkeythatshouldbeatleast32bytes";
+//    @Value("jwt.secret")
+    private String SECRET_KEY = "thisisaverysecurejwtsecretkeythatshouldbeatleast32bytes";
+    @Value("${jwt.expiration}")
+    private long jwtExpiration;
 
     public Claims extractAllClaims(String token) {
         return Jwts.parser().verifyWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(SECRET_KEY))).build().parseSignedClaims(token).getPayload();
@@ -25,11 +30,17 @@ public class JwtTokenProvider {
                 .claims(claims)
                 .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 10000 * 60 * 60))
+                .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(SECRET_KEY)))
                 .compact();
     }
-
+    public String resolveToken(HttpServletRequest http) {
+        String bearerToken = http.getHeader("Authorization");
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
+        }
+        return null;
+    }
     public String getUserFromJWT(String token) {
         return extractAllClaims(token).getSubject();
     }

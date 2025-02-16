@@ -17,7 +17,7 @@ const Login = () => {
         password
       });
       // Lưu JWT vào localStorage
-      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('token', response.data);
       navigate('/dashboard'); // Chuyển hướng sau khi đăng nhập
     } catch (err) {
       setError('Tên đăng nhập hoặc mật khẩu không đúng!');

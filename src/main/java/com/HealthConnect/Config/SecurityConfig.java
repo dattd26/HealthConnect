@@ -1,6 +1,8 @@
 package com.HealthConnect.Config;
 
+import com.HealthConnect.Jwt.JwtTokenFilter;
 import com.HealthConnect.Service.CustomUserDetailsService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -12,6 +14,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.List;
@@ -19,6 +22,8 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+    @Autowired
+    private JwtTokenFilter jwtTokenFilter;
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable());
@@ -32,9 +37,10 @@ public class SecurityConfig {
         }));
         http.authorizeHttpRequests((auth) -> auth
                 .requestMatchers(HttpMethod.POST,"/api/auth/**").permitAll()
-                .requestMatchers("/", "/error/**").permitAll()
+                .requestMatchers("/", "/error/**", "/api/auth/**").permitAll()
                 .anyRequest().authenticated())
-                .formLogin(Customizer.withDefaults());
+                .formLogin(Customizer.withDefaults())
+                .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

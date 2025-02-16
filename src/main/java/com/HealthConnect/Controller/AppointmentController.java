@@ -40,11 +40,11 @@ public class AppointmentController {
         appointmentService.cancelAppointment(appointmentId);
         return ResponseEntity.noContent().build();
     }
-    @GetMapping
-    public ResponseEntity<List<Appointment>> getUserAppointments(
-            @AuthenticationPrincipal User user
-    ) {
-        List<Appointment> appointments = appointmentService.getAppointmentsByUser(user);
-        return ResponseEntity.ok(appointments);
-    }
+//    @GetMapping
+//    public ResponseEntity<List<Appointment>> getUserAppointments(
+//            @AuthenticationPrincipal User user
+//    ) {
+//        List<Appointment> appointments = appointmentService.getAppointmentsByUser(user);
+//        return ResponseEntity.ok(appointments);
+//    }
 }

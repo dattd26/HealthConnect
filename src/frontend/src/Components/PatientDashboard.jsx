@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-
+import "./style.css"
 const PatientDashboard = () => {
   const [appointments, setAppointments] = useState([]);
   const navigate = useNavigate();

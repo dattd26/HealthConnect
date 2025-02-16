@@ -1,15 +1,10 @@
 import logo from './logo.svg';
 import './App.css';
-import Headers from './Components/Header.js';
-import VehicleList from './Components/VehicleList.js';
 import { Route, Routes } from 'react-router-dom';
 import Login from './Components/Login.jsx';
-import SellVehicle from './Components/SellVehicle.js';
-import VehiclesManager from './Components/VehiclesManage.js';
-import SearchFilter from './Components/SearchFilter.js';
-import ChatRoom from './Components/ChatRoom.jsx';
 import { useLocation } from 'react-router-dom';
 import PatientDashboard from './Components/PatientDashboard.jsx';
+import AppointmentsPage from './pages/AppointmentsPage.jsx';
 const App = () => {
     const location = useLocation();
     const vehicle = location.state ? location.state.vehicle : null;
@@ -47,6 +42,7 @@ const App = () => {
 
          <Route path="/login" element={<Login />} />
          <Route path="/dashboard" element={<PatientDashboard />} />
+         <Route path="/appointments" element={<AppointmentsPage />} />
          {/* <Route path="/sell-vehicle" element={<SellVehicle />} />
          <Route path="/vehicles-manager" element={<VehiclesManager />} />
          <Route path='/chat-room' element={<ChatRoom senderUsername={localStorage.getItem("user")} receiverUsername={(vehicle ? vehicle.owner : null)}/>}/> */}
