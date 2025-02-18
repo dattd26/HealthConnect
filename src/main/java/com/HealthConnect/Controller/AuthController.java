@@ -1,8 +1,10 @@
 package com.HealthConnect.Controller;
 
 import com.HealthConnect.Dto.AuthenticationRequest;
+import com.HealthConnect.Dto.RegisterRequest;
 import com.HealthConnect.Jwt.JwtTokenProvider;
 import com.HealthConnect.Model.User;
+import com.HealthConnect.Service.EmailService;
 import com.HealthConnect.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,6 +14,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,22 +33,32 @@ public class AuthController {
     private UserService userService;
 
     @Autowired
+    EmailService emailService;
+
+    @Autowired
     PasswordEncoder passwordEncoder;
     @PostMapping("/register")
-    public ResponseEntity<User> register(@RequestBody User user) {
+    public ResponseEntity<User> register(@RequestBody RegisterRequest request) {
         // Kiểm tra email/phone đã tồn tại
-        if (userService.checkExistsEmail(user.getEmail())) {
+        if (userService.checkExistsEmail(request.getEmail())) {
             throw new RuntimeException("Email đã được sử dụng!");
         }
-
+        User user = new User();
+        user.setFullName(request.getFullName());
+        user.setUsername(request.getUsername());
         // Mã hóa mật khẩu
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-
-        // Mặc định chưa xác thực nếu là bác sĩ
-        if (user.getRole().equals("DOCTOR")) {
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setEmail(request.getEmail());
+        user.setRole(request.getRole());
+        if ("DOCTOR".equalsIgnoreCase(request.getRole())) {
             user.setVerified(false);
+            user.setLicense(request.getLicense());
+            user.setSpecialty(request.getSpecialty());
         }
-
+        else {
+            String token = jwtTokenProvider.genarateTokens(user.getUsername());
+            emailService.sendVerificationEmail(user.getEmail(), token);
+        }
         User newUser = userService.saveUser(user);
         return ResponseEntity.ok(newUser);
     }
@@ -75,5 +88,16 @@ public class AuthController {
         }
     }
 
+    @GetMapping("/verify")
+    public ResponseEntity<String> verifyEmail(@RequestParam String token) {
+        String username = jwtTokenProvider.getUserFromJWT(token);
+
+        User user = userService.getUserByUsername(username).orElseThrow(() -> new RuntimeException("Khong tim thay user"));
+        user.setVerified(true);
+        userService.saveUser(user);
+
+        return ResponseEntity.ok("Xác thực thành công!");
+
+    }
 
 }
