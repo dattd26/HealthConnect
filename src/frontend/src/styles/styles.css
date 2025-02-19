@@ -1,0 +1,203 @@
+/* Import Google Fonts cho Roboto và Open Sans */
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Roboto:wght@700&display=swap');
+
+/* Định nghĩa biến CSS */
+:root {
+  --primary-color: #3498db;         /* Màu xanh dương chính */
+  --primary-hover: #2980b9;         /* Màu xanh đậm khi hover */
+  --white: #ffffff;                /* Màu trắng */
+  --light-gray: #f5f5f5;           /* Màu xám nhạt */
+  --font-title: 'Roboto', sans-serif;
+  --font-content: 'Open Sans', sans-serif;
+}
+
+/* Reset cơ bản */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Kiểu chữ và nền cho toàn bộ trang */
+body {
+  font-family: var(--font-content);
+  background-color: var(--light-gray);
+  color: #333;
+  line-height: 1.6;
+}
+
+/* Headings sử dụng font Roboto Bold */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-title);
+  color: var(--primary-color);
+}
+
+/* Liên kết */
+a {
+  text-decoration: none;
+  color: var(--primary-color);
+}
+
+/* Hình ảnh tối ưu */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* --------------------- */
+/*  Header               */
+/* --------------------- */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--white);
+  padding: 10px 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Logo */
+.header .logo {
+  display: flex;
+  align-items: center;
+}
+
+.header .logo img {
+  width: 40px;
+  height: 40px;
+  margin-right: 10px;
+}
+
+/* Navigation */
+.header .navigation ul {
+  display: flex;
+  list-style: none;
+}
+
+.header .navigation ul li {
+  margin: 0 15px;
+}
+
+.header .navigation ul li a {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* Các nút bấm */
+.btn {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.login-btn, .signup-btn {
+  background-color: var(--primary-color);
+  color: var(--white);
+  border: none;
+}
+
+.login-btn:hover, .signup-btn:hover {
+  background-color: var(--primary-hover);
+}
+
+.doctor-btn {
+  background-color: #e74c3c;  /* Màu nổi bật cho nút "Bác sĩ? Tham gia ngay" */
+  color: var(--white);
+  border: none;
+}
+
+.doctor-btn:hover {
+  background-color: #c0392b;
+}
+
+/* --------------------- */
+/*  Hero Section         */
+/* --------------------- */
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 60px 20px;
+  background-color: var(--white);
+}
+
+.hero .hero-content {
+  flex: 1;
+  padding-right: 20px;
+}
+
+.hero .hero-content h1 {
+  font-size: 36px;
+  margin-bottom: 20px;
+}
+
+.hero .hero-content p {
+  font-size: 18px;
+  margin-bottom: 30px;
+}
+
+.hero .cta-button {
+  background-color: var(--primary-color);
+  color: var(--white);
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.hero .cta-button:hover {
+  background-color: var(--primary-hover);
+}
+
+.hero .hero-image {
+  flex: 1;
+}
+
+/* --------------------- */
+/*  Footer               */
+/* --------------------- */
+footer {
+  background-color: var(--light-gray);
+  padding: 20px;
+  text-align: center;
+  font-size: 14px;
+}
+
+/* --------------------- */
+/*  Responsive           */
+/* --------------------- */
+@media (max-width: 768px) {
+  /* Header: điều chỉnh cho mobile */
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  /* Ẩn menu: có thể hiển thị theo toggle bằng JavaScript */
+  .header .navigation ul {
+    flex-direction: column;
+    width: 100%;
+    display: none;  /* Ban đầu ẩn, mở theo yêu cầu */
+  }
+
+  .header .navigation.active ul {
+    display: flex;
+  }
+
+  /* Hero Section: chuyển sang dạng cột */
+  .hero {
+    flex-direction: column;
+  }
+
+  .hero .hero-content {
+    padding-right: 0;
+    text-align: center;
+  }
+}
