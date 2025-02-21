@@ -1,9 +1,18 @@
-import React from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Search, Video, FileText, CreditCard, ChevronRight, Star, Menu } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import telemedicineImage from "../assets/images/telemedicine-7520691_1280.jpg";
-
+import { AuthContext } from '../context/AuthContext';
 const Homepage = () => {
+  const { user } = useContext(AuthContext);
+  const [isLogged, setIsLogged] = useState(false);  // Corrected syntax here
+
+  useEffect(() => {
+    if (user) {
+      setIsLogged(true);
+    }
+  }, [user]);  // Added user as dependency
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -27,15 +36,28 @@ const Homepage = () => {
             </nav>
 
             <div className="hidden md:flex items-center space-x-4">
-                <Link 
-                    to="/login"
-                    className="px-4 py-2 text-[#3498db] hover:bg-blue-50 rounded-lg"
-                >
-                    Đăng nhập
-                </Link>
-              <Link to="/register" className="px-4 py-2 bg-[#3498db] text-white rounded-lg hover:bg-blue-600">
-                Đăng ký
-              </Link>
+              {
+                isLogged ? (
+                  <Link 
+                    to="/dashboard"
+                    className="px-4 py-2 bg-[#3498db] text-white rounded-lg hover:bg-blue-600"
+                  >
+                    Dashboard
+                  </Link>
+                ) : (
+                  <>
+                    <Link 
+                        to="/login"
+                        className="px-4 py-2 text-[#3498db] hover:bg-blue-50 rounded-lg"
+                    >
+                        Đăng nhập
+                    </Link>
+                    <Link to="/register" className="px-4 py-2 bg-[#3498db] text-white rounded-lg hover:bg-blue-600">
+                      Đăng ký
+                    </Link> 
+                  </>
+                )
+              } 
             </div>
 
             <button className="md:hidden">

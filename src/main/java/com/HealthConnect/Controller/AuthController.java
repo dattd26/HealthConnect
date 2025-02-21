@@ -1,6 +1,7 @@
 package com.HealthConnect.Controller;
 
 import com.HealthConnect.Dto.AuthenticationRequest;
+import com.HealthConnect.Dto.LoginResponse;
 import com.HealthConnect.Dto.RegisterRequest;
 import com.HealthConnect.Jwt.JwtTokenProvider;
 import com.HealthConnect.Model.User;
@@ -18,6 +19,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 @RestController
@@ -63,7 +66,7 @@ public class AuthController {
         return ResponseEntity.ok(newUser);
     }
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody AuthenticationRequest request) {
+    public ResponseEntity<?> login(@RequestBody AuthenticationRequest request) {
         try {
 
             authenticationManager.authenticate(
@@ -76,18 +79,17 @@ public class AuthController {
             // Kiểm tra xác thực
             if (!user.isVerified()) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body("Tài khoản chưa được xác thực. Vui lòng kiểm tra email hoặc liên hệ Admin.");
+                        .body(new LoginResponse(null, user));
             }
 
             String token = jwtTokenProvider.genarateTokens(request.getUsername());
-            return ResponseEntity.ok(token);
+            return ResponseEntity.ok(new LoginResponse(token, user));
         }
         catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("Dang nhap khong thang cong");
         }
     }
-
     @GetMapping("/verify")
     public ResponseEntity<String> verifyEmail(@RequestParam String token) {
         String username = jwtTokenProvider.getUserFromJWT(token);
@@ -99,5 +101,32 @@ public class AuthController {
         return ResponseEntity.ok("Xác thực thành công!");
 
     }
+    @PostMapping("/validate")
+    public ResponseEntity<?> validateToken(@RequestBody Map<String, String> request) {
+        try {
+            String token = request.get("token");
+            if (token == null || token.isEmpty()) {
+                return ResponseEntity.badRequest().body("Token không được cung cấp");
+            }
 
+            // Kiểm tra tính hợp lệ của token
+            if (!jwtTokenProvider.validateToken(token)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Token không hợp lệ hoặc đã hết hạn");
+            }
+
+            // Lấy username từ token
+            String username = jwtTokenProvider.getUserFromJWT(token);
+
+            // Lấy thông tin user từ username (tùy chọn)
+            User user = userService.getUserByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("User không tồn tại"));
+
+            // Trả về thông tin user hoặc chỉ xác nhận token hợp lệ
+            return ResponseEntity.ok(new LoginResponse(token, user));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Xác thực token thất bại: " + e.getMessage());
+        }
+    }
 }

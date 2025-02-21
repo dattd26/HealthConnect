@@ -16,7 +16,7 @@ const PatientDashboard = () => {
         });
         setAppointments(response.data);
       } catch (err) {
-        console.error("Lỗi tải lịch hẹn:", err);
+        console.error("Lỗi tải lịch hẹn:", err); 
       }
     };
     fetchAppointments();
