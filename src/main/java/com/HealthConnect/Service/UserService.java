@@ -18,8 +18,8 @@ public class UserService {
         user.setPassword(encodePassword(user.getPassword()));
         return userRepository.save(user);
     }
-    public Optional<User> getUserByUsername(String username) {
-        return userRepository.findByUsername(username);
+    public User getUserByUsername(String username) {
+        return userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
     }
     private String encodePassword(String password) {
         return new BCryptPasswordEncoder().encode(password);
@@ -32,5 +32,8 @@ public class UserService {
     }
     public List<User> getAllDoctors() {
         return userRepository.findAllByRole("DOCTOR");
+    }
+    public User getUserProfile(Long userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
     }
 }

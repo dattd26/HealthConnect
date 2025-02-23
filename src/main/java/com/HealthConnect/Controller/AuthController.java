@@ -73,8 +73,7 @@ public class AuthController {
                     new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
             );
 
-            User user = userService.getUserByUsername(request.getUsername())
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+            User user = userService.getUserByUsername(request.getUsername());
 
             // Kiểm tra xác thực
             if (!user.isVerified()) {
@@ -94,7 +93,7 @@ public class AuthController {
     public ResponseEntity<String> verifyEmail(@RequestParam String token) {
         String username = jwtTokenProvider.getUserFromJWT(token);
 
-        User user = userService.getUserByUsername(username).orElseThrow(() -> new RuntimeException("Khong tim thay user"));
+        User user = userService.getUserByUsername(username);
         user.setVerified(true);
         userService.saveUser(user);
 
@@ -119,8 +118,7 @@ public class AuthController {
             String username = jwtTokenProvider.getUserFromJWT(token);
 
             // Lấy thông tin user từ username (tùy chọn)
-            User user = userService.getUserByUsername(username)
-                    .orElseThrow(() -> new RuntimeException("User không tồn tại"));
+            User user = userService.getUserByUsername(username);
 
             // Trả về thông tin user hoặc chỉ xác nhận token hợp lệ
             return ResponseEntity.ok(new LoginResponse(token, user));

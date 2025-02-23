@@ -15,18 +15,18 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/user")
 public class UserController {
 
     @Autowired
     UserService userService;
 
     @GetMapping("/me")
-    public ResponseEntity<Optional<User>> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<User> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        Optional<User> user = userService.getUserByUsername(userDetails.getUsername());
+        User user = userService.getUserByUsername(userDetails.getUsername());
         return ResponseEntity.ok(user);
     }
 
@@ -34,5 +34,14 @@ public class UserController {
     public ResponseEntity<List<User>> getAllDoctors() {
         List<User> doctors = userService.getAllDoctors();
         return ResponseEntity.ok(doctors);
+    }
+    @GetMapping("/profile")
+    public ResponseEntity<User> getUserProfile(@AuthenticationPrincipal UserDetails user) {
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        User profile = userService.getUserByUsername(user.getUsername());
+        return ResponseEntity.ok(profile);
     }
 }
