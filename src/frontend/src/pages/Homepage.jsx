@@ -11,6 +11,9 @@ const Homepage = () => {
     if (user) {
       setIsLogged(true);
     }
+    else {
+      setIsLogged(false);
+    }
   }, [user]);  // Added user as dependency
 
   return (

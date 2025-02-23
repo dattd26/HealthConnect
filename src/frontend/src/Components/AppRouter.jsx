@@ -7,7 +7,6 @@ import RegisterPage from "../pages/RegisterPage";
 import { ProtectedRoute } from "./ProtectedRoute";
 import PatientDashboard from "./PatientDashboard";
 import AppointmentsPage from "../pages/AppointmentsPage";
-import getDefaultRoute from "./getDefaultRoute";
 
 export const AppRouter = () => {
     const { user } = useContext(AuthContext);
