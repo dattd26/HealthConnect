@@ -1,131 +1,157 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 .dashboard-header {
-    background: #3498db;
+    background: linear-gradient(135deg, #3498db, #2ba0e9);
     color: white;
-    padding: 1rem;
-    border-radius: 10px;
+    padding: 1.5rem;
+    border-radius: 12px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-  }
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
   
-  .dashboard-header h1 {
+.dashboard-header h1 {
     margin: 0;
-    font-size: 1.5rem;
-  }
+    font-size: 2rem;
+    font-weight: 600;
+
+}
   
-  .emergency-button {
+.emergency-button {
     background: #e74c3c;
     color: white;
     border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
     cursor: pointer;
-    transition: background 0.2s ease;
-  }
+    transition: background 0.3s ease, transform 0.2s ease;
+}
   
-  .emergency-button:hover {
+.emergency-button:hover {
     background: #c0392b;
-  }
-  .health-stats {
+    transform: translateY(-2px);
+}
+.health-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-  }
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
   
-  .stat-item {
-    background: white;
-    padding: 1rem;
-    border-radius: 10px;
+.stat-item {
+    background: #f9f9f9;
+    padding: 1.5rem;
+    border-radius: 12px;
     text-align: center;
-  }
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease;
+}
   
-  .stat-item .label {
-    font-size: 0.9rem;
+.stat-item:hover {
+    transform: translateY(-2px);
+}
+  
+.stat-item .label {
+    font-size: 1rem;
     color: #7f8c8d;
-  }
+}
   
-  .stat-item .value {
-    font-size: 1.5rem;
+.stat-item .value {
+    font-size: 1.75rem;
     font-weight: bold;
     color: #2c3e50;
-  }
+}
   
-  .stat-item .trend {
-    font-size: 0.8rem;
+.stat-item .trend {
+    font-size: 0.9rem;
     color: #2ecc71;
-  }
+}
   
-  .stat-item .trend.up {
+.stat-item .trend.up {
     color: #e74c3c;
-  }
-  .health-chart {
-    padding: 1rem;
-    background: white;
-    border-radius: 10px;
-  }
+}
+.health-chart {
+    padding: 1.5rem;
+    background: #f9f9f9;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
   
-  .health-chart h2 {
+.health-chart h2 {
     margin-top: 0;
     color: #2c3e50;
-  }
-  .appointments, .messages {
-    padding: 1rem;
-    background: white;
-    border-radius: 10px;
-  }
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+.appointments, .messages {
+    padding: 1.5rem;
+    background: #f9f9f9;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
   
-  .appointments h2, .messages h2 {
+.appointments h2, .messages h2 {
     margin-top: 0;
     color: #2c3e50;
-  }
+    font-size: 1.5rem;
+    font-weight: 600;
+}
   
-  .appointment-item, .message-item {
-    padding: 0.5rem 0;
-    border-bottom: 1px solid #f0f0f0;
-  }
+.appointment-item, .message-item {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #e0e0e0;
+}
   
-  .appointment-item:last-child, .message-item:last-child {
+.appointment-item:last-child, .message-item:last-child {
     border-bottom: none;
-  }
-  .quick-actions {
+}
+.quick-actions {
     display: flex;
-    gap: 1rem;
-    padding: 1rem;
-    background: white;
-    border-radius: 10px;
-  }
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: #f9f9f9;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
   
-  .quick-actions button {
+.quick-actions button {
     background: #3498db;
     color: white;
     border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
     cursor: pointer;
-    transition: background 0.2s ease;
-  }
+    transition: background 0.3s ease, transform 0.2s ease;
+}
   
-  .quick-actions button:hover {
+.quick-actions button:hover {
     background: #2980b9;
-  }
-  .health-tips {
-    padding: 1rem;
-    background: white;
-    border-radius: 10px;
-  }
+    transform: translateY(-2px);
+}
+.health-tips {
+    padding: 1.5rem;
+    background: #f9f9f9;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
   
-  .health-tips h3 {
+.health-tips h3 {
     margin-top: 0;
     color: #2c3e50;
-  }
+    font-size: 1.5rem;
+    font-weight: 600;
+}
   
-  .health-tips ul {
+.health-tips ul {
     list-style: none;
     padding: 0;
-  }
+}
   
-  .health-tips li {
-    padding: 0.5rem 0;
+.health-tips li {
+    padding: 0.75rem 0;
     color: #7f8c8d;
-  }
+}
   
