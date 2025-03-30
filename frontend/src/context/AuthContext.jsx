@@ -1,5 +1,5 @@
 import React, { createContext, useEffect, useState } from "react";
-import axios from "axios";
+import { authService } from "../services/authService";
 export const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
@@ -8,28 +8,18 @@ export const AuthProvider = ({ children }) => {
 
     useEffect(() => {
         // Create a cancellation token
-        const cancelToken = axios.CancelToken.source();
+        // const cancelToken = axios.CancelToken.source();
 
         const validateToken = async () => {
             const token = localStorage.getItem('token');
             if (token) {
                 try {
-                    // Using axios instead of fetch for consistency and to utilize cancelToken
-                    const response = await axios.post(
-                        "http://localhost:8080/api/auth/validate",
-                        { token },
-                        {
-                            headers: { "Content-Type": "application/json" },
-                            cancelToken: cancelToken.token
-                        }
-                    );
+                    const data = await authService.validate(token)
                     
-                    setUser(response.data.user);
+                    setUser(data.userData);
                 } catch (error) {
-                    if (!axios.isCancel(error)) {
-                        console.error("Lỗi xác thực token:", error);
-                        logout();
-                    }
+                    console.error("Lỗi xác thực token:", error);
+                    logout();
                 } finally {
                     setLoading(false);
                 }
@@ -41,9 +31,9 @@ export const AuthProvider = ({ children }) => {
         validateToken();
 
         // Cleanup function
-        return () => {
-            cancelToken.cancel("Component unmounted");
-        };
+        // return () => {
+        //     cancelToken.cancel("Component unmounted");
+        // };
     }, []);
 
     const logout = () => {
@@ -53,16 +43,14 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (username, password) => {
         try {
-            const response = await axios.post('http://localhost:8080/api/auth/login', {
-                username,
-                password
-            });
+            const data = await authService.login(username, password);
             
-            const { token, user } = response.data;
+            const { token, user } = data;
 
             localStorage.setItem('token', token);
             setUser(user);
-
+            console.log(user.role);
+            console.log(localStorage.getItem('token'));
             return user.role;
         } catch (error) {
             throw new Error('Login failed');

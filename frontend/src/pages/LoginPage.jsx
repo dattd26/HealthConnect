@@ -1,13 +1,13 @@
 import React, { useContext, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import getDefaultRoute from "../Components/common/getDefaultRoute"
 import "../styles/LoginPage.css";
 
 export const LoginPage = () => {
     const { login } = useContext(AuthContext);
     const navigate = useNavigate();
-    const location = useLocation();
+    // const location = useLocation();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');

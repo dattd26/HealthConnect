@@ -3,14 +3,15 @@ import { HealthChart } from "../patient/HealthChart";
 import { HealthMetrics } from "../patient/HealthMetrics";
 import AppointmentsList from "../appointment/AppointmentsList";
 import { HealthTips } from "../home/HealthTips";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import axios from "axios";
+import { AuthContext } from "../../context/AuthContext";
 
 const PatientDashboard = () => {
   const [userInfor, setUserInFor] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const { user} = useContext(AuthContext);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -61,7 +62,7 @@ const PatientDashboard = () => {
         {/* Upcoming Appointments */}
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-xl font-semibold mb-4">Lịch hẹn sắp tới</h2>
-          <AppointmentsList />
+          <AppointmentsList userId={user.id} role={user.role}/>
         </div>
 
         {/* Recent Messages */}

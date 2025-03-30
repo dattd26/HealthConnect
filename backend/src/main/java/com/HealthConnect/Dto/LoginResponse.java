@@ -9,6 +9,6 @@ import lombok.Getter;
 @AllArgsConstructor
 public class LoginResponse {
     String token;
-    User user;
+    UserDTO user;
 
 }
