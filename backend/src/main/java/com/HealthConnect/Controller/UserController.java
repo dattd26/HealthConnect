@@ -26,6 +26,7 @@ public class UserController {
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+        System.out.println(userDetails.getUsername());
         User user = userService.getUserByUsername(userDetails.getUsername());
         return ResponseEntity.ok(user);
     }

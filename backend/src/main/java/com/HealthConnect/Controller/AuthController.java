@@ -3,6 +3,7 @@ package com.HealthConnect.Controller;
 import com.HealthConnect.Dto.AuthenticationRequest;
 import com.HealthConnect.Dto.LoginResponse;
 import com.HealthConnect.Dto.RegisterRequest;
+import com.HealthConnect.Dto.UserDTO;
 import com.HealthConnect.Jwt.JwtTokenProvider;
 import com.HealthConnect.Model.User;
 import com.HealthConnect.Service.EmailService;
@@ -78,11 +79,11 @@ public class AuthController {
             // Kiểm tra xác thực
             if (!user.isVerified()) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(new LoginResponse(null, user));
+                        .body(new LoginResponse(null, new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getRole())));
             }
 
             String token = jwtTokenProvider.genarateTokens(request.getUsername());
-            return ResponseEntity.ok(new LoginResponse(token, user));
+            return ResponseEntity.ok(new LoginResponse(token, new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getRole())));
         }
         catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -121,7 +122,8 @@ public class AuthController {
             User user = userService.getUserByUsername(username);
 
             // Trả về thông tin user hoặc chỉ xác nhận token hợp lệ
-            return ResponseEntity.ok(new LoginResponse(token, user));
+            return ResponseEntity.ok(Map.of("userData", new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getRole()), "tokenValid", true));
+//            return ResponseEntity.ok(token);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("Xác thực token thất bại: " + e.getMessage());

@@ -1,12 +1,18 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Search, Video, FileText, CreditCard, ChevronRight, Star, Menu } from 'lucide-react';
+import { Video, FileText, CreditCard, ChevronRight, Star, Menu } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import telemedicineImage from "../assets/images/telemedicine-7520691_1280.jpg";
 import { AuthContext } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 const Homepage = () => {
-  const { user } = useContext(AuthContext);
+  const { user, logout } = useContext(AuthContext);
   const [isLogged, setIsLogged] = useState(false);  // Corrected syntax here
+  const navigate = useNavigate();
 
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  }
   useEffect(() => {
     if (user) {
       setIsLogged(true);
@@ -32,21 +38,26 @@ const Homepage = () => {
             </div>
             
             <nav className="hidden md:flex items-center space-x-6">
-              <a href="#" className="text-gray-700 hover:text-[#3498db]">Trang chủ</a>
-              <a href="#" className="text-gray-700 hover:text-[#3498db]">Tìm bác sĩ</a>
-              <a href="#" className="text-gray-700 hover:text-[#3498db]">Giới thiệu</a>
-              <a href="#" className="text-gray-700 hover:text-[#3498db]">Blog</a>
+              <a  className="text-gray-700 hover:text-[#3498db]">Trang chủ</a>
+              <a  className="text-gray-700 hover:text-[#3498db]">Tìm bác sĩ</a>
+              <a  className="text-gray-700 hover:text-[#3498db]">Giới thiệu</a>
+              <a  className="text-gray-700 hover:text-[#3498db]">Blog</a>
             </nav>
 
             <div className="hidden md:flex items-center space-x-4">
               {
                 isLogged ? (
-                  <Link 
-                    to="/dashboard"
-                    className="px-4 py-2 bg-[#3498db] text-white rounded-lg hover:bg-blue-600"
-                  >
-                    Dashboard
-                  </Link>
+                  <>
+                    <Link 
+                      to="/dashboard"
+                      className="px-4 py-2 bg-[#3498db] text-white rounded-lg hover:bg-blue-600"
+                    >
+                      Dashboard
+                    </Link>
+                    <button onClick={handleLogout} className="px-4 py-2 bg-[#3498db] text-white rounded-lg hover:bg-blue-600">
+                      Đăng xuất
+                    </button>
+                  </>
                 ) : (
                   <>
                     <Link 
@@ -81,7 +92,7 @@ const Homepage = () => {
               Kết nối với bác sĩ hàng đầu chỉ sau 5 phút, mọi lúc mọi nơi.
             </p>
             <button className="px-8 py-4 bg-[#3498db] text-white rounded-lg hover:bg-blue-600 flex items-center">
-              Đặt lịch ngay
+              <Link to="/appointments"> Đặt lịch ngay</Link> 
               <ChevronRight className="ml-2 w-5 h-5" />
             </button>
           </div>
@@ -170,7 +181,7 @@ const Homepage = () => {
                     <span className="ml-1">4.9 (120 đánh giá)</span>
                   </div>
                   <button className="w-full px-4 py-2 bg-[#3498db] text-white rounded-lg hover:bg-blue-600">
-                    Đặt lịch ngay
+                    <Link to="/appointments"> Đặt lịch ngay</Link> 
                   </button>
                 </div>
               </div>
@@ -197,10 +208,10 @@ const Homepage = () => {
             <div>
               <h5 className="text-xl font-bold mb-4">Pháp lý</h5>
               <div className="space-y-2">
-                <a href="#" className="block text-gray-400 hover:text-white">
+                <a className="block text-gray-400 hover:text-white">
                   Chính sách bảo mật
                 </a>
-                <a href="#" className="block text-gray-400 hover:text-white">
+                <a className="block text-gray-400 hover:text-white">
                   Điều khoản sử dụng
                 </a>
               </div>

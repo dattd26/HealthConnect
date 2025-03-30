@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 // import './Login.css';
 
 const Login = () => {
@@ -8,14 +7,12 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:8080/api/auth/login', {
-        username,
-        password
-      });
+      const response = await login(username, password);
       // Lưu JWT vào localStorage
       localStorage.setItem('token', response.data);
       navigate('/dashboard'); // Chuyển hướng sau khi đăng nhập

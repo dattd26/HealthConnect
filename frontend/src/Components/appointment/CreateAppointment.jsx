@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../style.css"
+import { appointmentService } from "../../services/appointmentService";
 const CreateAppointment = ({ doctors }) => {
   const [doctorId, setDoctorId] = useState("");
   const [appointmentTime, setAppointmentTime] = useState("");
@@ -11,12 +11,8 @@ const CreateAppointment = ({ doctors }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.post(
-        "http://localhost:8080/api/appointments",
-        { doctorId: parseInt(doctorId, 10), appointmentTime, notes },
-        { headers: { Authorization: `Bearer ${token}` , "Content-Type": "application/json"} }
-      );
+      const data = await appointmentService.createAppointment({doctorId: parseInt(doctorId, 10), appointmentTime, notes})
+      console.log(data)
       alert("Lịch hẹn đã được tạo thành công!");
       navigate("/appointments");
     } catch (err) {

@@ -1,11 +1,14 @@
 package com.HealthConnect.Controller;
 
+import com.HealthConnect.Dto.AppointmentRequest;
 import com.HealthConnect.Model.Appointment;
 import com.HealthConnect.Model.User;
 import com.HealthConnect.Service.AppointmentService;
+import com.HealthConnect.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,6 +19,9 @@ public class AppointmentController {
 
     @Autowired
     private AppointmentService appointmentService;
+
+    @Autowired
+    private UserService userService;
 
     @GetMapping("/patient/{patientId}")
     public ResponseEntity<List<Appointment>> getAppointmentsByPatient(@PathVariable Long patientId) {
@@ -30,9 +36,17 @@ public class AppointmentController {
     }
 
     @PostMapping
-    public ResponseEntity<Appointment> createAppointment(@RequestBody Appointment appointment) {
-        Appointment newAppointment = appointmentService.createAppointment(appointment);
-        return ResponseEntity.ok(newAppointment);
+    public ResponseEntity<Appointment> createAppointment(@AuthenticationPrincipal UserDetails userDetails, @RequestBody AppointmentRequest request) {
+
+
+        Appointment newAppointment = new Appointment();
+        newAppointment.setAppointmentTime(request.getAppointmentTime());
+        newAppointment.setDoctor(userService.getUserById(request.getDoctorId()));
+        newAppointment.setPatient(userService.getUserByUsername(userDetails.getUsername()));
+        newAppointment.setStatus("SCHEDULED");
+        newAppointment.setNotes(request.getNotes());
+
+        return ResponseEntity.ok(appointmentService.createAppointment(newAppointment));
     }
 
     @PutMapping("/{appointmentId}/cancel")

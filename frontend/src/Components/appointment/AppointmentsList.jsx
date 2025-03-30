@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import { appointmentService } from "../../services/appointmentService";
 import AppointmentCard from "./AppointmentCard";
 import "../style.css"
+
 const AppointmentsList = ({ userId, role }) => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -9,15 +10,8 @@ const AppointmentsList = ({ userId, role }) => {
   useEffect(() => {
     const fetchAppointments = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const endpoint = role === "PATIENT" 
-          ? `/api/appointments/patient/${userId}`
-          : `/api/appointments/doctor/${userId}`;
-        
-        const response = await axios.get(endpoint, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setAppointments(response.data);
+        const data = await appointmentService.getAppointments(userId, role);
+        setAppointments(data);
       } catch (err) {
         console.error("Lỗi tải lịch hẹn:", err);
       } finally {
