@@ -39,7 +39,7 @@ public class HealthDataController {
             return ResponseEntity.status(401).build();
         }
         User user = userService.getUserByUsername(userDetails.getUsername());
-        if (start == null) start = LocalDateTime.now().minusDays(7);
+        if (start == null) start = LocalDateTime.now().minusDays(99);
         if (end == null) end = LocalDateTime.now();
 
 //        if (!List.of("BLOOD_PRESSURE", "BLOOD_GLUCOSE", "HEART_RATE", "BODY_TEMPERATURE").contains(type)) {
