@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import AppointmentCard from "./AppointmentCard";
-import "./style.css"
+import "../style.css"
 const AppointmentsList = ({ userId, role }) => {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);

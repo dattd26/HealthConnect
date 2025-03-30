@@ -1,8 +1,8 @@
-import { EmergencyButton } from "./EmergencyButton";
-import { HealthChart } from "./HealthChart";
-import { HealthMetrics } from "./HealthMetrics";
-import AppointmentsList from "./AppointmentsList";
-import { HealthTips } from "./HealthTips";
+import { EmergencyButton } from "../patient/EmergencyButton";
+import { HealthChart } from "../patient/HealthChart";
+import { HealthMetrics } from "../patient/HealthMetrics";
+import AppointmentsList from "../appointment/AppointmentsList";
+import { HealthTips } from "../home/HealthTips";
 import { useEffect, useState } from "react";
 import axios from "axios";
 

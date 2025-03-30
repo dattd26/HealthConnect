@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import AppointmentsList from "../Components/AppointmentsList";
-import CreateAppointment from "../Components/CreateAppointment";
+import AppointmentsList from "../Components/appointment/AppointmentsList";
+import CreateAppointment from "../Components/appointment/CreateAppointment";
 import { useNavigate } from "react-router-dom";
 import "../Components/style.css"
 const AppointmentsPage = () => {

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Activity, Heart, Thermometer, Droplet } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import axios from "axios";
 
 // Map type từ API tới title và icon

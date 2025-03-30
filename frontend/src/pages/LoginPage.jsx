@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useLocation, useNavigate } from "react-router-dom";
-import getDefaultRoute from "../Components/getDefaultRoute";
+import getDefaultRoute from "../Components/common/getDefaultRoute"
 import "../styles/LoginPage.css";
 
 export const LoginPage = () => {

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import "./style.css"
+import "../style.css"
 const CreateAppointment = ({ doctors }) => {
   const [doctorId, setDoctorId] = useState("");
   const [appointmentTime, setAppointmentTime] = useState("");

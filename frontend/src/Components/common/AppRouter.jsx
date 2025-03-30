@@ -1,14 +1,14 @@
 import React, { useContext, useEffect } from "react";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../../context/AuthContext";
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
-import Homepage from "../pages/Homepage";
-import { LoginPage } from "../pages/LoginPage";
-import RegisterPage from "../pages/RegisterPage";
-import { ProtectedRoute } from "./ProtectedRoute";
-import PatientDashboard from "./PatientDashboard";
-import AppointmentsPage from "../pages/AppointmentsPage";
+import Homepage from "../../pages/Homepage";
+import { LoginPage } from "../../pages/LoginPage";
+import RegisterPage from "../../pages/RegisterPage";
+import { ProtectedRoute } from "../auth/ProtectedRoute";
+import PatientDashboard from "../patient/PatientDashboard";
+import AppointmentsPage from "../../pages/AppointmentsPage";
 
-export const AppRouter = () => {
+const AppRouter = () => {
     const { user } = useContext(AuthContext);
     const location = useLocation();
     const navigate = useNavigate();
@@ -43,3 +43,4 @@ export const AppRouter = () => {
         </Routes>
     );
 }
+export default AppRouter;
