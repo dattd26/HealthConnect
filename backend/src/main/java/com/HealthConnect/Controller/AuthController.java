@@ -75,15 +75,20 @@ public class AuthController {
             );
 
             User user = userService.getUserByUsername(request.getUsername());
-
+            UserDTO userDTORes = UserDTO
+                    .builder()
+                    .username(user.getUsername())
+                    .email(user.getEmail())
+                    .role(user.getRole())
+                    .build();
             // Kiểm tra xác thực
             if (!user.isVerified()) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(new LoginResponse(null, new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getRole())));
+                        .body(new LoginResponse(null, userDTORes));
             }
 
             String token = jwtTokenProvider.genarateTokens(request.getUsername());
-            return ResponseEntity.ok(new LoginResponse(token, new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getRole())));
+            return ResponseEntity.ok(new LoginResponse(token, userDTORes));
         }
         catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -120,9 +125,14 @@ public class AuthController {
 
             // Lấy thông tin user từ username (tùy chọn)
             User user = userService.getUserByUsername(username);
-
+            UserDTO userDTORes = UserDTO
+                    .builder()
+                    .username(user.getUsername())
+                    .email(user.getEmail())
+                    .role(user.getRole())
+                    .build();
             // Trả về thông tin user hoặc chỉ xác nhận token hợp lệ
-            return ResponseEntity.ok(Map.of("userData", new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getRole()), "tokenValid", true));
+            return ResponseEntity.ok(Map.of("userData", userDTORes, "tokenValid", true));
 //            return ResponseEntity.ok(token);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

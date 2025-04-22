@@ -7,11 +7,12 @@ import RegisterPage from "../../pages/RegisterPage";
 import { ProtectedRoute } from "../auth/ProtectedRoute";
 import PatientDashboard from "../patient/PatientDashboard";
 import AppointmentsPage from "../../pages/AppointmentsPage";
+import ProfilePage from "../../pages/ProfilePage";
 
 const AppRouter = () => {
-    const { user } = useContext(AuthContext);
-    const location = useLocation();
-    const navigate = useNavigate();
+    // const { user } = useContext(AuthContext);
+    // const location = useLocation();
+    // const navigate = useNavigate();
 
     // useEffect(() => {
     //     const defaultRoute = getDefaultRoute(user?.role?.toLowerCase());
@@ -38,6 +39,11 @@ const AppRouter = () => {
             <Route path="/appointments" element={
                 <ProtectedRoute allowedRoles={['PATIENT']}>
                     <AppointmentsPage />
+                </ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+                <ProtectedRoute allowedRoles={['PATIENT']}>
+                    <ProfilePage />
                 </ProtectedRoute>
             } />
         </Routes>
