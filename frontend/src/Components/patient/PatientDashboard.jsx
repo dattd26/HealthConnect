@@ -6,6 +6,34 @@ import { HealthTips } from "../home/HealthTips";
 import { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../../context/AuthContext";
+import { Link } from "react-router-dom";
+import { Calendar, User, FileText, MessageSquare } from "lucide-react";
+
+const QuickActions = () => {
+  return (
+    <div className="space-y-4">
+      <h2 className="text-xl font-semibold mb-4">Hành động nhanh</h2>
+      <div className="grid grid-cols-2 gap-3">
+        <Link to="/appointments" className="bg-blue-600 text-white rounded-lg p-3 flex items-center justify-center hover:bg-blue-700 transition duration-300">
+          <Calendar className="w-5 h-5 mr-2" />
+          <span>Đặt lịch khám</span>
+        </Link>
+        <Link to="/profile" className="bg-green-600 text-white rounded-lg p-3 flex items-center justify-center hover:bg-green-700 transition duration-300">
+          <User className="w-5 h-5 mr-2" />
+          <span>Hồ sơ của tôi</span>
+        </Link>
+        <button className="bg-purple-600 text-white rounded-lg p-3 flex items-center justify-center hover:bg-purple-700 transition duration-300">
+          <MessageSquare className="w-5 h-5 mr-2" />
+          <span>Tư vấn trực tuyến</span>
+        </button>
+        <Link to="/profile/medical-history" className="bg-amber-600 text-white rounded-lg p-3 flex items-center justify-center hover:bg-amber-700 transition duration-300">
+          <FileText className="w-5 h-5 mr-2" />
+          <span>Lịch sử khám</span>
+        </Link>
+      </div>
+    </div>
+  );
+};
 
 const PatientDashboard = () => {
   const [userInfor, setUserInFor] = useState({});
@@ -70,13 +98,12 @@ const PatientDashboard = () => {
           <h2 className="text-xl font-semibold mb-4">Tin nhắn gần đây</h2>
           {/* Add a component to display recent messages */}
           {/* <RecentMessages /> */}
+          <p className="text-gray-500 italic">Không có tin nhắn nào</p>
         </div>
 
         {/* Quick Actions */}
         <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Hành động nhanh</h2>
-          {/* Add a component for quick actions */}
-          {/* <QuickActions /> */}
+          <QuickActions />
         </div>
 
         {/* Health Tips */}

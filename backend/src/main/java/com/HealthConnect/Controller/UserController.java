@@ -1,15 +1,17 @@
 package com.HealthConnect.Controller;
 
+import com.HealthConnect.Dto.HealthRecordDTO;
+import com.HealthConnect.Dto.UserDTO;
+import com.HealthConnect.Model.HealthRecord;
 import com.HealthConnect.Model.User;
+import com.HealthConnect.Repository.HealthRecordRepository;
 import com.HealthConnect.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +22,9 @@ public class UserController {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    HealthRecordRepository healthRecordRepository;
 
     @GetMapping("/me")
     public ResponseEntity<User> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
@@ -37,12 +42,67 @@ public class UserController {
         return ResponseEntity.ok(doctors);
     }
     @GetMapping("/profile")
-    public ResponseEntity<User> getUserProfile(@AuthenticationPrincipal UserDetails user) {
+    public ResponseEntity<UserDTO> getUserProfile(@AuthenticationPrincipal UserDetails user) {
         if (user == null) {
             return ResponseEntity.status(401).build();
         }
 
         User profile = userService.getUserByUsername(user.getUsername());
-        return ResponseEntity.ok(profile);
+        UserDTO userDTOResponse = UserDTO
+                .builder()
+                .fullName(profile.getFullName())
+                .gender(profile.getGender())
+                .email(profile.getEmail())
+                .dateOfBirth(profile.getDateOfBirth())
+                .phone(profile.getPhone())
+                .address(profile.getAddress())
+                .role(profile.getRole())
+                .build();
+        return ResponseEntity.ok(userDTOResponse);
+    }
+
+    @GetMapping("/health-record")
+    public ResponseEntity<?> getCurrentUserHealthRecords(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        User user = userService.getUserByUsername(userDetails.getUsername());
+        HealthRecord record = healthRecordRepository.findByUser(user).orElseGet(() -> null);
+        if (record == null) {
+            return ResponseEntity.badRequest().body("User chua co ban record nao");
+        }
+        return ResponseEntity.ok(new HealthRecordDTO(record.getBloodType(), record.getHeight(), record.getWeight(),
+                record.getBmi(),
+                record.getMedicalConditions(),
+                record.getAllergies(),
+                record.getMedications()));
+    }
+    @PutMapping("/health-record/update")
+    public ResponseEntity<?> updateUserHealthRecord(@AuthenticationPrincipal UserDetails userDetails, @RequestBody HealthRecordDTO recordDTO) {
+        if (userDetails == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        User user = userService.getUserByUsername(userDetails.getUsername());
+        HealthRecord record = healthRecordRepository.findByUser(user)
+                .orElseGet(() -> {
+                    HealthRecord newRecord = new HealthRecord();
+                    newRecord.setUser(user);
+                    return newRecord;
+                });
+
+//        if (record == null) {
+//            record = new HealthRecord();
+//        }
+
+        record.setBloodType(recordDTO.getBloodType());
+        record.setHeight(recordDTO.getHeight());
+        record.setWeight(recordDTO.getWeight());
+        record.setBmi(recordDTO.getBmi());
+        record.setMedicalConditions(recordDTO.getMedicalConditions());
+        record.setMedications(recordDTO.getMedications());
+
+        return ResponseEntity.ok(healthRecordRepository.save(record));
     }
 }

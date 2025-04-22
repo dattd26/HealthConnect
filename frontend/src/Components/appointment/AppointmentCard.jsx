@@ -33,8 +33,14 @@ const AppointmentCard = ({ appointment, role }) => {
       <p>
         <strong>Trạng thái:</strong> {appointment.status}
       </p>
+      <p>
+        <strong>Google Meet:</strong> <a href="https://meet.google.com/hqd-yzpu-hug" target="_blank" rel="noopener noreferrer">https://meet.google.com/hqd-yzpu-hug</a>
+      </p>
       {appointment.status === "SCHEDULED" && (
         <button onClick={handleCancel}>Hủy lịch hẹn</button>
+      )}
+      {appointment.status === "IN_PROGRESS" && (
+        <button onClick={handleCancel}>Kết thúc lịch hẹn</button>
       )}
     </div>
   );

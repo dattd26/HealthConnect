@@ -2,6 +2,7 @@ package com.HealthConnect.Model;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -14,8 +15,11 @@ public class User {
 
     private String fullName;
     private String username;
+    private Date dateOfBirth;
+    private String address;
     private String email;
     private String phone;
+    private String gender;
     private String password;
     private String role; // PATIENT, DOCTOR, ADMIN
 
@@ -23,4 +27,6 @@ public class User {
     private String license;
     private boolean isVerified; // Admin xác thực
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private HealthRecord healthRecord;
 }
