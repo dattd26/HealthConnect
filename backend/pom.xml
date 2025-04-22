@@ -40,6 +40,7 @@
 			<artifactId>google-auth-library-oauth2-http</artifactId>
 			<version>1.33.1</version>
 		</dependency>
+<<<<<<< HEAD
 		<dependency>
 			<groupId>com.google.api-client</groupId>
 			<artifactId>google-api-client</artifactId>
@@ -55,6 +56,8 @@
 			<artifactId>google-api-services-calendar</artifactId>
 			<version>v3-rev20220715-2.0.0</version>
 		</dependency>
+=======
+>>>>>>> 5b660732c38a709a3325d523ef336b65669699d4
 		<!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
 		<!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
 		<dependency>

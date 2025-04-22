@@ -24,7 +24,7 @@ const Navbar = () => {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center">
-              <span className="text-blue-400 font-bold text-xl">HealthConnect</span>
+              <span className="text-blue-400 font-bold text-xl">MediBridge</span>
             </Link>
           </div>
 

@@ -84,11 +84,19 @@ public class AuthController {
             // Kiểm tra xác thực
             if (!user.isVerified()) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+<<<<<<< HEAD
                         .body(new LoginResponse(null, userDTORes));
             }
 
             String token = jwtTokenProvider.genarateTokens(request.getUsername());
             return ResponseEntity.ok(new LoginResponse(token, userDTORes));
+=======
+                        .body(new LoginResponse(null, new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getRole())));
+            }
+
+            String token = jwtTokenProvider.genarateTokens(request.getUsername());
+            return ResponseEntity.ok(new LoginResponse(token, new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getRole())));
+>>>>>>> 5b660732c38a709a3325d523ef336b65669699d4
         }
         catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -132,7 +140,11 @@ public class AuthController {
                     .role(user.getRole())
                     .build();
             // Trả về thông tin user hoặc chỉ xác nhận token hợp lệ
+<<<<<<< HEAD
             return ResponseEntity.ok(Map.of("userData", userDTORes, "tokenValid", true));
+=======
+            return ResponseEntity.ok(Map.of("userData", new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getRole()), "tokenValid", true));
+>>>>>>> 5b660732c38a709a3325d523ef336b65669699d4
 //            return ResponseEntity.ok(token);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
