@@ -1,10 +1,10 @@
 const getDefaultRoute = (role) => {
     switch (role) {
-      case 'patient':
-        return '/dashboard';
-      case 'doctor':
+      case 'PATIENT':
+        return '/profile';
+      case 'DOCTOR':
         return '/doctor/dashboard';
-      case 'admin':
+      case 'ADMIN':
         return '/admin/dashboard';
       default:
         return '/';

@@ -23,67 +23,11 @@ const Homepage = () => {
   }, [user]);  // Added user as dependency
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="fixed top-0 w-full bg-white shadow-sm z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Link to="/" className="text-[#3498db] font-bold text-2xl">
-                HealthConnect
-              </Link>
-              <svg className="w-6 h-6 text-[#3498db]" viewBox="0 0 24 24">
-                <path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
-              </svg>
-            </div>
-            
-            <nav className="hidden md:flex items-center space-x-6">
-              <a  className="text-gray-700 hover:text-[#3498db]">Trang chủ</a>
-              <a  className="text-gray-700 hover:text-[#3498db]">Tìm bác sĩ</a>
-              <a  className="text-gray-700 hover:text-[#3498db]">Giới thiệu</a>
-              <a  className="text-gray-700 hover:text-[#3498db]">Blog</a>
-            </nav>
-
-            <div className="hidden md:flex items-center space-x-4">
-              {
-                isLogged ? (
-                  <>
-                    <Link 
-                      to="/dashboard"
-                      className="px-4 py-2 bg-[#3498db] text-white rounded-lg hover:bg-blue-600"
-                    >
-                      Dashboard
-                    </Link>
-                    <button onClick={handleLogout} className="px-4 py-2 bg-[#3498db] text-white rounded-lg hover:bg-blue-600">
-                      Đăng xuất
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <Link 
-                        to="/login"
-                        className="px-4 py-2 text-[#3498db] hover:bg-blue-50 rounded-lg"
-                    >
-                        Đăng nhập
-                    </Link>
-                    <Link to="/register" className="px-4 py-2 bg-[#3498db] text-white rounded-lg hover:bg-blue-600">
-                      Đăng ký
-                    </Link> 
-                  </>
-                )
-              } 
-            </div>
-
-            <button className="md:hidden">
-              <Menu className="w-6 h-6 text-gray-700" />
-            </button>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gray-50">
 
       {/* Hero Section */}
-      <section className="pt-24 pb-16 px-4">
-        <div className="container mx-auto flex flex-col md:flex-row items-center" >
+      <section className="pt-24 pb-16 px-4 bg-white">
+        <div className="container mx-auto flex flex-col md:flex-row items-center">
           <div className="md:w-1/2 mb-8 md:mb-0">
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
               Khám bệnh trực tuyến - Tiện lợi, An toàn, Chuyên nghiệp
@@ -91,8 +35,8 @@ const Homepage = () => {
             <p className="text-xl text-gray-600 mb-8">
               Kết nối với bác sĩ hàng đầu chỉ sau 5 phút, mọi lúc mọi nơi.
             </p>
-            <button className="px-8 py-4 bg-[#3498db] text-white rounded-lg hover:bg-blue-600 flex items-center">
-              <Link to="/appointments"> Đặt lịch ngay</Link> 
+            <button className="px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center transition-colors shadow-md">
+              <Link to="/book-appointment"> Đặt lịch ngay</Link> 
               <ChevronRight className="ml-2 w-5 h-5" />
             </button>
           </div>
@@ -100,32 +44,33 @@ const Homepage = () => {
             <img
               src={telemedicineImage}
               alt="Telemedicine Illustration"
-              className="rounded-xl shadow-lg w-full h-[600px] object-cover"
+              className="rounded-xl shadow-lg w-full h-auto max-h-[600px] object-cover"
             />
           </div>
         </div>
       </section>
 
       {/* Features */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-12 text-blue-600">Dịch vụ y tế hiện đại</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <Video className="w-12 h-12 text-[#3498db] mb-4" />
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+              <Video className="w-12 h-12 text-blue-600 mb-4" />
               <h3 className="text-xl font-bold mb-3">Tư vấn qua Video</h3>
               <p className="text-gray-600">
                 Gặp bác sĩ trực tiếp qua chất lượng hình ảnh HD.
               </p>
             </div>
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <FileText className="w-12 h-12 text-[#3498db] mb-4" />
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+              <FileText className="w-12 h-12 text-blue-600 mb-4" />
               <h3 className="text-xl font-bold mb-3">Đơn thuốc điện tử</h3>
               <p className="text-gray-600">
                 Nhận đơn thuốc số hóa, gửi trực tiếp đến nhà thuốc.
               </p>
             </div>
-            <div className="bg-white p-6 rounded-xl shadow-sm">
-              <CreditCard className="w-12 h-12 text-[#3498db] mb-4" />
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+              <CreditCard className="w-12 h-12 text-blue-600 mb-4" />
               <h3 className="text-xl font-bold mb-3">Thanh toán an toàn</h3>
               <p className="text-gray-600">
                 Hỗ trợ Visa, Mastercard, MoMo, ZaloPay.
@@ -136,13 +81,13 @@ const Homepage = () => {
       </section>
 
       {/* How It Works */}
-      <section className="py-16">
+      <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Quy trình đơn giản</h2>
+          <h2 className="text-3xl font-bold text-center mb-12 text-blue-600">Quy trình đơn giản</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[1, 2, 3].map((step) => (
-              <div key={step} className="flex flex-col items-center">
-                <div className="w-12 h-12 rounded-full bg-[#3498db] text-white flex items-center justify-center text-xl font-bold mb-4">
+              <div key={step} className="flex flex-col items-center bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center text-xl font-bold mb-4">
                   {step}
                 </div>
                 <h4 className="text-xl font-bold mb-2">
@@ -162,12 +107,12 @@ const Homepage = () => {
       </section>
 
       {/* Doctors */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Đội ngũ bác sĩ chuyên nghiệp</h2>
+          <h2 className="text-3xl font-bold text-center mb-12 text-blue-600">Đội ngũ bác sĩ chuyên nghiệp</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[1, 2, 3].map((doctor) => (
-              <div key={doctor} className="bg-white rounded-xl shadow-sm overflow-hidden">
+              <div key={doctor} className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 hover:shadow-md transition-shadow">
                 <img
                   src={`/api/placeholder/400/300`}
                   alt={`Doctor ${doctor}`}
@@ -180,25 +125,62 @@ const Homepage = () => {
                     <Star className="w-5 h-5 text-yellow-400" />
                     <span className="ml-1">4.9 (120 đánh giá)</span>
                   </div>
-                  <button className="w-full px-4 py-2 bg-[#3498db] text-white rounded-lg hover:bg-blue-600">
-                    <Link to="/appointments"> Đặt lịch ngay</Link> 
+                  <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
+                    <Link to="/book-appointment" className="w-full inline-block"> Đặt lịch ngay</Link> 
                   </button>
                 </div>
               </div>
             ))}
           </div>
+          <div className="text-center mt-8">
+            <Link to="/doctors" className="text-blue-600 hover:text-blue-800 font-medium inline-flex items-center">
+              Xem tất cả bác sĩ <ChevronRight className="ml-1 w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-12 bg-blue-600 text-white">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold mb-4">Bắt đầu trải nghiệm y tế hiện đại ngay hôm nay</h2>
+          <p className="text-lg text-blue-100 mb-8 max-w-2xl mx-auto">
+            Dịch vụ khám bệnh trực tuyến chất lượng cao, tiết kiệm thời gian và chi phí cho bạn và gia đình
+          </p>
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <Link to="/register" className="px-6 py-3 bg-white text-blue-600 rounded-lg font-medium hover:bg-gray-100 transition-colors">
+              Đăng ký ngay
+            </Link>
+            <Link to="/book-appointment" className="px-6 py-3 bg-blue-700 text-white rounded-lg font-medium hover:bg-blue-800 transition-colors">
+              Đặt lịch khám
+            </Link>
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
+      {/* <footer className="bg-gray-900 text-white py-12">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="col-span-1 md:col-span-1">
               <h5 className="text-xl font-bold mb-4">HealthConnect</h5>
               <p className="text-gray-400">
                 Giải pháp Telemedicine hàng đầu Việt Nam
               </p>
+            </div>
+            <div>
+              <h5 className="text-xl font-bold mb-4">Dịch vụ</h5>
+              <div className="space-y-2">
+                <Link to="/services" className="block text-gray-400 hover:text-white">
+                  Khám bệnh online
+                </Link>
+                <Link to="/services" className="block text-gray-400 hover:text-white">
+                  Đặt lịch khám
+                </Link>
+                <Link to="/services" className="block text-gray-400 hover:text-white">
+                  Tư vấn sức khỏe
+                </Link>
+              </div>
             </div>
             <div>
               <h5 className="text-xl font-bold mb-4">Liên hệ</h5>
@@ -208,17 +190,20 @@ const Homepage = () => {
             <div>
               <h5 className="text-xl font-bold mb-4">Pháp lý</h5>
               <div className="space-y-2">
-                <a className="block text-gray-400 hover:text-white">
+                <Link to="/privacy" className="block text-gray-400 hover:text-white">
                   Chính sách bảo mật
-                </a>
-                <a className="block text-gray-400 hover:text-white">
+                </Link>
+                <Link to="/terms" className="block text-gray-400 hover:text-white">
                   Điều khoản sử dụng
-                </a>
+                </Link>
               </div>
             </div>
           </div>
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500">
+            <p>© {new Date().getFullYear()} HealthConnect. Tất cả các quyền được bảo lưu.</p>
+          </div>
         </div>
-      </footer>
+      </footer> */}
     </div>
   );
 };

@@ -29,7 +29,7 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable());
         http.cors(cors -> cors.configurationSource(request -> {
             CorsConfiguration configuration = new CorsConfiguration();
-            configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:3001")); // Cho phép từ frontend
+            configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:3001", "http://localhost:5173/")); // Cho phép từ frontend
             configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Phương thức HTTP
             configuration.setAllowedHeaders(List.of("*"));
             configuration.setAllowCredentials(true);
@@ -37,7 +37,7 @@ public class SecurityConfig {
         }));
         http.authorizeHttpRequests((auth) -> auth
                 .requestMatchers(HttpMethod.POST,"/api/auth/**").permitAll()
-                .requestMatchers("/", "/error/**", "/api/auth/**").permitAll()
+                .requestMatchers("/", "/error/**", "/api/auth/**", "/zoom", "/zoom/callback").permitAll()
                 .anyRequest().authenticated())
                 .formLogin(Customizer.withDefaults())
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);

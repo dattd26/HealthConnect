@@ -6,7 +6,7 @@ import { LoginPage } from "../../pages/LoginPage";
 import RegisterPage from "../../pages/RegisterPage";
 import { ProtectedRoute } from "../auth/ProtectedRoute";
 import PatientDashboard from "../patient/PatientDashboard";
-import AppointmentsPage from "../../pages/AppointmentsPage";
+import BookAppointmentPage from "../../pages/BookAppointmentPage";
 import ProfilePage from "../../pages/ProfilePage";
 
 const AppRouter = () => {
@@ -30,15 +30,9 @@ const AppRouter = () => {
             <Route path="/register" element={<RegisterPage/>}/>
             {/* <Route path="/about" element={<RegisterPage/>}/> */}
 
-            {/* Patient Routes */}
-            <Route path="/dashboard" element={
-                <ProtectedRoute allowedRoles={ ["PATIENT"] }>
-                    <PatientDashboard />
-                </ProtectedRoute>
-            }/>
-            <Route path="/appointments" element={
+            <Route path="/book-appointments" element={
                 <ProtectedRoute allowedRoles={['PATIENT']}>
-                    <AppointmentsPage />
+                    <BookAppointmentPage />
                 </ProtectedRoute>
             } />
             <Route path="/profile" element={

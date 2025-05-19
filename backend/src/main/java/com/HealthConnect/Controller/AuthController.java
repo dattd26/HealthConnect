@@ -14,15 +14,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -41,6 +37,7 @@ public class AuthController {
 
     @Autowired
     PasswordEncoder passwordEncoder;
+
     @PostMapping("/register")
     public ResponseEntity<User> register(@RequestBody RegisterRequest request) {
         // Kiểm tra email/phone đã tồn tại
@@ -84,19 +81,12 @@ public class AuthController {
             // Kiểm tra xác thực
             if (!user.isVerified()) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-<<<<<<< HEAD
                         .body(new LoginResponse(null, userDTORes));
             }
 
             String token = jwtTokenProvider.genarateTokens(request.getUsername());
             return ResponseEntity.ok(new LoginResponse(token, userDTORes));
-=======
-                        .body(new LoginResponse(null, new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getRole())));
-            }
 
-            String token = jwtTokenProvider.genarateTokens(request.getUsername());
-            return ResponseEntity.ok(new LoginResponse(token, new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getRole())));
->>>>>>> 5b660732c38a709a3325d523ef336b65669699d4
         }
         catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -140,11 +130,11 @@ public class AuthController {
                     .role(user.getRole())
                     .build();
             // Trả về thông tin user hoặc chỉ xác nhận token hợp lệ
-<<<<<<< HEAD
+
             return ResponseEntity.ok(Map.of("userData", userDTORes, "tokenValid", true));
-=======
-            return ResponseEntity.ok(Map.of("userData", new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getRole()), "tokenValid", true));
->>>>>>> 5b660732c38a709a3325d523ef336b65669699d4
+            // return ResponseEntity.ok(Map.of("userData", new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getRole()), "tokenValid", true));
+
+            // return ResponseEntity.ok(Map.of("userData", userDTORes, "tokenValid", true));
 //            return ResponseEntity.ok(token);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

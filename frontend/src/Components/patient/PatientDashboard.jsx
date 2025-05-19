@@ -6,7 +6,7 @@ import { HealthTips } from "../home/HealthTips";
 import { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../../context/AuthContext";
-<<<<<<< HEAD
+
 import { Link } from "react-router-dom";
 import { Calendar, User, FileText, MessageSquare } from "lucide-react";
 
@@ -35,8 +35,6 @@ const QuickActions = () => {
     </div>
   );
 };
-=======
->>>>>>> 5b660732c38a709a3325d523ef336b65669699d4
 
 const PatientDashboard = () => {
   const [userInfor, setUserInFor] = useState({});
@@ -71,7 +69,7 @@ const PatientDashboard = () => {
       {/* Header */}
       <header className="bg-gradient-to-r from-blue-500 to-blue-700 text-white p-6 rounded-lg shadow-md flex justify-between items-center">
         <h1 className="text-2xl font-semibold">Chào mừng trở lại, {userInfor.fullName}!</h1>
-        <EmergencyButton />
+        {/* <EmergencyButton /> */}
       </header>
 
       {/* Grid Layout */}

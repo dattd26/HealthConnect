@@ -2,8 +2,6 @@ package com.HealthConnect.Service;
 
 
 import com.HealthConnect.Model.User;
-import com.HealthConnect.Repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
