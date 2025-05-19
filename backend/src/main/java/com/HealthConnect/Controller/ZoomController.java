@@ -2,7 +2,6 @@ package com.HealthConnect.Controller;
 
 import com.HealthConnect.Dto.MeetingRequest;
 import com.HealthConnect.Service.ZoomService;
-import com.google.api.services.meet.v2.Meet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

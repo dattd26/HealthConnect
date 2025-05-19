@@ -1,4 +1,5 @@
 package com.HealthConnect.Model;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -27,6 +28,7 @@ public class User {
     private String license;
     private boolean isVerified; // Admin xác thực
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private HealthRecord healthRecord;
 }

@@ -24,7 +24,7 @@ const Navbar = () => {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center">
-              <span className="text-blue-400 font-bold text-xl">HealthConnect</span>
+              <span className="text-blue-600 font-bold text-xl">HealthConnect</span>
             </Link>
           </div>
 
@@ -36,11 +36,11 @@ const Navbar = () => {
             
             {user ? (
               <>
-                <Link to="/dashboard" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-100">
+                {/* <Link to="/dashboard" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-100">
                   Dashboard
-                </Link>
-                <Link to="/appointments" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-100">
-                  Lịch hẹn
+                </Link> */}
+                <Link to="/book-appointment" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-100">
+                  Đặt lịch khám
                 </Link>
                 <Link to="/profile" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-100">
                   Hồ sơ của tôi
@@ -105,13 +105,13 @@ const Navbar = () => {
                   </div>
                 </Link>
                 <Link 
-                  to="/appointments"
+                  to="/book-appointment"
                   className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-100"
                   onClick={toggleMenu}
                 >
                   <div className="flex items-center">
                     <Calendar className="w-5 h-5 mr-2" />
-                    Lịch hẹn
+                    Đặt lịch khám
                   </div>
                 </Link>
                 <Link 

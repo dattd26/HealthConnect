@@ -41,6 +41,7 @@ public class AuthController {
 
     @Autowired
     PasswordEncoder passwordEncoder;
+
     @PostMapping("/register")
     public ResponseEntity<User> register(@RequestBody RegisterRequest request) {
         // Kiểm tra email/phone đã tồn tại

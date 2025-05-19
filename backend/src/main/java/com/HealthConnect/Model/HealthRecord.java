@@ -1,5 +1,6 @@
 package com.HealthConnect.Model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -14,7 +15,8 @@ public class HealthRecord {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn
+    @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
     private User user;
 
     private String bloodType;
