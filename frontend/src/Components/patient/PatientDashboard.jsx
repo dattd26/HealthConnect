@@ -6,6 +6,10 @@ import { HealthTips } from "../home/HealthTips";
 import { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../../context/AuthContext";
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> feature/user-profile
 import { Link } from "react-router-dom";
 import { Calendar, User, FileText, MessageSquare } from "lucide-react";
 
@@ -34,6 +38,11 @@ const QuickActions = () => {
     </div>
   );
 };
+<<<<<<< HEAD
+=======
+>>>>>>> 5b660732c38a709a3325d523ef336b65669699d4
+=======
+>>>>>>> feature/user-profile
 
 const PatientDashboard = () => {
   const [userInfor, setUserInFor] = useState({});

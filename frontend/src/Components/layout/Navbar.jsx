@@ -24,7 +24,11 @@ const Navbar = () => {
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex-shrink-0 flex items-center">
+<<<<<<< HEAD
+              <span className="text-blue-400 font-bold text-xl">MediBridge</span>
+=======
               <span className="text-blue-600 font-bold text-xl">HealthConnect</span>
+>>>>>>> feature/user-profile
             </Link>
           </div>
 
@@ -36,11 +40,19 @@ const Navbar = () => {
             
             {user ? (
               <>
+<<<<<<< HEAD
+                <Link to="/dashboard" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-100">
+                  Dashboard
+                </Link>
+                <Link to="/appointments" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-100">
+                  Lịch hẹn
+=======
                 {/* <Link to="/dashboard" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-100">
                   Dashboard
                 </Link> */}
                 <Link to="/book-appointment" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-100">
                   Đặt lịch khám
+>>>>>>> feature/user-profile
                 </Link>
                 <Link to="/profile" className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-100">
                   Hồ sơ của tôi
@@ -105,13 +117,21 @@ const Navbar = () => {
                   </div>
                 </Link>
                 <Link 
+<<<<<<< HEAD
+                  to="/appointments"
+=======
                   to="/book-appointment"
+>>>>>>> feature/user-profile
                   className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-100"
                   onClick={toggleMenu}
                 >
                   <div className="flex items-center">
                     <Calendar className="w-5 h-5 mr-2" />
+<<<<<<< HEAD
+                    Lịch hẹn
+=======
                     Đặt lịch khám
+>>>>>>> feature/user-profile
                   </div>
                 </Link>
                 <Link 

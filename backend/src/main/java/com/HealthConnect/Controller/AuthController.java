@@ -90,6 +90,7 @@ public class AuthController {
 
             String token = jwtTokenProvider.genarateTokens(request.getUsername());
             return ResponseEntity.ok(new LoginResponse(token, userDTORes));
+
         }
         catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

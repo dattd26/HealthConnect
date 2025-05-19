@@ -8,8 +8,11 @@ import MedicalHistory from '../Components/patient/profile/MedicalHistory';
 import Appointments from '../Components/patient/profile/Appointments';
 import Payments from '../Components/patient/profile/Payments';
 import Settings from '../Components/patient/profile/Settings';
+<<<<<<< HEAD
+=======
 import Loading from '../Components/common/Loading';
 
+>>>>>>> feature/user-profile
 
 const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState('personal-info');
@@ -58,7 +61,15 @@ const ProfilePage = () => {
     }
   };
 
+<<<<<<< HEAD
+  if (loading) return (
+    <div className="flex justify-center items-center min-h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+    </div>
+  );
+=======
   if (loading) return <Loading />;
+>>>>>>> feature/user-profile
 
   if (error) return <div className="text-center p-6 text-red-500">{error}</div>;
 

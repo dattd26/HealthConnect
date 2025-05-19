@@ -1,17 +1,17 @@
 import React, { useContext, useEffect } from "react";
+import { AuthContext } from "../../context/AuthContext";
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import Homepage from "../../pages/Homepage";
 import { LoginPage } from "../../pages/LoginPage";
 import RegisterPage from "../../pages/RegisterPage";
 import { ProtectedRoute } from "../auth/ProtectedRoute";
 import PatientDashboard from "../patient/PatientDashboard";
-import BookAppointmentPage from "../../pages/BookAppointmentPage";
-import ProfilePage from "../../pages/ProfilePage";
+import AppointmentsPage from "../../pages/AppointmentsPage";
 
 const AppRouter = () => {
-    // const { user } = useContext(AuthContext);
-    // const location = useLocation();
-    // const navigate = useNavigate();
+    const { user } = useContext(AuthContext);
+    const location = useLocation();
+    const navigate = useNavigate();
 
     // useEffect(() => {
     //     const defaultRoute = getDefaultRoute(user?.role?.toLowerCase());
@@ -30,22 +30,16 @@ const AppRouter = () => {
             {/* <Route path="/about" element={<RegisterPage/>}/> */}
 
             {/* Patient Routes */}
-            {/* <Route path="/dashboard" element={
-                <ProtectedRoute allowedRoles={["PATIENT"]}>
+            <Route path="/dashboard" element={
+                <ProtectedRoute allowedRoles={ ["PATIENT"] }>
                     <PatientDashboard />
                 </ProtectedRoute>
-            }/> */}
-            <Route path="/book-appointment" element={
+            }/>
+            <Route path="/appointments" element={
                 <ProtectedRoute allowedRoles={['PATIENT']}>
-                    <BookAppointmentPage />
+                    <AppointmentsPage />
                 </ProtectedRoute>
             } />
-            <Route path="/profile" element={
-                <ProtectedRoute allowedRoles={['PATIENT']}>
-                    <ProfilePage />
-                </ProtectedRoute>
-            } />
-            {/* <Route path="*" element={(< />} /> */}
         </Routes>
     );
 }
