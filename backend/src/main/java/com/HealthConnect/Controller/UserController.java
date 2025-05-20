@@ -59,7 +59,27 @@ public class UserController {
                 .build();
         return ResponseEntity.ok(userDTOResponse);
     }
+    @PutMapping("/profile/update")
+    public ResponseEntity<String> updateUserProfile(@AuthenticationPrincipal UserDetails user, @RequestBody UserDTO newData) {
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
 
+        User userProfile = userService.getUserByUsername(user.getUsername());
+        userProfile.setAddress(newData.getAddress());
+        userProfile.setDateOfBirth(newData.getDateOfBirth());
+        userProfile.setEmail(newData.getEmail());
+        userProfile.setFullName(newData.getFullName());
+        userProfile.setGender(newData.getGender());
+        userProfile.setPhone(newData.getPhone());
+        try {
+            userService.saveUser(userProfile);
+            return ResponseEntity.ok("Profile update successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                .body("Error updating profile: " + e.getMessage());
+        }
+    }
     @GetMapping("/health-record")
     public ResponseEntity<?> getCurrentUserHealthRecords(@AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails == null) {
