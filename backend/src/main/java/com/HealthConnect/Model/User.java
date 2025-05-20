@@ -2,7 +2,8 @@ package com.HealthConnect.Model;
 import jakarta.persistence.*;
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import java.util.Date;
+
+import java.time.LocalDate;
 
 @Data
 @Table(name = "users")
@@ -14,7 +15,7 @@ public class User {
 
     private String fullName;
     private String username;
-    private Date dateOfBirth;
+    private LocalDate dateOfBirth;
     private String address;
     private String email;
     private String phone;
