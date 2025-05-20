@@ -30,7 +30,7 @@ const AppRouter = () => {
             <Route path="/register" element={<RegisterPage/>}/>
             {/* <Route path="/about" element={<RegisterPage/>}/> */}
 
-            <Route path="/book-appointments" element={
+            <Route path="/book-appointment" element={
                 <ProtectedRoute allowedRoles={['PATIENT']}>
                     <BookAppointmentPage />
                 </ProtectedRoute>
