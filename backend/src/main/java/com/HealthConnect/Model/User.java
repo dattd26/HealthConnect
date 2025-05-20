@@ -1,8 +1,7 @@
 package com.HealthConnect.Model;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
-
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import java.util.Date;
 
 @Data

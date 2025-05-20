@@ -1,9 +1,8 @@
 package com.HealthConnect.Model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
-
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import java.util.List;
 
 @Table(name = "health_records")
@@ -14,8 +13,9 @@ public class HealthRecord {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @OneToOne
     @JsonBackReference
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
     private String bloodType;
