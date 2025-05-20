@@ -39,7 +39,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST,"/api/auth/**").permitAll()
                 .requestMatchers("/", "/error/**", "/api/auth/**", "/zoom", "/zoom/callback").permitAll()
                 .anyRequest().authenticated())
-                .formLogin(Customizer.withDefaults())
+                // .formLogin(Customizer.withDefaults())
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
