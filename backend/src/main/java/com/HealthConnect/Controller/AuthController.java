@@ -75,7 +75,12 @@ public class AuthController {
             UserDTO userDTORes = UserDTO
                     .builder()
                     .username(user.getUsername())
+                    .fullName(user.getFullName())
+                    .gender(user.getGender())
                     .email(user.getEmail())
+                    .dateOfBirth(user.getDateOfBirth())
+                    .phone(user.getPhone())
+                    .address(user.getAddress())
                     .role(user.getRole())
                     .build();
             // Kiểm tra xác thực
@@ -125,8 +130,12 @@ public class AuthController {
             User user = userService.getUserByUsername(username);
             UserDTO userDTORes = UserDTO
                     .builder()
-                    .username(user.getUsername())
+                    .fullName(user.getFullName())
+                    .gender(user.getGender())
                     .email(user.getEmail())
+                    .dateOfBirth(user.getDateOfBirth())
+                    .phone(user.getPhone())
+                    .address(user.getAddress())
                     .role(user.getRole())
                     .build();
             // Trả về thông tin user hoặc chỉ xác nhận token hợp lệ
