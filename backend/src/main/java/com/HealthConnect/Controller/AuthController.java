@@ -4,6 +4,7 @@ import com.HealthConnect.Dto.AuthenticationRequest;
 import com.HealthConnect.Dto.LoginResponse;
 import com.HealthConnect.Dto.RegisterRequest;
 import com.HealthConnect.Dto.UserDTO;
+import com.HealthConnect.Factory.UserFactoryImpl;
 import com.HealthConnect.Jwt.JwtTokenProvider;
 import com.HealthConnect.Model.User;
 import com.HealthConnect.Service.EmailService;
@@ -25,18 +26,16 @@ import java.util.Map;
 public class AuthController {
     @Autowired
     JwtTokenProvider jwtTokenProvider;
-
     @Autowired
     AuthenticationManager authenticationManager;
-
     @Autowired
     private UserService userService;
-
     @Autowired
     EmailService emailService;
-
     @Autowired
     PasswordEncoder passwordEncoder;
+    @Autowired
+    UserFactoryImpl userFactory;
 
     @PostMapping("/register")
     public ResponseEntity<User> register(@RequestBody RegisterRequest request) {
@@ -44,24 +43,17 @@ public class AuthController {
         if (userService.checkExistsEmail(request.getEmail())) {
             throw new RuntimeException("Email đã được sử dụng!");
         }
-        User user = new User();
-        user.setFullName(request.getFullName());
-        user.setUsername(request.getUsername());
-        // Mã hóa mật khẩu
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setEmail(request.getEmail());
-        user.setRole(request.getRole());
-        if ("DOCTOR".equalsIgnoreCase(request.getRole())) {
-            user.setVerified(false);
-            user.setLicense(request.getLicense());
-            user.setSpecialty(request.getSpecialty());
-        }
-        else {
+        User user = userFactory.createUser(request, passwordEncoder);
+        
+        try {
+            User newUser = userService.saveUser(user);
             String token = jwtTokenProvider.genarateTokens(user.getUsername());
             emailService.sendVerificationEmail(user.getEmail(), token);
-        }
-        User newUser = userService.saveUser(user);
-        return ResponseEntity.ok(newUser);
+        
+            return ResponseEntity.ok(newUser);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }    
     }
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthenticationRequest request) {
