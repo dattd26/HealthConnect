@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { appointmentService } from "../../services/appointmentService";
+import { AuthContext } from "../../context/AuthContext";
+import dayjs from 'dayjs'
 
 const CreateAppointment = ({ doctors }) => {
   const navigate = useNavigate();
+  const { user } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   
   // Personal Information
@@ -64,19 +67,20 @@ const CreateAppointment = ({ doctors }) => {
         // const profile = response.data;
         
         // For now we'll just simulate this
-        // setFullName(profile.fullName);
-        // setGender(profile.gender);
-        // setDateOfBirth(profile.dateOfBirth);
-        // setPhoneNumber(profile.phoneNumber);
-        // setEmail(profile.email);
-        // setAddress(profile.address);
+        setFullName(user.fullName);
+        setGender(user.gender);
+        setDateOfBirth(user.dateOfBirth);
+        setPhoneNumber(user.phone);
+        setEmail(user.email);
+        setAddress(user.address);
+        
       } catch (err) {
         console.error("Error loading user profile:", err);
       }
     };
     
     fetchUserProfile();
-  }, []);
+  }, [bookingFor, user]);
 
   // Filter doctors based on specialty
   const filteredDoctors = specialty 
@@ -152,9 +156,37 @@ const CreateAppointment = ({ doctors }) => {
       <h2 className="text-xl font-semibold text-blue-600 mb-4">Đặt lịch hẹn mới</h2>
       
       <form onSubmit={handleSubmit} className="space-y-6">
+        <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Người đặt hộ</label>
+              <div className="flex space-x-4 mt-1">
+                <label className="inline-flex items-center">
+                  <input
+                    type="radio"
+                    className="form-radio text-blue-600"
+                    name="bookingFor"
+                    value="self"
+                    checked={bookingFor === "self"}
+                    onChange={() => setBookingFor("self")}
+                  />
+                  <span className="ml-2">Đặt cho bản thân</span>
+                </label>
+                <label className="inline-flex items-center">
+                  <input
+                    type="radio"
+                    className="form-radio text-blue-600"
+                    name="bookingFor"
+                    value="other"
+                    checked={bookingFor === "other"}
+                    onChange={() => setBookingFor("other")}
+                  />
+                  <span className="ml-2">Đặt cho người thân</span>
+                </label>
+              </div>
+            </div>
         {/* Personal Information Section */}
         <div className="border-b pb-4">
           <h3 className="text-lg font-medium text-gray-800 mb-3">Thông tin cá nhân</h3>
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Họ và tên *</label>
@@ -171,7 +203,7 @@ const CreateAppointment = ({ doctors }) => {
               <label className="block text-sm font-medium text-gray-700 mb-1">Giới tính *</label>
               <select
                 className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                value={gender}
+                value={gender.toLowerCase()}
                 onChange={(e) => setGender(e.target.value)}
                 required
               >
@@ -373,33 +405,7 @@ const CreateAppointment = ({ doctors }) => {
               />
             </div>
             
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Người đặt hộ</label>
-              <div className="flex space-x-4 mt-1">
-                <label className="inline-flex items-center">
-                  <input
-                    type="radio"
-                    className="form-radio text-blue-600"
-                    name="bookingFor"
-                    value="self"
-                    checked={bookingFor === "self"}
-                    onChange={() => setBookingFor("self")}
-                  />
-                  <span className="ml-2">Đặt cho bản thân</span>
-                </label>
-                <label className="inline-flex items-center">
-                  <input
-                    type="radio"
-                    className="form-radio text-blue-600"
-                    name="bookingFor"
-                    value="other"
-                    checked={bookingFor === "other"}
-                    onChange={() => setBookingFor("other")}
-                  />
-                  <span className="ml-2">Đặt cho người thân</span>
-                </label>
-              </div>
-            </div>
+            
           </div>
         </div>
         
