@@ -3,6 +3,7 @@ package com.HealthConnect.Controller;
 import com.HealthConnect.Dto.HealthRecordDTO;
 import com.HealthConnect.Dto.UserDTO;
 import com.HealthConnect.Model.HealthRecord;
+import com.HealthConnect.Model.Patient;
 import com.HealthConnect.Model.User;
 import com.HealthConnect.Repository.HealthRecordRepository;
 import com.HealthConnect.Service.UserService;
@@ -94,11 +95,22 @@ public class UserController {
     @GetMapping("/health-record")
     public ResponseEntity<?> getCurrentUserHealthRecords(@AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails == null) {
-            return ResponseEntity.status(401).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("error", "Bạn chưa đăng nhập."));
         }
 
         User user = userService.getUserByUsername(userDetails.getUsername());
-        HealthRecord record = healthRecordRepository.findByUser(user).orElseGet(() -> null);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Người dùng không tồn tại."));
+        }
+
+        if (!(user instanceof Patient)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", "Chỉ bệnh nhân mới được truy cập hồ sơ sức khỏe."));
+        }
+        Patient patient = (Patient) user;
+        HealthRecord record = healthRecordRepository.findByPatient(patient).orElseGet(() -> null);
         if (record == null) {
             return ResponseEntity.badRequest().body("User chua co ban record nao");
         }
@@ -115,10 +127,15 @@ public class UserController {
         }
 
         User user = userService.getUserByUsername(userDetails.getUsername());
-        HealthRecord record = healthRecordRepository.findByUser(user)
+        if (!(user instanceof Patient)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", "Chỉ bệnh nhân mới được truy cập hồ sơ sức khỏe."));
+        }
+        Patient patient = (Patient) user;
+        HealthRecord record = healthRecordRepository.findByPatient(patient)
                 .orElseGet(() -> {
                     HealthRecord newRecord = new HealthRecord();
-                    newRecord.setUser(user);
+                    newRecord.setPatient(patient);
                     return newRecord;
                 });
 
