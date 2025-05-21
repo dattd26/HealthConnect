@@ -15,8 +15,8 @@ public class HealthRecord {
 
     @OneToOne
     @JsonBackReference
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
-    private User user;
+    @JoinColumn(name = "patient_id", nullable = false, unique = true)
+    private Patient patient;
 
     private String bloodType;
     private double height;

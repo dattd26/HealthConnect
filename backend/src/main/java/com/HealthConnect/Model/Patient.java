@@ -9,7 +9,7 @@ import jakarta.persistence.Entity;
 @Entity
 @Table(name = "patients")
 public class Patient extends User {
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "patient", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private HealthRecord healthRecord;
 }
