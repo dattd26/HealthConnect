@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/user")
@@ -60,7 +61,7 @@ public class UserController {
         return ResponseEntity.ok(userDTOResponse);
     }
     @PutMapping("/profile/update")
-    public ResponseEntity<String> updateUserProfile(@AuthenticationPrincipal UserDetails user, @RequestBody UserDTO newData) {
+    public ResponseEntity<?> updateUserProfile(@AuthenticationPrincipal UserDetails user, @RequestBody UserDTO newData) {
         if (user == null) {
             return ResponseEntity.status(401).build();
         }
@@ -74,7 +75,17 @@ public class UserController {
         userProfile.setPhone(newData.getPhone());
         try {
             userService.saveUser(userProfile);
-            return ResponseEntity.ok("Profile update successfully");
+            UserDTO userDTOResponse = UserDTO
+                    .builder()
+                    .fullName(userProfile.getFullName())
+                    .gender(userProfile.getGender())
+                    .email(userProfile.getEmail())
+                    .dateOfBirth(userProfile.getDateOfBirth())
+                    .phone(userProfile.getPhone())
+                    .address(userProfile.getAddress())
+                    .role(userProfile.getRole())
+                    .build();
+            return ResponseEntity.ok(Map.of("message", "Profile update successfully", "data", userDTOResponse));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                                 .body("Error updating profile: " + e.getMessage());

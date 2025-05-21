@@ -3,7 +3,7 @@ import { AuthContext } from '../../../context/AuthContext';
 import axios from 'axios';
 
 const PersonalInfo = ({ userData, isLoading }) => {
-  const { user } = useContext(AuthContext);
+  const { user, setUser } = useContext(AuthContext);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     fullName: userData?.fullName || '',
@@ -33,13 +33,14 @@ const PersonalInfo = ({ userData, isLoading }) => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.put("http://localhost:8080/api/user/profile/update", formData, {
+      const res = await axios.put("http://localhost:8080/api/user/profile/update", formData, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ' + token
-        }
+        } 
       });
-      setSuccess("Thông tin đã được cập nhật thành công!");
+      setSuccess(res.data.message);
+      setUser(res.data.data);
       setIsEditing(false);
     } catch (error) {
       setError(error.response?.data?.message || "Đã xảy ra lỗi khi cập nhật thông tin");
