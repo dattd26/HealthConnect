@@ -12,6 +12,7 @@ import com.HealthConnect.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
@@ -38,7 +39,7 @@ public class AuthController {
     UserFactoryImpl userFactory;
 
     @PostMapping("/register")
-    public ResponseEntity<User> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
         // Kiểm tra email/phone đã tồn tại
         if (userService.checkExistsEmail(request.getEmail())) {
             throw new RuntimeException("Email đã được sử dụng!");
@@ -46,13 +47,15 @@ public class AuthController {
         User user = userFactory.createUser(request, passwordEncoder);
         
         try {
-            User newUser = userService.saveUser(user);
+            userService.saveUser(user);
             String token = jwtTokenProvider.genarateTokens(user.getUsername());
             emailService.sendVerificationEmail(user.getEmail(), token);
         
-            return ResponseEntity.ok(newUser);
+            return ResponseEntity.ok("Registration successful! Please check your email to verify your account.");
+        } catch (MailException e) {
+            return ResponseEntity.internalServerError().body("Cant not send mail");
         } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body("Registration failed");
         }    
     }
     @PostMapping("/login")
