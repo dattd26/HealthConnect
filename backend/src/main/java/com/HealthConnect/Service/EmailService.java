@@ -13,7 +13,7 @@ public class EmailService {
     private JavaMailSender javaMailSender;
 
     public void sendVerificationEmail(String email, String token) throws MailException {
-        String verificationUrl = "https://localhost:8080/api/auth/verify?token=" + token;
+        String verificationUrl = "http://localhost:8080/api/auth/verify?token=" + token;
         String subject = "Xác thực tài khoản HealthConnect";
         String content = "Vui lòng nhấp vào link sau để xác thực tài khoản: " + verificationUrl;
 

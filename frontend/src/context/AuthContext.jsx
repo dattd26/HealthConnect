@@ -7,14 +7,11 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Create a cancellation token
-        // const cancelToken = axios.CancelToken.source();
-
         const validateToken = async () => {
             const token = localStorage.getItem('token');
             if (token) {
                 try {
-                    const data = await authService.validate(token)
+                    const data = await authService.validate(token);
                     
                     setUser(data.userData);
                 } catch (error) {
@@ -30,10 +27,6 @@ export const AuthProvider = ({ children }) => {
 
         validateToken();
 
-        // Cleanup function
-        // return () => {
-        //     cancelToken.cancel("Component unmounted");
-        // };
     }, []);
 
     const logout = () => {

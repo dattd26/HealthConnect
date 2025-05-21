@@ -11,15 +11,18 @@ const RegisterPage = () => {
     phone: "",
     password: "",
     role: "PATIENT", // Mặc định là PATIENT
-    specialty: "", // Chỉ hiển thị nếu role là DOCTOR
+    specialty: [], // Chỉ hiển thị nếu role là DOCTOR
     license: "",
   });
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const [isRegistered, setIsRegistered] = useState(false);
 
   const handleSubmit = async (e) => {
+    setIsRegistered(true);
     e.preventDefault();
     try {
+      console.log(formData)
       const response = await axios.post("http://localhost:8080/api/auth/register", formData);
       if (response.data.role === "DOCTOR") {
         alert("Đăng ký thành công! Vui lòng chờ Admin xác thực.");
@@ -29,6 +32,7 @@ const RegisterPage = () => {
       navigate("/login");
     } catch (err) {
       setError(err.response?.data?.message || "Đăng ký thất bại!");
+      setIsRegistered(false);
     }
   };
 
@@ -107,7 +111,7 @@ const RegisterPage = () => {
               <input
                 type="text"
                 value={formData.specialty}
-                onChange={(e) => setFormData({ ...formData, specialty: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, specialty: [e.target.value] })}
                 required
               />
             </div>
@@ -125,7 +129,7 @@ const RegisterPage = () => {
         )}
 
         <button type="submit" className="register-button">
-          Đăng ký
+          {!isRegistered ? "Đăng ký" : "Đang đăng ký..."}
         </button>
 
         <p className="login-link">

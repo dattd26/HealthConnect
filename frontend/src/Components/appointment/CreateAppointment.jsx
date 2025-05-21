@@ -34,19 +34,28 @@ const CreateAppointment = ({ doctors }) => {
   const [bookingFor, setBookingFor] = useState("self");
   const [acceptTerms, setAcceptTerms] = useState(false);
   
-  // Specialties list
+
   const specialties = [
-    "Nội tổng quát",
-    "Nhi khoa",
-    "Da liễu",
-    "Tim mạch",
-    "Tiêu hóa",
-    "Thần kinh",
-    "Tai mũi họng",
-    "Mắt",
-    "Chỉnh hình",
-    "Sản phụ khoa"
-  ];
+  { id: "K001", vi: "Khoa nhi", en: "pediatrics" },
+  { vi: "Khoa nội", en: "pnternal Medicine" },
+  { vi: "Khoa ngoại", en: "purgery" },
+  { vi: "Khoa tim mạch", en: "pardiology" },
+  { vi: "Khoa sản", en: "pbstetrics & Gynecology" },
+  { vi: "Khoa da liễu", en: "permatology" }
+];
+
+<select
+  className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+  value={specialty}
+  onChange={(e) => setSpecialty(e.target.value)}
+  required
+>
+  <option value="">-- Select Specialty --</option>
+  {specialties.map((spec, index) => (
+    <option key={index} value={spec.en}>{spec.en}</option>
+  ))}
+</select>
+
   
   // Time slots
   const timeSlots = [
@@ -203,7 +212,7 @@ const CreateAppointment = ({ doctors }) => {
               <label className="block text-sm font-medium text-gray-700 mb-1">Giới tính *</label>
               <select
                 className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                value={gender.toLowerCase()}
+                value={gender ? gender.toLowerCase() : ""}
                 onChange={(e) => setGender(e.target.value)}
                 required
               >
@@ -273,14 +282,15 @@ const CreateAppointment = ({ doctors }) => {
               >
                 <option value="">-- Chọn chuyên khoa --</option>
                 {specialties.map((spec, index) => (
-                  <option key={index} value={spec}>{spec}</option>
+                  <option key={index} value={spec.en}>{spec.vn}</option>
                 ))}
               </select>
             </div>
             
             <div>
+              
               <label className="block text-sm font-medium text-gray-700 mb-1">Bác sĩ *</label>
-              <select
+              {specialty ? (<select
                 className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 value={doctorId}
                 onChange={(e) => setDoctorId(e.target.value)}
@@ -292,7 +302,10 @@ const CreateAppointment = ({ doctors }) => {
                     {doctor.fullName || doctor.username}
                   </option>
                 ))}
-              </select>
+              </select> ) :
+              (<>Vui lòng chọn chuyên khoa</>)
+            } 
+              
             </div>
             
             <div>
