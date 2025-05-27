@@ -5,7 +5,7 @@ FROM openjdk:17-jdk-slim
 WORKDIR /app
 
 # Copy file jar
-COPY target/HealthConnect-0.0.1-SNAPSHOT.jar app.jar
+COPY target/*.jar app.jar
 
 # Mặc định chạy app.jar
 ENTRYPOINT ["java", "-jar", "app.jar"]
