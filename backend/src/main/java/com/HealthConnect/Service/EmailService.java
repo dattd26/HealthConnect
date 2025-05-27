@@ -12,15 +12,20 @@ public class EmailService {
     @Autowired
     private JavaMailSender javaMailSender;
 
-    public void sendVerificationEmail(String email, String token) throws MailException {
+    public void sendVerificationEmail(String email, String token)  {
         String verificationUrl = "http://localhost:8080/api/auth/verify?token=" + token;
         String subject = "Xác thực tài khoản HealthConnect";
         String content = "Vui lòng nhấp vào link sau để xác thực tài khoản: " + verificationUrl;
-
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(email);
-        message.setSubject(subject);
-        message.setText(content);
-        javaMailSender.send(message);
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(email);
+            message.setSubject(subject);
+            
+            message.setText(content);
+            javaMailSender.send(message);
+        } catch (MailException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Cant not send mail");
+        }
     }
 }

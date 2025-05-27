@@ -42,17 +42,17 @@ public class AuthController {
     public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
         // Kiểm tra email/phone đã tồn tại
         if (userService.checkExistsEmail(request.getEmail())) {
-            throw new RuntimeException("Email đã được sử dụng!");
+            return ResponseEntity.badRequest().body("Email has been used");
         }
         User user = userFactory.createUser(request, passwordEncoder);
         
         try {
-            userService.saveUser(user);
             String token = jwtTokenProvider.genarateTokens(user.getUsername());
             emailService.sendVerificationEmail(user.getEmail(), token);
-        
+            userService.saveUser(user);
+            
             return ResponseEntity.ok("Registration successful! Please check your email to verify your account.");
-        } catch (MailException e) {
+        } catch (RuntimeException e) {
             return ResponseEntity.internalServerError().body("Cant not send mail");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Registration failed");

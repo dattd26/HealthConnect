@@ -4,6 +4,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import io.jsonwebtoken.Jwts;
@@ -12,8 +14,9 @@ import java.util.*;
 
 @Component
 public class JwtTokenProvider {
-//    @Value("jwt.secret")
-    private String SECRET_KEY = "thisisaverysecurejwtsecretkeythatshouldbeatleast32bytes";
+
+    @Value("${jwt.secret}")
+    private String SECRET_KEY;
     @Value("${jwt.expiration}")
     private long jwtExpiration;
 
