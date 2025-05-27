@@ -6,10 +6,8 @@ services:
     container_name: mysql-container
     ports:
       - "3306:3306"
-    environment:
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_ALLOW_EMPTY_PASSWORD: ${MYSQL_ALLOW_EMPTY_PASSWORD}
+    env_file:
+      - ./backend/.env
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
@@ -22,19 +20,8 @@ services:
       - "8080:8080"
     depends_on:
       - mysql
-    environment:
-      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
-      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
-      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
-      JWT_SECRET: ${JWT_SECRET}
-      JWT_EXPIRATION: ${JWT_EXPIRATION}
-      SPRING_MAIL_USERNAME: ${MAIL_USERNAME}
-      SPRING_MAIL_PASSWORD: ${MAIL_PASSWORD}
-      ZOOM_CLIENT_ID: ${ZOOM_CLIENT_ID}
-      ZOOM_CLIENT_SECRET: ${ZOOM_CLIENT_SECRET}
-      ZOOM_REDIRECT_URI: ${ZOOM_REDIRECT_URI}
-      ZOOM_TOKEN_URI: ${ZOOM_TOKEN_URI}
-      ZOOM_API_URL: ${ZOOM_API_URL}
+    env_file:
+      - ./backend/.env
     networks:
       - app-network
 
