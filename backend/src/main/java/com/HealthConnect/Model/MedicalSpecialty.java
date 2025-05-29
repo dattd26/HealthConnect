@@ -2,6 +2,8 @@ package com.HealthConnect.Model;
 
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -23,6 +25,7 @@ public class MedicalSpecialty {
     private String code;
 
     // Many-to-many relationship
+    @JsonManagedReference
     @ManyToMany(mappedBy = "specialties")
     private Set<Doctor> doctors;
 }

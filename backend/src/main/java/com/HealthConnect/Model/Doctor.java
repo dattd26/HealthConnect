@@ -2,6 +2,8 @@ package com.HealthConnect.Model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
@@ -20,6 +22,9 @@ public class Doctor extends User {
         joinColumns = @jakarta.persistence.JoinColumn(name = "doctor_id"),
         inverseJoinColumns = @jakarta.persistence.JoinColumn(name = "specialty_id")
     )
+    @JsonBackReference
     private List<MedicalSpecialty> specialties;
     private String license;
+    private String hospital;
+    private List<WeeklyAvailableSlot> weeklySlots;
 }
