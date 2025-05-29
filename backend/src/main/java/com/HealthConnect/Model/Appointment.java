@@ -21,8 +21,9 @@ public class Appointment {
     @JoinColumn(name = "doctor_id", nullable = false)
     private User doctor;
 
-    @Column(nullable = false)
-    private LocalDateTime appointmentTime;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
+
 
     @Column(nullable = false)
     private String status; // SCHEDULED, COMPLETED, CANCELLED
