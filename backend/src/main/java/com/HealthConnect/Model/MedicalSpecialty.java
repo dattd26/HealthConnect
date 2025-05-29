@@ -25,7 +25,7 @@ public class MedicalSpecialty {
     private String code;
 
     // Many-to-many relationship
-    @JsonManagedReference
+    @JsonManagedReference(value = "doctor-specialties")
     @ManyToMany(mappedBy = "specialties")
     private Set<Doctor> doctors;
 }
