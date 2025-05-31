@@ -5,6 +5,7 @@
   "dependencies": {
     "@daily-co/daily-js": "^0.78.0",
     "@daily-co/daily-react": "^0.22.0",
+    "@radix-ui/react-slot": "^1.2.3",
     "@shadcn/ui": "^0.0.4",
     "axios": "^1.7.9",
     "chart.js": "^4.4.8",
@@ -22,8 +23,9 @@
     "react-router-dom": "^7.1.3",
     "react-scripts": "^5.0.1",
     "shadcn-ui": "^0.9.4",
-    "tailwind-merge": "^3.0.2",
+    "tailwind-merge": "^3.3.0",
     "tailwindcss-animate": "^1.0.7",
+    "tw-animate-css": "^1.3.2",
     "web-vitals": "^4.2.4",
     "worker-rpc": "^0.2.0"
   },
