@@ -28,5 +28,9 @@ export const API_ENDPOINTS = {
     DOCTOR: {
         PROFILE: (userId) => `${API_BASE_URL}/doctors/${userId}`,
         PATIENTS: (userId) => `${API_BASE_URL}/doctors/${userId}/patients`
+    },
+    SPECIALTY: {
+        ALL: `${API_BASE_URL}/specialties`,
+        GET: (code) => `${API_BASE_URL}/specialties/${code}`
     }
 }; 
