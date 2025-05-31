@@ -1,14 +1,16 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, use } from "react";
 import { useNavigate } from "react-router-dom";
 import { appointmentService } from "../../services/appointmentService";
 import { AuthContext } from "../../context/AuthContext";
 import dayjs from 'dayjs'
-
+import medicalSpecialtyService from "../../services/medicalSpecialtyService";
+import DoctorCard from "../doctor/DoctorCard";
 const CreateAppointment = ({ doctors }) => {
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
-  
+
+  const [doctorsList, setDoctorsList] = useState([]);
   // Personal Information
   const [fullName, setFullName] = useState("");
   const [gender, setGender] = useState("");
@@ -16,35 +18,39 @@ const CreateAppointment = ({ doctors }) => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
-  
+
   // Appointment Information
-  const [specialty, setSpecialty] = useState("");
-  const [doctorId, setDoctorId] = useState("");
-  const [consultationType, setConsultationType] = useState("inperson");
+  const [doctorId, setDoctorId] = useState(null);
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [consultationType, setConsultationType] = useState("online");
   const [preferredDate, setPreferredDate] = useState("");
-  const [preferredTimeSlot, setPreferredTimeSlot] = useState("");
-  
+  const [preferredTimeSlot, setPreferredTimeSlot] = useState(null);
+
   // Medical Information
   const [symptoms, setSymptoms] = useState("");
   const [medicalHistory, setMedicalHistory] = useState("");
   const [attachments, setAttachments] = useState([]);
-  
+
   // Additional Options
   const [noteForDoctor, setNoteForDoctor] = useState("");
   const [bookingFor, setBookingFor] = useState("self");
   const [acceptTerms, setAcceptTerms] = useState(false);
-  
 
-  const specialties = [
-  { id: "K001", vi: "Khoa nhi", en: "pediatrics" },
-  { vi: "Khoa nội", en: "pnternal Medicine" },
-  { vi: "Khoa ngoại", en: "purgery" },
-  { vi: "Khoa tim mạch", en: "pardiology" },
-  { vi: "Khoa sản", en: "pbstetrics & Gynecology" },
-  { vi: "Khoa da liễu", en: "permatology" }
-];
+  const [specialties, setSpecialties] = useState([]);
+  const [selectedSpecialtyCode, setSelectedSpecialtyCode] = useState("");
 
-<select
+  const [comfirmedTimeSlot, setComfirmedTimeSlot] = useState(false);
+
+  //   const specialties = [
+  //   { id: "K001", vi: "Khoa nhi", en: "pediatrics" },
+  //   { vi: "Khoa nội", en: "pnternal Medicine" },
+  //   { vi: "Khoa ngoại", en: "purgery" },
+  //   { vi: "Khoa tim mạch", en: "pardiology" },
+  //   { vi: "Khoa sản", en: "pbstetrics & Gynecology" },
+  //   { vi: "Khoa da liễu", en: "permatology" }
+  // ];
+
+  {/* <select
   className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
   value={specialty}
   onChange={(e) => setSpecialty(e.target.value)}
@@ -54,9 +60,9 @@ const CreateAppointment = ({ doctors }) => {
   {specialties.map((spec, index) => (
     <option key={index} value={spec.en}>{spec.en}</option>
   ))}
-</select>
+</select> */}
 
-  
+
   // Time slots
   const timeSlots = [
     { id: "morning", label: "Buổi sáng (8:00 - 11:30)" },
@@ -64,38 +70,56 @@ const CreateAppointment = ({ doctors }) => {
     { id: "evening", label: "Buổi tối (18:00 - 20:30)" },
   ];
 
+  useEffect(() => {
+    const fetchSpecialties = async () => {
+      try {
+        const specialties = await medicalSpecialtyService.getMedicalSpecialties();
+        setSpecialties(specialties);
+      } catch (err) {
+        console.error("Error loading specialties:", err);
+      }
+    };
+
+    fetchSpecialties();
+  }, []);
   // Auto-fill patient information from profile
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
         const token = localStorage.getItem("token");
-        // This would be replaced with an actual API call to get user profile
-        // const response = await axios.get("http://localhost:8080/api/user/profile", {
-        //   headers: { Authorization: `Bearer ${token}` },
-        // });
-        // const profile = response.data;
-        
-        // For now we'll just simulate this
+        // const user = await authService.getUserProfile(token);
         setFullName(user.fullName);
         setGender(user.gender);
         setDateOfBirth(user.dateOfBirth);
         setPhoneNumber(user.phone);
         setEmail(user.email);
         setAddress(user.address);
-        
+
       } catch (err) {
         console.error("Error loading user profile:", err);
       }
     };
-    
+
     fetchUserProfile();
   }, [bookingFor, user]);
 
   // Filter doctors based on specialty
-  const filteredDoctors = specialty 
-    ? doctors.filter(doctor => doctor.specialty === specialty)
-    : doctors;
-
+  // const filteredDoctors = selectedSpecialtyCode 
+  //   ? doctors.filter(doctor => doctor.specialty === specialty)
+  //   : doctors;
+  const handleSelectSpecialty = (e) => {
+    setSelectedSpecialtyCode(e.target.value);
+    if (!e.target.value) {
+      setDoctorsList([]);
+      return;
+    }
+    specialties.forEach(specialty => {
+      if (specialty.code === e.target.value) {
+        setDoctorsList(specialty.doctors);
+        return;
+      }
+    });
+  }
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
     setAttachments(files);
@@ -103,53 +127,53 @@ const CreateAppointment = ({ doctors }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!acceptTerms) {
       alert("Vui lòng chấp nhận điều khoản và điều kiện trước khi đặt lịch.");
       return;
     }
-    
+
     setLoading(true);
-    
+
     try {
       // Format the appointment data
-      const formData = new FormData();
-      
-      // Personal information
-      formData.append("fullName", fullName);
-      formData.append("gender", gender);
-      formData.append("dateOfBirth", dateOfBirth);
-      formData.append("phoneNumber", phoneNumber);
-      formData.append("email", email);
-      formData.append("address", address);
-      
-      // Appointment details
-      formData.append("specialty", specialty);
-      formData.append("doctorId", doctorId);
-      formData.append("consultationType", consultationType);
-      formData.append("preferredDate", preferredDate);
-      formData.append("preferredTimeSlot", preferredTimeSlot);
-      
-      // Medical information
-      formData.append("symptoms", symptoms);
-      formData.append("medicalHistory", medicalHistory);
-      attachments.forEach(file => {
-        formData.append("attachments", file);
-      });
-      
-      // Additional information
-      formData.append("noteForDoctor", noteForDoctor);
-      formData.append("bookingFor", bookingFor);
-      
+      // const formData = new FormData();
+
+      // // Personal information
+      // formData.append("fullName", fullName);
+      // formData.append("gender", gender);
+      // formData.append("dateOfBirth", dateOfBirth);
+      // formData.append("phoneNumber", phoneNumber);
+      // formData.append("email", email);
+      // formData.append("address", address);
+
+      // // Appointment details
+      // formData.append("specialty", selectedSpecialtyCode);
+      // formData.append("doctorId", doctorId);
+      // formData.append("consultationType", consultationType);
+      // formData.append("preferredDate", preferredDate);
+      // formData.append("preferredTimeSlot", preferredTimeSlot);
+
+      // // Medical information
+      // formData.append("symptoms", symptoms);
+      // formData.append("medicalHistory", medicalHistory);
+      // attachments.forEach(file => {
+      //   formData.append("attachments", file);
+      // });
+
+      // // Additional information
+      // formData.append("noteForDoctor", noteForDoctor);
+      // formData.append("bookingFor", bookingFor);
+
       // For now, using the existing service but ideally would update the backend API
-      const appointmentData = {
-        doctorId: parseInt(doctorId, 10),
-        appointmentTime: `${preferredDate}T${preferredTimeSlot === "morning" ? "09:00" : preferredTimeSlot === "afternoon" ? "14:00" : "18:00"}`,
-        notes: `Triệu chứng: ${symptoms}\nTiền sử: ${medicalHistory}\nGhi chú: ${noteForDoctor}\nHình thức: ${consultationType === "inperson" ? "Khám trực tiếp" : "Khám online"}`,
-      };
-      
-      const data = await appointmentService.createAppointment(appointmentData);
-      console.log(data);
+      // const appointmentData = {
+      //   doctorId: parseInt(doctorId, 10),
+      //   appointmentTime: `${preferredDate}T${preferredTimeSlot === "morning" ? "09:00" : preferredTimeSlot === "afternoon" ? "14:00" : "18:00"}`,
+      //   notes: `Triệu chứng: ${symptoms}\nTiền sử: ${medicalHistory}\nGhi chú: ${noteForDoctor}\nHình thức: ${consultationType === "inperson" ? "Khám trực tiếp" : "Khám online"}`,
+      // };
+
+      // const data = await appointmentService.createAppointment(appointmentData);
+      console.log(preferredTimeSlot);
       alert("Lịch hẹn đã được tạo thành công! Bạn sẽ nhận được email xác nhận trong ít phút.");
       navigate("/book-appointment");
     } catch (err) {
@@ -159,43 +183,52 @@ const CreateAppointment = ({ doctors }) => {
       setLoading(false);
     }
   };
-
+  // const handleSelectDoctor = (e) => {
+  //   const doctor = doctors.find(doctor => (doctor.id === parseInt(e.target.value, 10) ? doctor : null));
+  //   setDoctor(doctor);
+  //   setDoctorId(e.target.value);
+  // }
+  const handleSelectDoctor = (d, slot) => {
+    setPreferredTimeSlot(slot);
+    setSelectedDoctor(d);
+    console.log("Selected doctor:", d);
+  }
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       <h2 className="text-xl font-semibold text-blue-600 mb-4">Đặt lịch hẹn mới</h2>
-      
-      <form onSubmit={handleSubmit} className="space-y-6">
+
+      <form onSubmit={handleSubmit} id="create-appointment-form" className="space-y-6">
         <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Người đặt hộ</label>
-              <div className="flex space-x-4 mt-1">
-                <label className="inline-flex items-center">
-                  <input
-                    type="radio"
-                    className="form-radio text-blue-600"
-                    name="bookingFor"
-                    value="self"
-                    checked={bookingFor === "self"}
-                    onChange={() => setBookingFor("self")}
-                  />
-                  <span className="ml-2">Đặt cho bản thân</span>
-                </label>
-                <label className="inline-flex items-center">
-                  <input
-                    type="radio"
-                    className="form-radio text-blue-600"
-                    name="bookingFor"
-                    value="other"
-                    checked={bookingFor === "other"}
-                    onChange={() => setBookingFor("other")}
-                  />
-                  <span className="ml-2">Đặt cho người thân</span>
-                </label>
-              </div>
-            </div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Người đặt hộ</label>
+          <div className="flex space-x-4 mt-1">
+            <label className="inline-flex items-center">
+              <input
+                type="radio"
+                className="form-radio text-blue-600"
+                name="bookingFor"
+                value="self"
+                checked={bookingFor === "self"}
+                onChange={() => setBookingFor("self")}
+              />
+              <span className="ml-2">Đặt cho bản thân</span>
+            </label>
+            <label className="inline-flex items-center">
+              <input
+                type="radio"
+                className="form-radio text-blue-600"
+                name="bookingFor"
+                value="other"
+                checked={bookingFor === "other"}
+                onChange={() => setBookingFor("other")}
+              />
+              <span className="ml-2">Đặt cho người thân</span>
+            </label>
+          </div>
+        </div>
         {/* Personal Information Section */}
         <div className="border-b pb-4">
           <h3 className="text-lg font-medium text-gray-800 mb-3">Thông tin cá nhân</h3>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Họ và tên *</label>
@@ -207,7 +240,7 @@ const CreateAppointment = ({ doctors }) => {
                 required
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Giới tính *</label>
               <select
@@ -222,7 +255,7 @@ const CreateAppointment = ({ doctors }) => {
                 <option value="other">Khác</option>
               </select>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Ngày sinh *</label>
               <input
@@ -233,7 +266,7 @@ const CreateAppointment = ({ doctors }) => {
                 required
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Số điện thoại *</label>
               <input
@@ -244,7 +277,7 @@ const CreateAppointment = ({ doctors }) => {
                 required
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
               <input
@@ -255,7 +288,7 @@ const CreateAppointment = ({ doctors }) => {
                 required
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Địa chỉ</label>
               <input
@@ -267,52 +300,36 @@ const CreateAppointment = ({ doctors }) => {
             </div>
           </div>
         </div>
-        
-        {/* Appointment Information Section */}
+
         <div className="border-b pb-4">
           <h3 className="text-lg font-medium text-gray-800 mb-3">Thông tin khám bệnh</h3>
+
+          {/* Grid 2 cột cho Chuyên khoa + Hình thức khám */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            {/* Cột Chuyên khoa */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Chuyên khoa *</label>
               <select
                 className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                value={specialty}
-                onChange={(e) => setSpecialty(e.target.value)}
+                value={selectedSpecialtyCode}
+                onChange={handleSelectSpecialty}
                 required
               >
                 <option value="">-- Chọn chuyên khoa --</option>
                 {specialties.map((spec, index) => (
-                  <option key={index} value={spec.en}>{spec.vn}</option>
+                  <option key={index} value={spec.code}>{spec.name}</option>
                 ))}
               </select>
             </div>
-            
-            <div>
-              
-              <label className="block text-sm font-medium text-gray-700 mb-1">Bác sĩ *</label>
-              {specialty ? (<select
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                value={doctorId}
-                onChange={(e) => setDoctorId(e.target.value)}
-                required
-              >
-                <option value="">-- Chọn bác sĩ --</option>
-                {filteredDoctors.map((doctor) => (
-                  <option key={doctor.id} value={doctor.id}>
-                    {doctor.fullName || doctor.username}
-                  </option>
-                ))}
-              </select> ) :
-              (<>Vui lòng chọn chuyên khoa</>)
-            } 
-              
-            </div>
-            
+
+            {/* Cột Hình thức khám */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Hình thức khám *</label>
-              <div className="flex space-x-4 mt-1">
+              <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-2 sm:space-y-0 mt-1">
                 <label className="inline-flex items-center">
                   <input
+                    disabled
                     type="radio"
                     className="form-radio text-blue-600"
                     name="consultationType"
@@ -335,36 +352,34 @@ const CreateAppointment = ({ doctors }) => {
                 </label>
               </div>
             </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Ngày khám mong muốn *</label>
-              <input
-                type="date"
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                value={preferredDate}
-                onChange={(e) => setPreferredDate(e.target.value)}
-                min={new Date().toISOString().split('T')[0]}
-                required
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Khung giờ *</label>
-              <select
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                value={preferredTimeSlot}
-                onChange={(e) => setPreferredTimeSlot(e.target.value)}
-                required
-              >
-                <option value="">-- Chọn khung giờ --</option>
-                {timeSlots.map((slot) => (
-                  <option key={slot.id} value={slot.id}>{slot.label}</option>
-                ))}
-              </select>
-            </div>
+          </div>
+
+          {/* Danh sách bác sĩ - Luôn full width, dưới cùng */}
+          <div className="mt-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Bác sĩ phù hợp</label>
+            {doctorsList.length > 0 ? (
+              <div className="flex flex-col gap-4">
+                {doctorsList.map((doctor, index) =>
+                  doctor ? (
+                    <DoctorCard
+                      key={index}
+                      doctor={doctor}
+                      onSelect={(doctor, slot) => handleSelectDoctor(doctor, slot)}
+                      isDisabled={selectedDoctor !== null && doctor.id !== selectedDoctor?.id}
+                      comfirmed={selectedDoctor?.id === doctor.id}
+                    />
+                  ) : null
+                )}
+              </div>
+            ) : (
+              <div className="text-sm text-gray-600 italic">
+                Vui lòng chọn chuyên khoa để xem danh sách bác sĩ.
+              </div>
+            )}
           </div>
         </div>
-        
+
+
         {/* Medical Information Section */}
         <div className="border-b pb-4">
           <h3 className="text-lg font-medium text-gray-800 mb-3">Thông tin y tế</h3>
@@ -379,7 +394,7 @@ const CreateAppointment = ({ doctors }) => {
                 required
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Tiền sử bệnh lý</label>
               <textarea
@@ -389,7 +404,7 @@ const CreateAppointment = ({ doctors }) => {
                 placeholder="Các bệnh lý đã mắc trước đây, dị ứng, thuốc đang sử dụng..."
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Tệp đính kèm</label>
               <input
@@ -403,7 +418,7 @@ const CreateAppointment = ({ doctors }) => {
             </div>
           </div>
         </div>
-        
+
         {/* Additional Options Section */}
         <div className="border-b pb-4">
           <h3 className="text-lg font-medium text-gray-800 mb-3">Tùy chọn bổ sung</h3>
@@ -417,11 +432,11 @@ const CreateAppointment = ({ doctors }) => {
                 placeholder="Thông tin bổ sung, yêu cầu đặc biệt..."
               />
             </div>
-            
-            
+
+
           </div>
         </div>
-        
+
         {/* Terms and Conditions */}
         <div className="mb-4">
           <label className="inline-flex items-center">
@@ -437,12 +452,14 @@ const CreateAppointment = ({ doctors }) => {
             </span>
           </label>
         </div>
-        
+
         {/* Submit Button */}
-        <button 
+        <button
           type="submit"
+          form="create-appointment-form"
           className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 transition-colors font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
           disabled={loading}
+          // onClick={(e) => {}
         >
           {loading ? "Đang xử lý..." : "Đặt lịch khám"}
         </button>
