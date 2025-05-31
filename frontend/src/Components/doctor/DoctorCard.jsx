@@ -6,16 +6,7 @@ import axios from "axios";
 import { useState } from "react";
 import dayjs from "dayjs";
 
-export default function DoctorCard({ doctor, onSelect, isDisabled, comfirmed }) {
-  const [slots, setSlots] = useState([]);
-  const today = dayjs();
-  const [selectedDate, setSelectedDate] = useState(today);
-  const [selectableDates, setSelectableDates] = useState([]);
-  const [filteredSlots, setFilteredSlots] = useState([]);
-  const [selectedSlot, setSelectedSlot] = useState(null);
-  const [selectedSlotId, setSelectedSlotId] = useState(null);
-
-  const getDateOfWeekday  = (dayOfWeek) => {
+const getDateOfWeekday  = (dayOfWeek) => {
     const dayMap = {
       "SUNDAY": 0,
       "MONDAY": 1,
@@ -67,6 +58,15 @@ export default function DoctorCard({ doctor, onSelect, isDisabled, comfirmed }) 
     const match = duration.match(/PT(\d+)M/);
     return match ? parseInt(match[1]) : 0;
   };
+  
+export default function DoctorCard({ doctor, onSelect, isDisabled, comfirmed }) {
+  const [slots, setSlots] = useState([]);
+  const today = dayjs();
+  const [selectedDate, setSelectedDate] = useState(today);
+  const [selectableDates, setSelectableDates] = useState([]);
+  const [filteredSlots, setFilteredSlots] = useState([]);
+  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [selectedSlotId, setSelectedSlotId] = useState(null);
 
   useEffect(() => {
     const fetchAvailableSlots = async () => {
