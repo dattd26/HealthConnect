@@ -2,6 +2,8 @@ package com.HealthConnect.Dto;
 
 import java.util.List;
 
+import com.HealthConnect.Model.DoctorAvailability;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,5 +11,5 @@ import lombok.Setter;
 @Setter
 public class DoctorResponse extends UserDTO {
     private String license;
-    private List<DoctorTimeSlotDTO> timeslots;
+    private List<DoctorAvailability> availabilities;
 }

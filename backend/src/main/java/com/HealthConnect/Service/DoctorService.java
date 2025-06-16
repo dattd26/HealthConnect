@@ -1,47 +1,47 @@
 package com.HealthConnect.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.HealthConnect.Dto.AvailabilityDto;
+import com.HealthConnect.Dto.DoctorAvailabilitiesResponse;
 import com.HealthConnect.Dto.DoctorResponse;
-import com.HealthConnect.Dto.DoctorTimeSlotDTO;
 import com.HealthConnect.Model.Doctor;
-import com.HealthConnect.Model.DoctorTimeslot;
+import com.HealthConnect.Model.DoctorAvailability;
+import com.HealthConnect.Repository.DoctorAvailabilityRepository;
 import com.HealthConnect.Repository.DoctorRepository;
-import com.HealthConnect.Repository.DoctorTimeSlotRepository;
 
 @Service
 public class DoctorService {
     @Autowired
     DoctorRepository doctorRepository;
     @Autowired
-    DoctorTimeSlotRepository timeSlotRepository;
+    DoctorAvailabilityRepository doctorAvailabilityRepository;
 
     public Doctor getDoctor(Long id) {
         return doctorRepository.findById(id).orElseGet(null);
     }
-    public DoctorResponse updateTimeSlots(Doctor doctor, List<DoctorTimeSlotDTO> t) {
-        List<DoctorTimeslot> existingTimeSlots = timeSlotRepository.findByDoctor(doctor);    
-        timeSlotRepository.deleteAll(existingTimeSlots);
+    public DoctorAvailabilitiesResponse updateDoctorAvailability(Doctor doctor, List<AvailabilityDto> t) {
+        List<DoctorAvailability> doctorAvailabilities = doctorAvailabilityRepository.findByDoctor(doctor);    
+        doctorAvailabilityRepository.deleteAll(doctorAvailabilities);
 
-        List <DoctorTimeslot> newTimeSlots = t.stream().map(timeslot -> {
-            DoctorTimeslot newTimeSlot = new DoctorTimeslot();
-            newTimeSlot.setDayOfWeek(timeslot.getDayOfWeek());
-            newTimeSlot.setStartTime(timeslot.getStartTime());
-            newTimeSlot.setEndTime(timeslot.getEndTime());
-            newTimeSlot.setDuration(timeslot.getDuration());
-            newTimeSlot.setDoctor(doctor);
-            return newTimeSlot;
+        List <DoctorAvailability> newDoctorAvailabilities = t.stream().map(doctorAvailability -> {
+            DoctorAvailability newDoctorAvailability = new DoctorAvailability();
+            newDoctorAvailability.setDayOfWeek(doctorAvailability.getDayOfWeek());
+            newDoctorAvailability.setStartTime(doctorAvailability.getStartTime());
+            newDoctorAvailability.setEndTime(doctorAvailability.getEndTime());
+            newDoctorAvailability.setDoctor(doctor);
+            return newDoctorAvailability;
         }).toList();
 
-        timeSlotRepository.saveAll(newTimeSlots);
-        doctor.setTimeslots(new ArrayList<>(newTimeSlots));
+        doctorAvailabilityRepository.saveAll(newDoctorAvailabilities);
+        doctor.setAvailabilities(newDoctorAvailabilities);
         // Doctor d = doctorRepository.save(doctor);
-        DoctorResponse response = new DoctorResponse();
-        response.setTimeslots(t);
+        DoctorAvailabilitiesResponse response = new DoctorAvailabilitiesResponse();
+        response.setDoctorId(doctor.getId());
+        response.setAvailabilities(t);
         return response;
     }
 
@@ -49,12 +49,12 @@ public class DoctorService {
         Doctor doctor = doctorRepository.findById(id).orElseGet(null);
         
         DoctorResponse response = new DoctorResponse();
-        response.setTimeslots(doctor.getTimeslots().stream().map(timeslot -> {
-            DoctorTimeSlotDTO dto = new DoctorTimeSlotDTO();
-            dto.setDayOfWeek(timeslot.getDayOfWeek());
-            dto.setStartTime(timeslot.getStartTime());
-            dto.setEndTime(timeslot.getEndTime());
-            dto.setDuration(timeslot.getDuration());
+        response.setAvailabilities(doctor.getAvailabilities().stream().map(doctorAvailability -> {
+            DoctorAvailability dto = new DoctorAvailability();
+            dto.setDoctor(doctor);
+            dto.setDayOfWeek(doctorAvailability.getDayOfWeek());
+            dto.setStartTime(doctorAvailability.getStartTime());
+            dto.setEndTime(doctorAvailability.getEndTime());
             return dto;
         }).toList());
 

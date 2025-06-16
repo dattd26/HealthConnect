@@ -40,7 +40,8 @@ public class AppointmentController {
 
 
         Appointment newAppointment = new Appointment();
-        // newAppointment.setAppointmentTime(request.getAppointmentTime());
+        newAppointment.setStartTime(request.getStartTime());
+        newAppointment.setEndTime(request.getEndTime());
         newAppointment.setDoctor(userService.getUserById(request.getDoctorId()));
         newAppointment.setPatient(userService.getUserByUsername(userDetails.getUsername()));
         newAppointment.setStatus("SCHEDULED");

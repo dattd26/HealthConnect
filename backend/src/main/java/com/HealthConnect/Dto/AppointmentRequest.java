@@ -10,5 +10,6 @@ import java.time.LocalDateTime;
 public class AppointmentRequest {
     private Long doctorId;
     private String notes;
-    private LocalDateTime appointmentTime;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
 }
