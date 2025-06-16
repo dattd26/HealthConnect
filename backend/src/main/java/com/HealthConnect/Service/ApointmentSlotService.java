@@ -50,6 +50,11 @@ public class ApointmentSlotService {
             
             final LocalTime slotTime = currentTime;
             
+            if (currentDate.isEqual(LocalDate.now()) && (slotTime.isBefore(LocalTime.now()) || slotTime.equals(LocalTime.now()))) {
+                currentTime = currentTime.plus(DEFAULT_SLOT_DURATION);
+                continue;
+            }
+
             // Check if this slot is already booked
             boolean isBooked = existingSlots.stream()
                 .anyMatch(slot -> 
