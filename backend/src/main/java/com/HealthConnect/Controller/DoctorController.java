@@ -11,10 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.HealthConnect.Dto.AppointmentSlotDTO;
 import com.HealthConnect.Dto.AvailabilityDto;
+import com.HealthConnect.Dto.DoctorSlotDTO;
 import com.HealthConnect.Model.Doctor;
-import com.HealthConnect.Service.ApointmentSlotService;
 import com.HealthConnect.Service.DoctorService;
 
 @RestController
@@ -23,22 +22,21 @@ public class DoctorController {
     
     @Autowired
     DoctorService doctorService;
-    @Autowired
-    ApointmentSlotService apointmentSlotService;
     
     @GetMapping("/{id}/availability")
     public ResponseEntity<?> getAvailableTimeSlots(@PathVariable Long id) {
-        return ResponseEntity.ok(doctorService.getAvailableTimeslots(id).getAvailabilities());
+        return ResponseEntity.ok(doctorService.getAvailability(id).getAvailabilities());
     }
 
     @GetMapping("/{id}/available-slots")
-    public ResponseEntity<?> getAvailableSlots(@PathVariable Long id) {
-        return ResponseEntity.ok(apointmentSlotService.getAvailableSlotsForDoctor(id));
+    public ResponseEntity<List<DoctorSlotDTO>> getAvailableSlotsTest(@PathVariable Long id) {
+        return ResponseEntity.ok(doctorService.getAvailableSlot(id));
     }
+    
     @PostMapping("/{id}/availability")
     public ResponseEntity<?> updateAvailability(@PathVariable Long id, @RequestBody List<AvailabilityDto> availability) {
         try {
-            Doctor doctor = doctorService.getDoctor(id);
+            Doctor doctor = doctorService.getById(id);
             if (doctor == null) {
                 return ResponseEntity.badRequest().body("Doctor not found");
             }
@@ -46,9 +44,5 @@ public class DoctorController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
-    }
-    @PostMapping("/{id}/book-slot")
-    public ResponseEntity<?> bookSlot(@PathVariable Long id, @RequestBody AppointmentSlotDTO appointmentSlotDTO) {
-        return ResponseEntity.ok(apointmentSlotService.bookSlot(id, appointmentSlotDTO.getDate(), appointmentSlotDTO.getStartTime()));
     }
 }

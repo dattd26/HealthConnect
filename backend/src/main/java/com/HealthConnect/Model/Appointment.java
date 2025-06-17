@@ -1,9 +1,15 @@
 package com.HealthConnect.Model;
 
+import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+
+import jakarta.persistence.OneToOne;
+
 @Data
 @Entity
 @Table(name = "appointments")
@@ -15,19 +21,40 @@ public class Appointment {
 
     @ManyToOne
     @JoinColumn(name = "patient_id", nullable = false)
-    private User patient; 
+    @JsonBackReference(value = "patient-appointments")
+    private Patient patient; 
 
     @ManyToOne
     @JoinColumn(name = "doctor_id", nullable = false)
-    private User doctor;
+    @JsonBackReference(value = "doctor-appointments")
+    private Doctor doctor;
 
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
-
+    @OneToOne
+    @JoinColumn(name = "doctor_slot_id", nullable = false)
+    private DoctorSlot doctorSlot;
 
     @Column(nullable = false)
-    private String status; // SCHEDULED, COMPLETED, CANCELLED
+    private AppointmentStatus status;
+
+    public enum AppointmentStatus {
+        WAITING,
+        CONFIRMED,
+        CANCELLED
+    }
 
     @Column
     private String notes; // Ghi chú của bác sĩ hoặc bệnh nhân
+    @Column
+    private LocalDateTime createdAt;
+    @Column
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+    }
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
 }

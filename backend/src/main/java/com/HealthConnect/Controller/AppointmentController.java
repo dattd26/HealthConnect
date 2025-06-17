@@ -2,9 +2,11 @@ package com.HealthConnect.Controller;
 
 import com.HealthConnect.Dto.AppointmentRequest;
 import com.HealthConnect.Model.Appointment;
+import com.HealthConnect.Model.DoctorSlot;
 import com.HealthConnect.Model.User;
 import com.HealthConnect.Service.AppointmentService;
-import com.HealthConnect.Service.UserService;
+import com.HealthConnect.Service.DoctorService;
+import com.HealthConnect.Service.PatientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,8 +23,10 @@ public class AppointmentController {
     private AppointmentService appointmentService;
 
     @Autowired
-    private UserService userService;
-
+    private DoctorService doctorService;
+    @Autowired
+    private PatientService patientService;
+    
     @GetMapping("/patient/{patientId}")
     public ResponseEntity<List<Appointment>> getAppointmentsByPatient(@PathVariable Long patientId) {
         List<Appointment> appointments = appointmentService.getAppointmentsByPatient(patientId);
@@ -36,24 +40,33 @@ public class AppointmentController {
     }
 
     @PostMapping
-    public ResponseEntity<Appointment> createAppointment(@AuthenticationPrincipal UserDetails userDetails, @RequestBody AppointmentRequest request) {
+    public ResponseEntity<?> createAppointment(@AuthenticationPrincipal UserDetails userDetails, @RequestBody AppointmentRequest request) {
+        try {
+            DoctorSlot slot = doctorService.getSlotByDoctorIdAndDateAndStartTime(request.getDoctorId(), request.getDate(), request.getStartTime());
+            if (slot == null) {
+                throw new RuntimeException("Slot not found");
+            }
+            if (slot.getStatus() != DoctorSlot.SlotStatus.AVAILABLE) {
+                throw new RuntimeException("Slot is not available");
+            }
+            slot.setStatus(DoctorSlot.SlotStatus.BOOKED);
+            Appointment newAppointment = new Appointment();
+            newAppointment.setDoctor(doctorService.getById(request.getDoctorId()));
+            newAppointment.setDoctorSlot(slot);
+            newAppointment.setPatient(patientService.getByUsername(userDetails.getUsername()));
+            newAppointment.setStatus(Appointment.AppointmentStatus.WAITING);
+            newAppointment.setNotes(request.getNotes());
+            return ResponseEntity.ok(appointmentService.createAppointment(newAppointment));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
 
-
-        Appointment newAppointment = new Appointment();
-        newAppointment.setStartTime(request.getStartTime());
-        newAppointment.setEndTime(request.getEndTime());
-        newAppointment.setDoctor(userService.getUserById(request.getDoctorId()));
-        newAppointment.setPatient(userService.getUserByUsername(userDetails.getUsername()));
-        newAppointment.setStatus("SCHEDULED");
-        newAppointment.setNotes(request.getNotes());
-
-        return ResponseEntity.ok(appointmentService.createAppointment(newAppointment));
     }
 
     @PutMapping("/{appointmentId}/cancel")
-    public ResponseEntity<Void> cancelAppointment(@PathVariable Long appointmentId) {
+    public ResponseEntity<String> cancelAppointment(@PathVariable Long appointmentId) {
         appointmentService.cancelAppointment(appointmentId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok("Cancel appointment successfully");
     }
     @GetMapping
     public ResponseEntity<List<Appointment>> getUserAppointments(
