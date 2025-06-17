@@ -29,6 +29,10 @@ public class Doctor extends User {
     private String hospital;
 
     @OneToMany(mappedBy = "doctor")
+    @JsonBackReference(value = "doctor-appointments")
+    private Set<Appointment> appointments; 
+    
+    @OneToMany(mappedBy = "doctor")
     @JsonBackReference(value = "doctor-availabilities")
     private List<DoctorAvailability> availabilities;
 
