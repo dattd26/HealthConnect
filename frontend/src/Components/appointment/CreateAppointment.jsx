@@ -18,7 +18,7 @@ const CreateAppointment = ({ doctors }) => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
-
+  
   // Appointment Information
   const [doctorId, setDoctorId] = useState(null);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
@@ -84,24 +84,23 @@ const CreateAppointment = ({ doctors }) => {
   }, []);
   // Auto-fill patient information from profile
   useEffect(() => {
-    const fetchUserProfile = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        // const user = await authService.getUserProfile(token);
-        setFullName(user.fullName);
-        setGender(user.gender);
-        setDateOfBirth(user.dateOfBirth);
-        setPhoneNumber(user.phone);
-        setEmail(user.email);
-        setAddress(user.address);
-
-      } catch (err) {
-        console.error("Error loading user profile:", err);
-      }
-    };
-
-    fetchUserProfile();
-  }, [bookingFor, user]);
+    if (bookingFor === "self") {
+      setFullName(user.fullName);
+      setGender(user.gender);
+      setDateOfBirth(user.dateOfBirth);
+      setPhoneNumber(user.phone);
+      setEmail(user.email);
+      setAddress(user.address);
+    }
+    else {
+      setFullName("");
+      setGender("");
+      setDateOfBirth("");
+      setPhoneNumber("");
+      setEmail("");
+      setAddress("");
+    }
+  }, [bookingFor]);
 
   // Filter doctors based on specialty
   // const filteredDoctors = selectedSpecialtyCode 
@@ -166,14 +165,15 @@ const CreateAppointment = ({ doctors }) => {
       // formData.append("bookingFor", bookingFor);
 
       // For now, using the existing service but ideally would update the backend API
-      // const appointmentData = {
-      //   doctorId: parseInt(doctorId, 10),
-      //   appointmentTime: `${preferredDate}T${preferredTimeSlot === "morning" ? "09:00" : preferredTimeSlot === "afternoon" ? "14:00" : "18:00"}`,
-      //   notes: `Triệu chứng: ${symptoms}\nTiền sử: ${medicalHistory}\nGhi chú: ${noteForDoctor}\nHình thức: ${consultationType === "inperson" ? "Khám trực tiếp" : "Khám online"}`,
-      // };
+      const appointmentData = {
+        doctorId: parseInt(selectedDoctor.id, 10),
+        startTime: preferredTimeSlot.start,
+        endTime: preferredTimeSlot.end,
+        notes: `Triệu chứng: ${symptoms}\nTiền sử: ${medicalHistory}\nGhi chú: ${noteForDoctor}\nHình thức: ${consultationType === "inperson" ? "Khám trực tiếp" : "Khám online"}`,
+      };
 
-      // const data = await appointmentService.createAppointment(appointmentData);
-      console.log(preferredTimeSlot);
+      const data = await appointmentService.createAppointment(appointmentData);
+      console.log(data);
       alert("Lịch hẹn đã được tạo thành công! Bạn sẽ nhận được email xác nhận trong ít phút.");
       navigate("/book-appointment");
     } catch (err) {
