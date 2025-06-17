@@ -12,8 +12,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.OneToMany;
 
 import java.time.Duration;
+import java.util.Set;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -43,4 +45,6 @@ public class DoctorSlot {
         AVAILABLE,
         BOOKED
     }
+    @OneToMany(mappedBy = "doctorSlot")
+    private Set<Appointment> appointments;
 }

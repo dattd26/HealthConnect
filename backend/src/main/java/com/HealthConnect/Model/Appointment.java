@@ -8,8 +8,6 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 
-import jakarta.persistence.OneToOne;
-
 @Data
 @Entity
 @Table(name = "appointments")
@@ -29,7 +27,7 @@ public class Appointment {
     @JsonBackReference(value = "doctor-appointments")
     private Doctor doctor;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "doctor_slot_id", nullable = false)
     private DoctorSlot doctorSlot;
 
