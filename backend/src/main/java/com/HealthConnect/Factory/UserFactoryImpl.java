@@ -1,7 +1,9 @@
 package com.HealthConnect.Factory;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -48,7 +50,7 @@ public class UserFactoryImpl implements UserFactory {
         Doctor d = new Doctor();
         populateCommonFields(d, req, passwordEncoder);
         d.setLicense(req.getLicense()); 
-        List<MedicalSpecialty> specialties = new ArrayList<MedicalSpecialty>();
+        Set<MedicalSpecialty> specialties = new HashSet<MedicalSpecialty>();
         for (SpecialtyRequest s : req.getSpecialties()) {
             MedicalSpecialty specialty = specialtyService.findByCode(s.getCode());
             if (specialty != null) {
