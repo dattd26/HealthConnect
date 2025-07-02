@@ -36,7 +36,7 @@ public class SecurityConfig {
             return configuration;
         }));
         http.authorizeHttpRequests((auth) -> auth
-                .requestMatchers(HttpMethod.POST,"/api/auth/**").permitAll()
+                .requestMatchers(HttpMethod.POST,"/api/auth/**", "/api/zoom/**").permitAll()
                 .requestMatchers("/", "/error/**", "/api/auth/**", "/zoom", "/zoom/callback").permitAll()
                 .anyRequest().authenticated())
                 // .formLogin(Customizer.withDefaults())

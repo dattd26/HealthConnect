@@ -19,9 +19,9 @@ public class ZoomController {
 
     @PostMapping
     public ResponseEntity<?> testGetSignature(@RequestBody MeetingRequest request) {
+        String signature = zoomService.generateSignature(request);
         Map<String, String> res = new HashMap<>();
-        res.put("signature", zoomService.generateSignature(new MeetingRequest(request.getMeetingNumber(),
-                request.getRole(), null, null, "kajW83")));
+        res.put("signature", signature);
         res.put("sdkKey", "q48VIOcOS7Wb6xCsjQI5bg");
         return ResponseEntity.ok(res);
     }

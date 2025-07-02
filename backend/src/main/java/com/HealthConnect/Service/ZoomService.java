@@ -6,7 +6,7 @@ import com.HealthConnect.Dto.Zoom.ZoomMeetingResponse;
 import com.HealthConnect.Dto.Zoom.ZoomTokenResponse;
 
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,7 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import javax.crypto.spec.SecretKeySpec;
+import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
@@ -28,17 +28,21 @@ import java.util.Map;
 @Service
 public class ZoomService {
 
-    @Value("${zoom.oauth.clientId}")
-    private String clientId;
-
-    @Value("${zoom.oauth.clientSecret}")
-    private String clientSecret;
-
-    @Value("${zoom.oauth.apiUrl}")
+    @Value("${zoom.s2s.clientId}")
+    private String s2sClientId;
+    @Value("${zoom.s2s.clientSecret}")
+    private String s2sClientSecret;
+    @Value("${zoom.s2s.apiUrl}")
     private String apiUrl;
-
-    @Value("${zoom.oauth.accountId}")
+    @Value("${zoom.s2s.accountId}")
     private String accountId;
+
+    @Value("${zoom.sdk.clientId}")
+    private String sdkClientId;
+    @Value("${zoom.sdk.clientSecret}")
+    private String sdkClientSecret;
+    @Value("${zoom.sdk.redirectUri}")
+    private String sdkRedirectUri;
 
     @Autowired
     private RestTemplate restTemplate;
@@ -53,24 +57,21 @@ public class ZoomService {
                 : iat + 60 * 60 * 2; // cộng thêm 2 tiếng
 
         // Create HMAC-SHA256 key
-        SecretKeySpec secretKey = new SecretKeySpec(
-                clientSecret.getBytes(StandardCharsets.UTF_8),
-                SignatureAlgorithm.HS256.getJcaName()
-        );
+        SecretKey secretKey = Keys.hmacShaKeyFor(sdkClientSecret.getBytes(StandardCharsets.UTF_8));
 
         // Build JWT
         return Jwts.builder()
-                .setHeaderParam("alg", "HS256")
-                .setHeaderParam("typ", "JWT")
-                .claim("appKey", clientId) // Match JavaScript's appKey
-                .claim("sdkKey", clientId) // Match JavaScript's sdkKey
+                .header()
+                .add("alg", "HS256")
+                .add("typ", "JWT")
+                .and()
+                .claim("appKey", sdkClientId)
                 .claim("mn", request.getMeetingNumber())
                 .claim("role", request.getRole())
                 .claim("iat", iat)
                 .claim("exp", exp)
                 .claim("tokenExp", exp)
-                .claim("video_webrtc_mode", request.getVideoWebRtcMode())
-                .signWith(secretKey)
+                .signWith(secretKey, Jwts.SIG.HS256)
                 .compact();
     }
 
@@ -81,7 +82,7 @@ public class ZoomService {
             }
 
             // Tạo chuỗi Basic Auth
-            String auth = clientId + ":" + clientSecret;
+            String auth = s2sClientId + ":" + s2sClientSecret;
             String encodedAuth = Base64.getEncoder()
                     .encodeToString(auth.getBytes(StandardCharsets.UTF_8));
             HttpHeaders headers = new HttpHeaders();
