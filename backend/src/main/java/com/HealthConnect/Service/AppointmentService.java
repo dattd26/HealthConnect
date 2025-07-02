@@ -68,5 +68,8 @@ public class AppointmentService {
         }).collect(Collectors.toList());
     }
 
-    
+    public Appointment getAppointmentById(Long appointmentId) {
+        return appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+    }
 }

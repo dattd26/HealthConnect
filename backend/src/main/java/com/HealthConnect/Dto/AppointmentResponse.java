@@ -18,5 +18,11 @@ public class AppointmentResponse {
     private DoctorSlotDTO doctorSlot;
     private String notes;
     private String status;
+
+    // Zoom meeting info
+    private String zoomJoinUrl;
+    private String zoomStartUrl;
+    private String zoomMeetingId;
+    private String zoomPassword;
 }
 

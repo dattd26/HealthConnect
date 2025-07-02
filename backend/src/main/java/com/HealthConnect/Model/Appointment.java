@@ -55,4 +55,13 @@ public class Appointment {
     public void preUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
+
+    @Column
+    private String zoomMeetingId;
+    @Column
+    private String zoomJoinUrl;
+    @Column
+    private String zoomStartUrl;
+    @Column
+    private String zoomPassword;
 }
