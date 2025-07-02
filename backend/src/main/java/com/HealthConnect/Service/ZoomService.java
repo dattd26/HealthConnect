@@ -157,4 +157,25 @@ public class ZoomService {
         }
     }
 
+    public ZoomMeetingResponse getMeeting(String meetingId) {
+        String accessToken = getAccessToken();
+        if (accessToken == null) {
+            throw new RuntimeException("Failed to get access token");
+        }
+        String url = apiUrl + "/meetings/" + meetingId;
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(accessToken);
+        HttpEntity<String> request = new HttpEntity<>(headers);
+        ResponseEntity<ZoomMeetingResponse> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                request,
+                ZoomMeetingResponse.class
+        );
+        if (response.getStatusCode() == HttpStatus.OK) {
+            return response.getBody();
+        } else {
+            throw new RuntimeException("Failed to get meeting: " + response.getStatusCode());
+        }
+    }
 }

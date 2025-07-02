@@ -35,4 +35,8 @@ public class ZoomController {
     public ZoomMeetingResponse createMeeting(@RequestBody CreateMeetingRequest meetingRequest) {
         return zoomService.createMeeting(meetingRequest);
     }
+    @GetMapping("/get-meeting/{meetingId}")
+    public ZoomMeetingResponse getMeeting(@PathVariable String meetingId) {
+        return zoomService.getMeeting(meetingId);
+    }
 }
