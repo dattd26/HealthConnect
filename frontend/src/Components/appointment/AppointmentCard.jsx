@@ -28,19 +28,26 @@ const AppointmentCard = ({ appointment, role }) => {
       </p>
       <p>
         <strong>Thời gian:</strong>{" "}
-        {new Date(appointment.date).toLocaleString()} - {new Date(appointment.time).toLocaleString()}
+        {appointment.date} - {appointment.time}
       </p>
       <p>
         <strong>Trạng thái:</strong> {appointment.status}
       </p>
       <p>
-        <strong>Google Meet:</strong> <a href="https://meet.google.com/hqd-yzpu-hug" target="_blank" rel="noopener noreferrer">https://meet.google.com/hqd-yzpu-hug</a>
+        <strong>Google Meet:</strong> <a href={appointment.zoomJoinUrl} target="_blank" rel="noopener noreferrer">https://meet.google.com/hqd-yzpu-hug</a>
       </p>
       {appointment.status === "WAITING" && (
         <button onClick={handleCancel}>Hủy lịch hẹn</button>
       )}
       {appointment.status === "CONFIRMED" && (
-        <button onClick={handleCancel}>Kết thúc lịch hẹn</button>
+        <>
+          <button onClick={handleCancel}>Kết thúc lịch hẹn</button>
+          {appointment.zoomMeetingId && (
+            <button onClick={() => navigate(`/appointments/${appointment.id}/meeting`)}>
+              Tham gia cuộc họp
+            </button>
+          )}
+        </>
       )}
     </div>
   );

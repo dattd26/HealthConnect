@@ -9,6 +9,7 @@ import PatientDashboard from "../patient/PatientDashboard";
 import BookAppointmentPage from "../../pages/BookAppointmentPage";
 import ProfilePage from "../../pages/ProfilePage";
 import ZoomMeeting from "../../pages/ZoomTest";
+import AppointmentMeetingPage from "../../pages/AppointmentMeetingPage";
 
 const AppRouter = () => {
     // const { user } = useContext(AuthContext);
@@ -30,6 +31,7 @@ const AppRouter = () => {
             <Route path="/login" element={<LoginPage/>}/>
             <Route path="/register" element={<RegisterPage/>}/>
             <Route path="/test" element={<ZoomMeeting/>}/>
+            <Route path="/appointments/:appointmentId/meeting" element={<AppointmentMeetingPage/>}/>
             {/* <Route path="/about" element={<RegisterPage/>}/> */}
 
             <Route path="/book-appointment" element={

@@ -16,5 +16,12 @@ export const appointmentService = {
             headers: getAuthHeader()
         });
         return response.data;
+    },
+
+    getAppointmentById: async (id) => {
+        const response = await axios.get(API_ENDPOINTS.APPOINTMENTS.GET(id), {
+            headers: getAuthHeader()
+        });
+        return response.data;
     }
 }
