@@ -8,6 +8,7 @@ import { ProtectedRoute } from "../auth/ProtectedRoute";
 import PatientDashboard from "../patient/PatientDashboard";
 import BookAppointmentPage from "../../pages/BookAppointmentPage";
 import ProfilePage from "../../pages/ProfilePage";
+import ZoomMeeting from "../../pages/ZoomTest";
 
 const AppRouter = () => {
     // const { user } = useContext(AuthContext);
@@ -28,6 +29,7 @@ const AppRouter = () => {
             <Route path="/" element={<Homepage/>}/>
             <Route path="/login" element={<LoginPage/>}/>
             <Route path="/register" element={<RegisterPage/>}/>
+            <Route path="/test" element={<ZoomMeeting/>}/>
             {/* <Route path="/about" element={<RegisterPage/>}/> */}
 
             <Route path="/book-appointment" element={

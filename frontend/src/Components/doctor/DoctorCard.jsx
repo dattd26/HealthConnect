@@ -6,6 +6,15 @@ import axios from "axios";
 import { useState } from "react";
 import dayjs from "dayjs";
 
+const dayMap = {
+  "Su": "CN",
+  "Mo": "T2",
+  "Tu": "T3",
+  "We": "T4",
+  "Th": "T5",
+  "Fr": "T6",
+  "Sa": "T7",
+}
 const getDateOfWeekday  = (dayOfWeek) => {
     const dayMap = {
       "SUNDAY": 0,
@@ -71,13 +80,19 @@ export default function DoctorCard({ doctor, onSelect, isDisabled, comfirmed }) 
   useEffect(() => {
     const fetchAvailableSlots = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/api/doctors/${doctor.id}/available-slots`, {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + localStorage.getItem('token')
+        const startDate = today.format('YYYY-MM-DD');
+        const endDate = today.add(13, 'day').format('YYYY-MM-DD');
+        
+        const response = await axios.get(
+          `http://localhost:8080/api/doctors/${doctor.id}/available-slots`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + localStorage.getItem('token')
+            }
           }
-        });
-        setSlots(generateSlotsFromSchedule(response.data));
+        );
+        setSlots(response.data);
       }
       catch (error) {
         console.error("Error fetching available slots:", error);
@@ -90,7 +105,7 @@ export default function DoctorCard({ doctor, onSelect, isDisabled, comfirmed }) 
 
   useEffect(() => {
     setFilteredSlots(slots.filter(slot => (
-      dayjs(slot.start).isSame(selectedDate, 'day')
+      dayjs(slot.date).isSame(selectedDate, 'day')
     )));
   }, [selectedDate, slots]);
 
@@ -103,7 +118,7 @@ export default function DoctorCard({ doctor, onSelect, isDisabled, comfirmed }) 
     }
     const startDateNextWeek = today.add(7 - today.day(), 'day');
 
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < today.day(); i++) {
       const date = startDateNextWeek.add(i, 'day');
       dates.push(date);
     }
@@ -120,6 +135,13 @@ export default function DoctorCard({ doctor, onSelect, isDisabled, comfirmed }) 
         selectedSlot,
       );
     }
+  }
+  const handleSelectSlot = (slot) => {
+    console.log(slot);
+    if (slot.status === "BOOKED") {
+      return;
+    }
+    setSelectedSlot(selectedSlot === slot ? null : slot);
   }
   return (
     <Card className={`w-full max-w-full mx-auto rounded-2xl shadow-lg ${isDisabled ? "pointer-events-none opacity-50" : ""}`}>
@@ -143,46 +165,50 @@ Chuyên gia chuyên tham vấn các rối nhiễu tâm lý, loạn thần, đị
         <h3 className="text-sm font-semibold mb-2 flex items-center gap-1 text-blue-700">
           <Clock className="w-4 h-4" /> Thời gian khám, Hôm nay
         </h3>
-        {/* Menu chọn ngày */}
-      <div className="flex gap-2 flex-wrap mb-3">
-        {selectableDates.map((date, index) => (
-          <button
-            type="button"
-            key={index}
-            onClick={() => {
-              setSelectedDate(date);
-            }}
-            className={`text-xs px-3 py-1 rounded-full border transition ${
-              date.isSame(selectedDate, "day")
-                ? "bg-blue-700 text-white"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-300"
-            }`}
-          >
-            {date.format("dd DD/MM")}
-          </button>
-        ))}
-      </div>
+        
+          {/* Menu chọn ngày */}
+          <div className={`${comfirmed ? "pointer-events-none opacity-50" : ""}`}> 
+            <div className="flex gap-2 flex-wrap mb-3">
+            {selectableDates.map((date, index) => (
+              <button
+                type="button"
+                key={index}
+                onClick={() => {
+                  setSelectedDate(date);
+                  setSelectedSlot(null);
+                }}
+                className={`text-xs px-3 py-1 rounded-full border transition ${
+                  date.isSame(selectedDate, "day")
+                    ? "bg-blue-700 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-300"
+                }`}
+              >
+                {dayMap[date.format("dd")]} - {date.format("DD/MM")}
+              </button>
+            ))}
+          </div>
 
-      {/* Các slot tương ứng */}
-      <div className="flex flex-wrap gap-2">
-        {filteredSlots.length > 0 ? (
-          filteredSlots.map((slot, index) => (
-            <button
-              type="button"
-              key={index}
-              onClick={() => {
-                setSelectedSlot(slot);
-                setSelectedSlotId(slot.slotId);
-              }}
-              className={`${selectedSlotId === slot.slotId ? "bg-blue-100 hover:bg-blue-300 text-blue-800" : "bg-gray-100 text-gray-700 hover:bg-gray-300"} text-xs font-medium px-3 py-1 rounded-full transition`}
-            >
-              {dayjs(slot.start).format("HH:mm")} - {dayjs(slot.end).format("HH:mm")} | {dayjs(slot.start).format("DD/MM/YYYY")}
-            </button>
-          ))
-        ) : (
-          <span className="text-sm text-gray-500">Không có lịch trống</span>
-        )}
-      </div>
+          {/* Các slot tương ứng */}
+          <div className="flex flex-wrap gap-2">
+            {filteredSlots.length > 0 ? (
+              filteredSlots.map((slot, index) => (
+                <button
+                  type="button"
+                  key={index}
+                  disabled={slot.status === "BOOKED"}
+                  onClick={() => handleSelectSlot(slot)}
+                  className={`${slot.status === "BOOKED" ? "bg-gray-400 text-gray-600 cursor-not-allowed" : selectedSlot === slot ? "bg-blue-100 hover:bg-blue-300 text-blue-800" : "bg-gray-100 text-gray-700 hover:bg-gray-300"} text-xs font-medium px-3 py-1 rounded-full transition`}
+                >
+                  {slot.startTime} 
+                </button>
+
+              ))
+            ) : (
+              <span className="text-sm text-gray-500">Không có lịch trống</span>
+            )}
+          </div>
+        </div>
+        
       </div>
         
         <Button

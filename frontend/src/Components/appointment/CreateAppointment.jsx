@@ -135,40 +135,10 @@ const CreateAppointment = ({ doctors }) => {
     setLoading(true);
 
     try {
-      // Format the appointment data
-      // const formData = new FormData();
-
-      // // Personal information
-      // formData.append("fullName", fullName);
-      // formData.append("gender", gender);
-      // formData.append("dateOfBirth", dateOfBirth);
-      // formData.append("phoneNumber", phoneNumber);
-      // formData.append("email", email);
-      // formData.append("address", address);
-
-      // // Appointment details
-      // formData.append("specialty", selectedSpecialtyCode);
-      // formData.append("doctorId", doctorId);
-      // formData.append("consultationType", consultationType);
-      // formData.append("preferredDate", preferredDate);
-      // formData.append("preferredTimeSlot", preferredTimeSlot);
-
-      // // Medical information
-      // formData.append("symptoms", symptoms);
-      // formData.append("medicalHistory", medicalHistory);
-      // attachments.forEach(file => {
-      //   formData.append("attachments", file);
-      // });
-
-      // // Additional information
-      // formData.append("noteForDoctor", noteForDoctor);
-      // formData.append("bookingFor", bookingFor);
-
-      // For now, using the existing service but ideally would update the backend API
       const appointmentData = {
         doctorId: parseInt(selectedDoctor.id, 10),
-        startTime: preferredTimeSlot.start,
-        endTime: preferredTimeSlot.end,
+        date: preferredTimeSlot.date,
+        startTime: preferredTimeSlot.startTime,
         notes: `Triệu chứng: ${symptoms}\nTiền sử: ${medicalHistory}\nGhi chú: ${noteForDoctor}\nHình thức: ${consultationType === "inperson" ? "Khám trực tiếp" : "Khám online"}`,
       };
 
@@ -354,11 +324,11 @@ const CreateAppointment = ({ doctors }) => {
             </div>
           </div>
 
-          {/* Danh sách bác sĩ - Luôn full width, dưới cùng */}
+
           <div className="mt-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">Bác sĩ phù hợp</label>
             {doctorsList.length > 0 ? (
-              <div className="flex flex-col gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto pr-2">
                 {doctorsList.map((doctor, index) =>
                   doctor ? (
                     <DoctorCard

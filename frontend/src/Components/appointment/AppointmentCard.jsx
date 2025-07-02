@@ -24,11 +24,11 @@ const AppointmentCard = ({ appointment, role }) => {
     <div className="appointment-card">
       <p>
         <strong>{role === "PATIENT" ? "Bác sĩ" : "Bệnh nhân"}:</strong>{" "}
-        {role === "PATIENT" ? appointment.doctor.username : appointment.patient.username}
+        {role === "PATIENT" ? appointment.doctorName : appointment.patientName}
       </p>
       <p>
         <strong>Thời gian:</strong>{" "}
-        {new Date(appointment.appointmentTime).toLocaleString()}
+        {new Date(appointment.date).toLocaleString()} - {new Date(appointment.time).toLocaleString()}
       </p>
       <p>
         <strong>Trạng thái:</strong> {appointment.status}
@@ -36,10 +36,10 @@ const AppointmentCard = ({ appointment, role }) => {
       <p>
         <strong>Google Meet:</strong> <a href="https://meet.google.com/hqd-yzpu-hug" target="_blank" rel="noopener noreferrer">https://meet.google.com/hqd-yzpu-hug</a>
       </p>
-      {appointment.status === "SCHEDULED" && (
+      {appointment.status === "WAITING" && (
         <button onClick={handleCancel}>Hủy lịch hẹn</button>
       )}
-      {appointment.status === "IN_PROGRESS" && (
+      {appointment.status === "CONFIRMED" && (
         <button onClick={handleCancel}>Kết thúc lịch hẹn</button>
       )}
     </div>

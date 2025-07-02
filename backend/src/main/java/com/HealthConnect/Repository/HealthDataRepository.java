@@ -7,7 +7,9 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface HealthDataRepository extends JpaRepository<HealthData, Long> {
     // Lấy dữ liệu theo user, loại và khoảng thời gian
     @Query("SELECT h FROM HealthData h WHERE " +

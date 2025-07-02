@@ -1,6 +1,10 @@
 package com.HealthConnect.Service;
 
+import com.HealthConnect.Dto.AppointmentResponse;
+import com.HealthConnect.Dto.DoctorResponse;
+import com.HealthConnect.Dto.DoctorSlotDTO;
 import com.HealthConnect.Model.Appointment;
+import com.HealthConnect.Model.Doctor;
 import com.HealthConnect.Model.DoctorSlot;
 import com.HealthConnect.Model.User;
 import com.HealthConnect.Repository.AppointmentRepository;
@@ -9,9 +13,8 @@ import com.HealthConnect.Repository.DoctorSlotRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class AppointmentService {
@@ -42,9 +45,27 @@ public class AppointmentService {
         doctorSlotRepository.save(slot);
         appointmentRepository.save(appointment);
     }
-    public List<Appointment> getAppointmentsByUser(User user) {
-        // Find appointments where user is either patient or doctor
-        return appointmentRepository.findByPatientOrDoctor(user, user);
+    public List<AppointmentResponse> getAppointmentsByUser(User user) {
+        List<Appointment> appointments = appointmentRepository.findByPatientOrDoctor(user, user);
+        return appointments.stream().map(appointment -> {
+            AppointmentResponse response = new AppointmentResponse();
+            response.setId(appointment.getId());
+            response.setDoctorName(appointment.getDoctor().getFullName());
+            response.setDate(appointment.getDoctorSlot().getDate().toString());
+            response.setTime(appointment.getDoctorSlot().getStartTime().toString());
+            DoctorSlot doctorSlot = appointment.getDoctorSlot();
+            DoctorSlotDTO doctorSlotResponse = new DoctorSlotDTO();
+            doctorSlotResponse.setDoctorId(doctorSlot.getDoctor().getId());
+            doctorSlotResponse.setDate(doctorSlot.getDate());
+            doctorSlotResponse.setStartTime(doctorSlot.getStartTime());
+            doctorSlotResponse.setEndTime(doctorSlot.getEndTime());
+            doctorSlotResponse.setDuration(doctorSlot.getDuration());
+            doctorSlotResponse.setStatus(doctorSlot.getStatus().toString());
+            response.setDoctorSlot(doctorSlotResponse);
+            response.setNotes(appointment.getNotes());
+            response.setStatus(appointment.getStatus().toString());
+            return response;
+        }).collect(Collectors.toList());
     }
 
     

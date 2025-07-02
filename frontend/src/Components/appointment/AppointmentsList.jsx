@@ -22,7 +22,7 @@ const AppointmentsList = ({ userId, role }) => {
   }, [userId, role]);
 
   const filteredAppointments = appointments.filter(appointment => {
-    const appointmentDate = new Date(appointment.appointmentTime);
+    const appointmentDate = new Date(appointment.date);
     const now = new Date();
     
     if (filter === "upcoming") return appointmentDate > now;
