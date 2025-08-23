@@ -33,9 +33,6 @@ const AppointmentCard = ({ appointment, role }) => {
       <p>
         <strong>Trạng thái:</strong> {appointment.status}
       </p>
-      <p>
-        <strong>Google Meet:</strong> <a href={appointment.zoomJoinUrl} target="_blank" rel="noopener noreferrer">https://meet.google.com/hqd-yzpu-hug</a>
-      </p>
       {appointment.status === "WAITING" && (
         <button onClick={handleCancel}>Hủy lịch hẹn</button>
       )}
@@ -43,8 +40,17 @@ const AppointmentCard = ({ appointment, role }) => {
         <>
           <button onClick={handleCancel}>Kết thúc lịch hẹn</button>
           {appointment.zoomMeetingId && (
-            <button onClick={() => navigate(`/appointments/${appointment.id}/meeting`)}>
-              Tham gia cuộc họp
+            <button 
+              onClick={() => navigate(`/appointments/${appointment.id}/meeting`, { 
+                state: { 
+                  meetingId: appointment.zoomMeetingId,
+                  role: role === "DOCTOR" ? 1 : 0,
+                  zoomPassword: appointment.zoomPassword
+                } 
+              })}
+              className="join-meeting-btn"
+            >
+              🎥 Tham gia cuộc họp
             </button>
           )}
         </>

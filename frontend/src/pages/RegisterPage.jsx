@@ -11,7 +11,7 @@ const RegisterPage = () => {
     phone: "",
     password: "",
     role: "PATIENT", // Mặc định là PATIENT
-    specialty: [], // Chỉ hiển thị nếu role là DOCTOR
+    specialties: [], // Chỉ hiển thị nếu role là DOCTOR
     license: "",
   });
   const [error, setError] = useState("");
@@ -110,8 +110,8 @@ const RegisterPage = () => {
               <label>Chuyên khoa</label>
               <input
                 type="text"
-                value={formData.specialty}
-                onChange={(e) => setFormData({ ...formData, specialty: [e.target.value] })}
+                value={formData.specialties}
+                onChange={(e) => setFormData({ ...formData, specialties: [e.target.value] })}
                 required
               />
             </div>

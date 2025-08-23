@@ -15,7 +15,9 @@ export const API_ENDPOINTS = {
         CREATE: `${API_BASE_URL}/appointments`,
         UPDATE: (id) => `${API_BASE_URL}/appointments/${id}`,
         DELETE: (id) => `${API_BASE_URL}/appointments/${id}`,
-        GET: (id) => `${API_BASE_URL}/appointments/${id}`
+        CANCEL: `${API_BASE_URL}/appointments`,
+        GET: (id) => `${API_BASE_URL}/appointments/${id}`,
+        USER: `${API_BASE_URL}/appointments`
     },
     
     // Patient endpoints
@@ -28,8 +30,19 @@ export const API_ENDPOINTS = {
     // Doctor endpoints
     DOCTOR: {
         PROFILE: (userId) => `${API_BASE_URL}/doctors/${userId}`,
-        PATIENTS: (userId) => `${API_BASE_URL}/doctors/${userId}/patients`
+        PATIENTS: (userId) => `${API_BASE_URL}/doctors/${userId}/patients`,
+        AVAILABILITY: (doctorId) => `${API_BASE_URL}/doctors/${doctorId}/availability`,
+        AVAILABLE_SLOTS: (doctorId) => `${API_BASE_URL}/doctors/${doctorId}/available-slots`,
+        SLOTS_BY_DATE: (doctorId) => `${API_BASE_URL}/doctors/${doctorId}/slots`
     },
+    
+    // Slots endpoints (optimized)
+    SLOTS: {
+        AVAILABLE: (doctorId) => `${API_BASE_URL}/slots/doctor/${doctorId}/available`,
+        BY_DATE_RANGE: (doctorId) => `${API_BASE_URL}/slots/doctor/${doctorId}`,
+        SUMMARY: (doctorId) => `${API_BASE_URL}/slots/doctor/${doctorId}/summary`
+    },
+    
     SPECIALTY: {
         ALL: `${API_BASE_URL}/specialties`,
         GET: (code) => `${API_BASE_URL}/specialties/${code}`

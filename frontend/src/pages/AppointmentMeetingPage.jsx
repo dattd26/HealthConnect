@@ -1,657 +1,236 @@
-import React, { useEffect, useRef, useState, useContext, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import ZoomMtgEmbedded from '@zoom/meetingsdk/embedded';
+import React, { useEffect, useRef, useState, useLayoutEffect } from 'react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { ZoomMtg } from '@zoom/meetingsdk';
 import { getSignature } from '../services/zoomService';
-import { appointmentService } from '../services/appointmentService';
-import { AuthContext } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
+import LoadingSpinner from '../Components/common/LoadingSpinner';
+import axios from 'axios';
+
 import '../styles/zoom.css';
+
+ZoomMtg.setZoomJSLib('https://source.zoom.us/3.13.1/lib', '/av');
 
 const AppointmentMeetingPage = () => {
   const { appointmentId } = useParams();
-  const { user } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user, token } = useAuth();
   
-  // State management
-  const [appointment, setAppointment] = useState(null);
-  const [inMeeting, setInMeeting] = useState(false);
-  const [participants, setParticipants] = useState([]);
-  const [meetingStats, setMeetingStats] = useState({
-    joinTime: null,
-    leaveTime: null,
-    duration: 0,
-    participantCount: 0,
-    maxParticipants: 0,
-    screenShareCount: 0,
-    chatMessages: 0
-  });
-  const [isLoading, setIsLoading] = useState(false);
+  const [meetingId, setMeetingId] = useState(location.state?.meetingId || appointmentId);
+  const [role, setRole] = useState(location.state?.role || 0);
+  const [zoomPassword, setZoomPassword] = useState(location.state?.zoomPassword || '');
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [connectionStatus, setConnectionStatus] = useState('disconnected');
-  const [audioVideo, setAudioVideo] = useState({ audio: true, video: true });
-  const [sidebarVisible, setSidebarVisible] = useState(true);
-  
-  // Refs
-  const zoomDivRef = useRef(null);
-  const zmClientRef = useRef(null);
-  const statsIntervalRef = useRef(null);
+  const [meetingState, setMeetingState] = useState('initializing');
+  const [isZoomReady, setIsZoomReady] = useState(false);
+  const [isDOMReady, setIsDOMReady] = useState(false);  
+  // const zoomContainerRef = useRef(null);
+  const [signature, setSignature] = useState('');
 
-  // Fetch appointment data
   useEffect(() => {
-    const fetchAppointment = async () => {
-      setIsLoading(true);
-      try {
-        const data = await appointmentService.getAppointmentById(appointmentId);
-        setAppointment(data);
-        setError(null);
-      } catch (err) {
-        console.error('Failed to fetch appointment', err);
-        setError('Không thể tải thông tin cuộc hẹn. Vui lòng thử lại.');
-      } finally {
-        setIsLoading(false);
-      }
+    const fetchAppointmentInfo = async () => {
+      const response = await axios.get(`http://localhost:8080/api/appointments/${appointmentId}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      setMeetingId(response.data.zoomMeetingId);
+      setZoomPassword(response.data.zoomPassword);
+      setIsLoading(false);
     };
-    fetchAppointment();
-  }, [appointmentId]);
+    setRole(localStorage.getItem('role') === 'DOCTOR' ? 1 : 0);
+    setTimeout(fetchAppointmentInfo, 1000);
+  }, [appointmentId, token]);
 
-  // Update meeting statistics
-  const updateMeetingStats = useCallback(() => {
-    if (inMeeting && meetingStats.joinTime) {
-      const now = new Date();
-      const duration = Math.floor((now - meetingStats.joinTime) / 1000);
-      setMeetingStats(prev => ({ ...prev, duration }));
+
+
+  //configuration
+  const zoomConfig = {
+    sdkKey: 'q48VIOcOS7Wb6xCsjQI5bg', //process.env.REACT_APP_ZOOM_API_KEY || 
+    meetingNumber: meetingId,
+    userName: user?.name || 'User',
+    passWord: zoomPassword, 
+    role: 0, // 0 tham gia, 1 host
+    signature: '',
+    leaveUrl: '/', 
+  };
+
+
+  const setupZoomEventListeners = () => {
+    if (!isZoomReady || !isDOMReady) return;
+    
+    // Kiểm tra xem DOM element đã tồn tại chưa
+    const zoomContainer = document.getElementById('zmmtg-root');
+    if (!zoomContainer) {
+      console.warn('Zoom container not found, retrying in 100ms...');
+      setTimeout(setupZoomEventListeners, 100);
+      return;
     }
-  }, [inMeeting, meetingStats.joinTime]);
-
-  // Start stats tracking
-  useEffect(() => {
-    if (inMeeting) {
-      statsIntervalRef.current = setInterval(updateMeetingStats, 1000);
-    } else {
-      if (statsIntervalRef.current) {
-        clearInterval(statsIntervalRef.current);
-      }
-    }
-    return () => {
-      if (statsIntervalRef.current) {
-        clearInterval(statsIntervalRef.current);
-      }
-    };
-  }, [inMeeting, updateMeetingStats]);
-
-  // Save meeting statistics to backend
-  const saveMeetingStats = async (stats) => {
+    
     try {
-      await appointmentService.updateMeetingStats(appointmentId, {
-        ...stats,
-        userId: user?.id,
-        appointmentId
+      ZoomMtg.inMeetingServiceListener('onMeetingStatus', (data) => {
+        console.log('Meeting status changed:', data);
+        setMeetingState(data.meetingStatus);
       });
+
+      ZoomMtg.inMeetingServiceListener('onParticipantJoin', (data) => {
+        console.log('Participant joined:', data);
+      });
+
+      ZoomMtg.inMeetingServiceListener('onParticipantLeave', (data) => {
+        console.log('Participant left:', data);
+      });
+
+      ZoomMtg.inMeetingServiceListener('onMeetingError', (data) => {
+        console.error('Meeting error:', data);
+        setError('Meeting error occurred');
+      });
+      
+      console.log('Zoom event listeners setup completed');
     } catch (error) {
-      console.error('Failed to save meeting stats:', error);
+      console.error('Error setting up Zoom event listeners:', error);
     }
   };
 
-  // Start meeting function
-  const startMeeting = async () => {
-    if (!appointment) return;
-    
-    setIsLoading(true);
-    setError(null);
-    
+  // Initialize Zoom Meeting
+  const initZoomMeeting = async () => {
     try {
-      const meetingNumber = appointment.zoomMeetingId;
-      const password = appointment.zoomPassword;
-      const role = user?.role === 'DOCTOR' ? 0 : 1;
-      const token = localStorage.getItem('token');
+      setIsLoading(true);
+      setError(null);
       
-      setConnectionStatus('connecting');
-      const signature = await getSignature(meetingNumber, role, token);
+    
+      const fallbackToken = token || localStorage.getItem('token');
+      if (!fallbackToken) {
+        throw new Error('No valid token available');
+      }
+      
+      // Get signature from backend
+      const sig = await getSignature(meetingId, role, fallbackToken);
+      if (!sig) {
+        throw new Error('Failed to get meeting signature');
+      }
 
-      const client = ZoomMtgEmbedded.createClient();
-      zmClientRef.current = client;
-
-      // Enhanced client initialization
-      client.init({
-        debug: process.env.NODE_ENV === 'development',
-        zoomAppRoot: zoomDivRef.current,
-        language: 'vi-VN',
-        customize: {
-          toolbar: {
-            buttons: [
-              {
-                text: 'Kết thúc cuộc gọi',
-                className: 'CustomEndButton',
-                onClick: () => leaveMeeting()
-              }
-            ]
-          },
-          meetingInfo: ['topic', 'host', 'mn', 'pwd', 'telPwd', 'invite', 'participant', 'dc', 'enctype'],
-          video: { 
-            viewSizes: { 
-              default: { width: '100%', height: '100%' },
-              ribbon: { width: 320, height: 180 }
-            },
-            popper: {
-              disableDraggable: false
-            }
-          },
-          chat: {
-            customizeUI: true
-          }
+      setSignature(sig);
+      
+      // Initialize Zoom Meeting
+      ZoomMtg.init({
+        leaveUrl: zoomConfig.leaveUrl,
+        success: (success) => {
+          console.log('Zoom Meeting initialized successfully:', success);
+          setIsZoomReady(true);
+          joinMeeting(sig);
         },
+        error: (error) => {
+          console.error('Zoom Meeting initialization failed:', error);
+          setError('Failed to initialize Zoom meeting');
+          setIsLoading(false);
+        }
       });
-
-      // Join meeting
-      await client.join({
-        sdkKey: process.env.REACT_APP_ZOOM_SDK_KEY || 'q48VIOcOS7Wb6xCsjQI5bg',
-        signature,
-        meetingNumber,
-        password,
-        userName: user?.fullName || 'Khách',
-      });
-
-      // Set up event handlers
-      setupEventHandlers(client);
-      
-      // Initialize meeting stats
-      const joinTime = new Date();
-      setMeetingStats(prev => ({
-        ...prev,
-        joinTime,
-        participantCount: 1,
-        maxParticipants: 1
-      }));
-
-      setInMeeting(true);
-      setConnectionStatus('connected');
-      
-    } catch (error) {
-      console.error('Error joining meeting', error);
-      setError('Không thể tham gia cuộc họp. Vui lòng kiểm tra kết nối mạng và thử lại.');
-      setConnectionStatus('error');
-    } finally {
+    } catch (err) {
+      console.error('Error initializing Zoom meeting:', err);
+      setError(err.message || 'Failed to initialize meeting');
       setIsLoading(false);
     }
   };
 
-  // Setup event handlers
-  const setupEventHandlers = (client) => {
-    // Participant events
-    client.on('user-added', (payload) => {
-      if (!payload || !payload.userId) return;
-      setParticipants(prev => {
-        const newParticipants = [...prev, payload];
-        setMeetingStats(prevStats => ({
-          ...prevStats,
-          participantCount: newParticipants.length,
-          maxParticipants: Math.max(prevStats.maxParticipants, newParticipants.length)
-        }));
-        return newParticipants;
-      });
-    });
-
-    client.on('user-removed', (payload) => {
-      if (!payload || !payload.userId) return;
-      setParticipants(prev => {
-        const newParticipants = prev.filter(p => p.userId !== payload.userId);
-        setMeetingStats(prevStats => ({
-          ...prevStats,
-          participantCount: newParticipants.length
-        }));
-        return newParticipants;
-      });
-    });
-
-    client.on('user-updated', (payload) => {
-      if (!payload || !payload.userId) return;
-      setParticipants(prev => 
-        prev.map(p => p.userId === payload.userId ? payload : p)
-      );
-    });
-
-    // Meeting events
-    client.on('meeting-ended', () => {
-      handleMeetingEnd();
-    });
-
-    client.on('connection-change', (payload) => {
-      setConnectionStatus(payload.status);
-    });
-
-    // Chat events
-    client.on('chat-on-message', () => {
-      setMeetingStats(prev => ({
-        ...prev,
-        chatMessages: prev.chatMessages + 1
-      }));
-    });
-
-    // Screen share events
-    client.on('active-share-change', (payload) => {
-      if (payload.state === 'active') {
-        console.log('Screen share active');
-        setMeetingStats(prev => ({
-          ...prev,
-          screenShareCount: prev.screenShareCount + 1
-        }));
+  // Join Zoom Meeting
+  const joinMeeting = (sig) => {
+    console.log('Joining meeting:', zoomConfig.meetingNumber, zoomConfig.passWord);
+    console.log('signature:', signature);
+    ZoomMtg.join({
+      signature: sig,
+      meetingNumber: meetingId,
+      userName: user?.fullName,
+      sdkKey: 'q48VIOcOS7Wb6xCsjQI5bg',
+      passWord: zoomPassword,
+      // role: zoomConfig.role,
+      success: (success) => {
+        console.log('Joined meeting successfully:', success);
+        setMeetingState('joined');
+        setIsLoading(false);
+      },
+      error: (error) => {
+        console.error('Failed to join meeting:', error);
+        setError('Failed to join meeting');
+        setIsLoading(false);
       }
     });
-
-    // Audio/Video events
-    client.on('audio-change', (payload) => {
-      setAudioVideo(prev => ({ ...prev, audio: payload.audio }));
-    });
-
-    client.on('video-change', (payload) => {
-      setAudioVideo(prev => ({ ...prev, video: payload.video }));
-    });
   };
 
-  // Leave meeting function
-  const leaveMeeting = async () => {
-    if (zmClientRef.current) {
-      try {
-        await zmClientRef.current.leaveMeeting();
-        handleMeetingEnd();
-      } catch (error) {
-        console.error('Error leaving meeting:', error);
-      }
+  // Setup event listeners when Zoom is ready
+  useLayoutEffect(() => {
+    if (isZoomReady && isDOMReady) {
+      setupZoomEventListeners();
     }
-  };
+  }, [isZoomReady, isDOMReady]);
 
-  // Handle meeting end
-  const handleMeetingEnd = async () => {
-    const leaveTime = new Date();
-    const finalStats = {
-      ...meetingStats,
-      leaveTime,
-      duration: meetingStats.joinTime ? Math.floor((leaveTime - meetingStats.joinTime) / 1000) : 0
-    };
+  // Mark DOM as ready after component mounts
+  useEffect(() => {
+    // Delay nhỏ để đảm bảo DOM hoàn toàn sẵn sàng
+    const timer = setTimeout(() => {
+      setIsDOMReady(true);
+      console.log('DOM marked as ready');
+    }, 100);
     
-    setMeetingStats(finalStats);
-    await saveMeetingStats(finalStats);
-    
-    setInMeeting(false);
-    setConnectionStatus('disconnected');
-    
-    // Navigate back or show summary
-    setTimeout(() => {
-      navigate('/appointments');
-    }, 3000);
-  };
+    return () => clearTimeout(timer);
+  }, []);
 
-  // Format duration
-  const formatDuration = (seconds) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
+  useEffect(() => {
+    if (isLoading || isZoomReady) return;
+    console.log('Current token from context:', token);
+    console.log('Current user from context:', user);
+    console.log('Meeting ID:', meetingId);
     
-    if (hours > 0) {
-      return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    // Fallback: nếu token từ context bị undefined, thử lấy từ localStorage
+    const fallbackToken = token || localStorage.getItem('token');
+    console.log('Fallback token:', fallbackToken);
+    
+    if (!meetingId || !user || !fallbackToken) {
+      setError('Missing required meeting information');
+      setIsLoading(false);
+      return;
     }
-    return `${minutes}:${secs.toString().padStart(2, '0')}`;
-  };
 
-  // Format date for appointment
-  const formatAppointmentDate = (dateString) => {
-    const options = { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    };
-    return new Date(dateString).toLocaleDateString('vi-VN', options);
-  };
+    // Initialize meeting
+    initZoomMeeting();
 
-  // Connection status indicator
-  const ConnectionStatus = () => (
-    <div className={`connection-status ${connectionStatus}`}>
-      <div className="status-indicator"></div>
-      <span>
-        {connectionStatus === 'connected' && 'Đã kết nối'}
-        {connectionStatus === 'connecting' && 'Đang kết nối...'}
-        {connectionStatus === 'disconnected' && 'Chưa kết nối'}
-        {connectionStatus === 'error' && 'Lỗi kết nối'}
-      </span>
-    </div>
-  );
+  }, [meetingId, user, token, isLoading]);
 
-  // Meeting controls
-  const MeetingControls = () => (
-    <div className="meeting-controls">
-      <button 
-        className="btn btn-circle" 
-        onClick={() => setSidebarVisible(!sidebarVisible)}
-        title={sidebarVisible ? "Ẩn danh sách" : "Hiện danh sách"}
-      >
-        <span>{sidebarVisible ? '→' : '←'}</span>
-      </button>
-      
-      <button 
-        className="btn btn-danger" 
-        onClick={leaveMeeting}
-        title="Kết thúc cuộc gọi"
-      >
-        <span>Kết thúc</span>
-      </button>
-    </div>
-  );
 
-  // Loading state
-  if (isLoading && !appointment) {
+  if (isLoading) {
     return (
-      <div className="zoom-wrapper loading">
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
-          <p>Đang tải thông tin cuộc hẹn...</p>
-        </div>
+      <div className="zoom-loading">
+        <div className="zoom-loading-spinner"></div>
+        <p className="mt-4 text-lg">Initializing Zoom meeting...</p>
+        <p className="text-sm opacity-75">Please wait while we connect you to the meeting</p>
       </div>
     );
   }
 
-  // Error state
   if (error) {
     return (
-      <div className="zoom-wrapper error">
-        <div className="error-container">
-          <div className="error-icon">⚠️</div>
-          <h3>Có lỗi xảy ra</h3>
-          <p>{error}</p>
-          <button className="btn btn-primary" onClick={() => window.location.reload()}>
-            Thử lại
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (!appointment) {
-    return (
-      <div className="zoom-wrapper error">
-        <div className="error-container">
-          <h3>Không tìm thấy cuộc hẹn</h3>
-          <button className="btn btn-primary" onClick={() => navigate('/appointments')}>
-            Quay lại danh sách
-          </button>
-        </div>
+      <div className="zoom-error">
+        <div className="zoom-error-icon">⚠️</div>
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">Meeting Error</h2>
+        <p className="text-gray-600 mb-6 text-center max-w-md">{error}</p>
+        <button
+          onClick={() => navigate('/appointments')}
+          className="zoom-control-btn bg-blue-600 text-white hover:bg-blue-700"
+        >
+          Back to Appointments
+        </button>
       </div>
     );
   }
 
   return (
-    <div className={`zoom-wrapper ${inMeeting ? 'in-meeting' : ''}`}>
-      {/* Header */}
-      <header className="zoom-header">
-        <div className="appointment-info">
-          <h2>
-            {user?.role === 'DOCTOR' 
-              ? `Cuộc hẹn với ${appointment.patientName || 'Bệnh nhân'}`
-              : `Cuộc hẹn với ${appointment.doctorName || 'Bác sĩ'}`
-            }
-          </h2>
-          <div className="appointment-details">
-            <span className="appointment-time">
-              <i className="fas fa-calendar-alt"></i> {formatAppointmentDate(appointment.scheduledTime)}
-            </span>
-            <span className="appointment-duration">
-              <i className="fas fa-clock"></i> {appointment.duration || 30} phút
-            </span>
-            {appointment.appointmentType && (
-              <span className="appointment-type">
-                <i className="fas fa-stethoscope"></i> {appointment.appointmentType}
-              </span>
-            )}
-          </div>
-        </div>
-        <div className="header-actions">
-          <ConnectionStatus />
-          {inMeeting && <MeetingControls />}
-        </div>
-      </header>
-
-      {/* Main content */}
-      <div className="zoom-content-container">
-        {/* Zoom meeting container */}
-        <div ref={zoomDivRef} id="zoom-embed" className="zoom-embed" />
-        {/* Pre-join screen */}
-        {!inMeeting && !meetingStats.leaveTime && (
-          <div className="zoom-prejoin">
-            <div className="prejoin-content">
-              <div className="medical-icon">
-                <i className="fas fa-clinic-medical"></i>
-              </div>
-              <h3>Sẵn sàng tham gia cuộc hẹn khám bệnh trực tuyến</h3>
-              <p className="prejoin-description">
-                Đảm bảo camera và microphone đã được bật để có trải nghiệm tốt nhất
-              </p>
-              
-              <div className="appointment-summary">
-                <div className="summary-item">
-                  <span className="summary-label">Bệnh nhân:</span>
-                  <span className="summary-value">{appointment.patientName}</span>
-                </div>
-                <div className="summary-item">
-                  <span className="summary-label">Bác sĩ:</span>
-                  <span className="summary-value">{appointment.doctorName}</span>
-                </div>
-                <div className="summary-item">
-                  <span className="summary-label">Thời gian:</span>
-                  <span className="summary-value">{formatAppointmentDate(appointment.scheduledTime)}</span>
-                </div>
-                {appointment.notes && (
-                  <div className="summary-item">
-                    <span className="summary-label">Ghi chú:</span>
-                    <span className="summary-value">{appointment.notes}</span>
-                  </div>
-                )}
-              </div>
-
-              <div className="prejoin-checklist">
-                <h4>Danh sách kiểm tra</h4>
-                <div className="checklist-item">
-                  <span className="check">✓</span>
-                  <span>Kiểm tra kết nối internet</span>
-                </div>
-                <div className="checklist-item">
-                  <span className="check">✓</span>
-                  <span>Chuẩn bị camera và microphone</span>
-                </div>
-                <div className="checklist-item">
-                  <span className="check">✓</span>
-                  <span>Tìm không gian yên tĩnh</span>
-                </div>
-                <div className="checklist-item">
-                  <span className="check">✓</span>
-                  <span>Chuẩn bị câu hỏi và triệu chứng</span>
-                </div>
-              </div>
-
-              <button 
-                className="btn btn-primary btn-join" 
-                onClick={startMeeting}
-                disabled={isLoading}
-              >
-                {isLoading ? 'Đang kết nối...' : <><i className="fas fa-video"></i> Tham gia cuộc hẹn</>}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Active meeting container */}
-        {inMeeting && (
-          <div className="meeting-layout">
-            <div className={`main-meeting-area ${!sidebarVisible ? 'full-width' : ''}`}>
-              
-              
-              {/* Meeting controls overlay */}
-              <div className="meeting-controls-overlay">
-                <div className="meeting-stats">
-                  <span className="time-stat"><i className="fas fa-clock"></i> {formatDuration(meetingStats.duration)}</span>
-                  <span className="participants-stat"><i className="fas fa-users"></i> {participants.length}</span>
-                  <span className={`audio-status ${audioVideo.audio ? 'on' : 'off'}`}>
-                    <i className={`fas ${audioVideo.audio ? 'fa-microphone' : 'fa-microphone-slash'}`}></i>
-                  </span>
-                  <span className={`video-status ${audioVideo.video ? 'on' : 'off'}`}>
-                    <i className={`fas ${audioVideo.video ? 'fa-video' : 'fa-video-slash'}`}></i>
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Participants sidebar */}
-            {sidebarVisible && (
-              <aside className="zoom-participants expanded">
-                <div className="participants-header">
-                  <h3><i className="fas fa-users"></i> Người tham gia ({participants.length})</h3>
-                  <button 
-                    className="toggle-btn"
-                    onClick={() => setSidebarVisible(false)}
-                    title="Ẩn danh sách"
-                  >
-                    →
-                  </button>
-                </div>
-                
-                <div className="participants-content">
-                  <ul className="participants-list">
-                    {participants.map((participant) => (
-                      <li key={participant.userId} className="participant-item">
-                        <div className="participant-info">
-                          <span className="participant-name">
-                            {participant.displayName}
-                            {participant.userId === user?.id && ' (Bạn)'}
-                          </span>
-                          <div className="participant-status">
-                            {participant.muted && <span className="status-icon muted"><i className="fas fa-microphone-slash"></i></span>}
-                            {!participant.videoOn && <span className="status-icon video"><i className="fas fa-video-slash"></i></span>}
-                            {participant.isHost && <span className="status-icon host"><i className="fas fa-crown"></i></span>}
-                          </div>
-                        </div>
-                      </li>
-                    ))}
-                    {participants.length === 0 && (
-                      <li className="no-participants">
-                        <p>Chưa có người tham gia khác</p>
-                      </li>
-                    )}
-                  </ul>
-                  
-                  <div className="meeting-info">
-                    <h4><i className="fas fa-chart-bar"></i> Thống kê cuộc họp</h4>
-                    <div className="stats-grid">
-                      <div className="stat">
-                        <span className="stat-number">{formatDuration(meetingStats.duration)}</span>
-                        <span className="stat-label">Thời gian</span>
-                      </div>
-                      <div className="stat">
-                        <span className="stat-number">{meetingStats.maxParticipants}</span>
-                        <span className="stat-label">Số người tối đa</span>
-                      </div>
-                      <div className="stat">
-                        <span className="stat-number">{meetingStats.chatMessages}</span>
-                        <span className="stat-label">Tin nhắn</span>
-                      </div>
-                      <div className="stat">
-                        <span className="stat-number">{meetingStats.screenShareCount}</span>
-                        <span className="stat-label">Chia sẻ màn hình</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {user?.role === 'DOCTOR' && (
-                    <div className="doctor-notes">
-                      <h4><i className="fas fa-notes-medical"></i> Ghi chú bác sĩ</h4>
-                      <textarea 
-                        className="doctor-notes-input" 
-                        placeholder="Nhập ghi chú về cuộc khám bệnh..."
-                        rows={5}
-                      ></textarea>
-                      <button className="btn btn-secondary btn-sm">
-                        <i className="fas fa-save"></i> Lưu ghi chú
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </aside>
-            )}
-          </div>
-        )}
-
-        {/* Meeting ended screen */}
-        {!inMeeting && meetingStats.leaveTime && (
-          <div className="meeting-ended">
-            <div className="meeting-summary">
-              <div className="summary-icon">
-                <i className="fas fa-check-circle"></i>
-              </div>
-              <h3>Cuộc hẹn đã kết thúc</h3>
-              
-              <div className="summary-stats">
-                <div className="stat-item">
-                  <i className="fas fa-clock"></i>
-                  <span className="stat-label">Thời gian:</span>
-                  <span className="stat-value">{formatDuration(meetingStats.duration)}</span>
-                </div>
-                <div className="stat-item">
-                  <i className="fas fa-users"></i>
-                  <span className="stat-label">Số người tham gia tối đa:</span>
-                  <span className="stat-value">{meetingStats.maxParticipants}</span>
-                </div>
-                <div className="stat-item">
-                  <i className="fas fa-comments"></i>
-                  <span className="stat-label">Tin nhắn chat:</span>
-                  <span className="stat-value">{meetingStats.chatMessages}</span>
-                </div>
-                <div className="stat-item">
-                  <i className="fas fa-desktop"></i>
-                  <span className="stat-label">Chia sẻ màn hình:</span>
-                  <span className="stat-value">{meetingStats.screenShareCount}</span>
-                </div>
-              </div>
-
-              <div className="meeting-feedback">
-                <h4>Đánh giá cuộc hẹn</h4>
-                <div className="rating">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <span key={star} className="star">★</span>
-                  ))}
-                </div>
-                <textarea 
-                  className="feedback-text" 
-                  placeholder="Nhập phản hồi của bạn về cuộc hẹn..."
-                  rows={3}
-                ></textarea>
-                <button className="btn btn-secondary">
-                  <i className="fas fa-paper-plane"></i> Gửi đánh giá
-                </button>
-              </div>
-              
-              <div className="post-meeting-actions">
-                <button className="btn btn-primary" onClick={() => navigate('/appointments')}>
-                  <i className="fas fa-calendar-alt"></i> Xem danh sách cuộc hẹn
-                </button>
-                {user?.role !== 'DOCTOR' && (
-                  <button className="btn btn-secondary" onClick={() => navigate('/book-appointment')}>
-                    <i className="fas fa-plus-circle"></i> Đặt lịch hẹn mới
-                  </button>
-                )}
-              </div>
-              
-              <p>Bạn sẽ được chuyển hướng về danh sách cuộc hẹn trong vài giây...</p>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Footer */}
-      <footer className="zoom-footer">
-        <div className="footer-content">
-          <p>© {new Date().getFullYear()} HealthConnect - Hỗ trợ trực tuyến: <a href="mailto:support@healthconnect.com">support@healthconnect.com</a></p>
-        </div>
-      </footer>
-    </div>
+    <>
+    
+      <div id="zmmtg-root" />
+    </>
   );
 };
 
