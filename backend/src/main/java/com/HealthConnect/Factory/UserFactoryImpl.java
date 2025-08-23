@@ -48,6 +48,7 @@ public class UserFactoryImpl implements UserFactory {
     }
     private Doctor buildDoctor(RegisterRequest req, PasswordEncoder passwordEncoder) {
         Doctor d = new Doctor();
+        System.out.println("concac" + req.getSpecialties());
         populateCommonFields(d, req, passwordEncoder);
         d.setLicense(req.getLicense()); 
         Set<MedicalSpecialty> specialties = new HashSet<MedicalSpecialty>();

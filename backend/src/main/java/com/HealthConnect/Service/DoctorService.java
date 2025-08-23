@@ -6,16 +6,18 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.HealthConnect.Dto.AvailabilityDto;
 import com.HealthConnect.Dto.DoctorAvailabilitiesResponse;
-import com.HealthConnect.Dto.DoctorResponse;
 import com.HealthConnect.Dto.DoctorSlotDTO;
+import com.HealthConnect.Exception.ResourceNotFoundException;
 import com.HealthConnect.Model.Doctor;
 import com.HealthConnect.Model.DoctorAvailability;
 import com.HealthConnect.Model.DoctorSlot;
@@ -35,109 +37,73 @@ public class DoctorService {
     AppointmentService appointmentService;
     @Autowired
     UserService userService;
+    @Autowired
+    SlotService slotService;
     
     // public Doctor updateDoctor(Long id, String address, LocalDate dateOfBirth, String email, String fullName, String gender, String phone) {
     //     userService.updateBasicInfo(id, address, dateOfBirth, email, fullName, gender, phone);
     //     Doctor doctor = doctorRepository.findById(id).orElseThrow(() -> new RuntimeException("Doctor not found"));
     // }
     public Doctor getById(Long id) {
-        return doctorRepository.findById(id).orElseGet(null);
+        return doctorRepository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Doctor", "id", id));
     }
 
-    public DoctorAvailabilitiesResponse updateDoctorAvailability(Doctor doctor, List<AvailabilityDto> t) {
-        List<DoctorAvailability> doctorAvailabilities = doctorAvailabilityRepository.findByDoctor(doctor);    
-        doctorAvailabilityRepository.deleteAll(doctorAvailabilities);
+    @Transactional
+    public DoctorAvailabilitiesResponse updateDoctorAvailability(Doctor doctor, List<AvailabilityDto> availabilityDtos) {
+        // Validate input
+        if (availabilityDtos == null || availabilityDtos.isEmpty()) {
+            throw new IllegalArgumentException("Availability list cannot be empty");
+        }
+        
+        // Delete existing availabilities
+        List<DoctorAvailability> existingAvailabilities = doctorAvailabilityRepository.findByDoctor(doctor);    
+        if (!existingAvailabilities.isEmpty()) {
+            doctorAvailabilityRepository.deleteAll(existingAvailabilities);
+        }
 
-        List <DoctorAvailability> newDoctorAvailabilities = t.stream().map(doctorAvailability -> {
-            DoctorAvailability newDoctorAvailability = new DoctorAvailability();
-            newDoctorAvailability.setDayOfWeek(doctorAvailability.getDayOfWeek());
-            newDoctorAvailability.setStartTime(doctorAvailability.getStartTime());
-            newDoctorAvailability.setEndTime(doctorAvailability.getEndTime());
-            newDoctorAvailability.setDoctor(doctor);
-            return newDoctorAvailability;
-        }).toList();
+        // Create new availabilities
+        List<DoctorAvailability> newDoctorAvailabilities = availabilityDtos.stream()
+            .map(dto -> createDoctorAvailability(dto, doctor))
+            .collect(Collectors.toList());
 
         doctorAvailabilityRepository.saveAll(newDoctorAvailabilities);
         doctor.setAvailabilities(newDoctorAvailabilities);
-        // Doctor d = doctorRepository.save(doctor);
-        DoctorAvailabilitiesResponse response = new DoctorAvailabilitiesResponse();
-        response.setDoctorId(doctor.getId());
-        response.setAvailabilities(t);
-        return response;
+        
+        return DoctorAvailabilitiesResponse.builder()
+                .doctorId(doctor.getId())
+                .availabilities(availabilityDtos)
+                .build();
+    }
+    
+    private DoctorAvailability createDoctorAvailability(AvailabilityDto dto, Doctor doctor) {
+        DoctorAvailability availability = new DoctorAvailability();
+        availability.setDayOfWeek(dto.getDayOfWeek());
+        availability.setStartTime(dto.getStartTime());
+        availability.setEndTime(dto.getEndTime());
+        availability.setDoctor(doctor);
+        return availability;
     }
 
-    public DoctorResponse getAvailability(Long id) {
-        Doctor doctor = doctorRepository.findById(id).orElseGet(null);
+    public List<AvailabilityDto> getAvailability(Long id) {
+        Doctor doctor = doctorRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor", "id", id));
         
-        DoctorResponse response = new DoctorResponse();
-        response.setAvailabilities(doctor.getAvailabilities().stream().map(doctorAvailability -> {
-            DoctorAvailability dto = new DoctorAvailability();
-            dto.setDoctor(doctor);
-            dto.setDayOfWeek(doctorAvailability.getDayOfWeek());
-            dto.setStartTime(doctorAvailability.getStartTime());
-            dto.setEndTime(doctorAvailability.getEndTime());
-            return dto;
-        }).toList());
-
-        return response;
+        return doctor.getAvailabilities().stream()
+                .map(availability -> {
+                    AvailabilityDto dto = new AvailabilityDto();
+                    dto.setDayOfWeek(availability.getDayOfWeek());
+                    dto.setStartTime(availability.getStartTime());
+                    dto.setEndTime(availability.getEndTime());
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
-    // private void create
-    public List<DoctorSlotDTO> getAvailableSlot(Long id) {
-        Doctor doctor = doctorRepository.findById(id).orElseGet(null);
-        
-        List<DoctorAvailability> availabilities = doctor.getAvailabilities();
-        List<DoctorSlotDTO> savedSlots = new ArrayList<DoctorSlotDTO>();
-        List<DoctorSlot> existingSlots = doctorSlotRepository.findByDoctorId(id);
-        Set<String> existingSlotKeys = existingSlots.stream()
-            .map(slot -> slot.getDate().toString() + "_" + slot.getStartTime().toString())
-            .collect(Collectors.toSet());
-        System.out.println(existingSlotKeys);
-
-        Duration duration = Duration.ofMinutes(30);
-        LocalDate currentDate = LocalDate.now();
-        for (DoctorAvailability availability : availabilities) {
-            LocalTime slotCurrenTime = availability.getStartTime();
-            LocalTime slotEndTime = availability.getEndTime();
-            while (slotCurrenTime.isBefore(slotEndTime) || slotCurrenTime.equals(slotEndTime)) {
-                LocalDate slotDate = currentDate.plusDays(
-                    (currentDate.getDayOfWeek().getValue() >  availability.getDayOfWeek().getValue() 
-                    ? 8-currentDate.getDayOfWeek().getValue() :  availability.getDayOfWeek().getValue()-currentDate.getDayOfWeek().getValue())
-                );
-                // System.out.println(slotDate);
-                if (slotDate.equals(currentDate) && (slotCurrenTime.isBefore(LocalTime.now()) || slotCurrenTime.equals(LocalTime.now()))) {
-                    slotCurrenTime = LocalTime.now();
-                    continue;
-                }
-                
-                DoctorSlot.SlotStatus slotStatus = DoctorSlot.SlotStatus.AVAILABLE;
-                if (!isSlotAvailable(doctor.getId(), slotDate, slotCurrenTime)) {
-                    slotStatus = DoctorSlot.SlotStatus.BOOKED;
-                }
-
-                DoctorSlotDTO savedSlotDTO = new DoctorSlotDTO();
-                savedSlotDTO.setDoctorId(doctor.getId());
-                savedSlotDTO.setDate(slotDate);
-                savedSlotDTO.setStartTime(slotCurrenTime);
-                savedSlotDTO.setEndTime(slotCurrenTime.plusMinutes(30));
-                savedSlotDTO.setDuration(duration);
-                savedSlotDTO.setStatus(slotStatus.toString());
-                savedSlots.add(savedSlotDTO);
-                
-                String slotKey = slotDate.toString() + "_" + slotCurrenTime.toString();
-                if (!existingSlotKeys.contains(slotKey)) {
-                    DoctorSlot slot = new DoctorSlot();
-                    slot.setDoctor(doctor);
-                    slot.setDate(slotDate);
-                    slot.setStartTime(slotCurrenTime);
-                    slot.setEndTime(slotCurrenTime.plusMinutes(30));
-                    slot.setDuration(duration);
-                    slot.setStatus(slotStatus);
-                    doctorSlotRepository.save(slot);
-                }
-                slotCurrenTime = slotCurrenTime.plusMinutes(30);
-            }
-        }
-        return savedSlots; 
+    // Deprecated: Use SlotService.getAvailableSlots() instead
+    @Deprecated
+    public List<DoctorSlotDTO> getAvailableSlot(Long doctorId) {
+        // Delegate to SlotService for backward compatibility
+        return slotService.getAvailableSlots(doctorId);
     }
     public boolean isSlotAvailable(Long doctorId, LocalDate date, LocalTime startTime) {
         DoctorSlot slot = doctorSlotRepository.findByDoctorIdAndDateAndStartTime(doctorId, date, startTime);

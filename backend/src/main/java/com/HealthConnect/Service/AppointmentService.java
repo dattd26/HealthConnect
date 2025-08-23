@@ -1,10 +1,8 @@
 package com.HealthConnect.Service;
 
 import com.HealthConnect.Dto.AppointmentResponse;
-import com.HealthConnect.Dto.DoctorResponse;
 import com.HealthConnect.Dto.DoctorSlotDTO;
 import com.HealthConnect.Model.Appointment;
-import com.HealthConnect.Model.Doctor;
 import com.HealthConnect.Model.DoctorSlot;
 import com.HealthConnect.Model.User;
 import com.HealthConnect.Repository.AppointmentRepository;
@@ -12,6 +10,7 @@ import com.HealthConnect.Repository.DoctorSlotRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,7 +21,7 @@ public class AppointmentService {
     @Autowired
     private AppointmentRepository appointmentRepository;
     @Autowired
-    private DoctorSlotRepository doctorSlotRepository;
+    private SlotService slotService;
     
     public List<Appointment> getAppointmentsByPatient(Long patientId) {
         return appointmentRepository.findByPatientId(patientId);
@@ -36,13 +35,17 @@ public class AppointmentService {
         return appointmentRepository.save(appointment);
     }
 
+    @Transactional
     public void cancelAppointment(Long appointmentId) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new RuntimeException("Lịch hẹn không tồn tại"));
+        
         appointment.setStatus(Appointment.AppointmentStatus.CANCELLED);
+        
+  
         DoctorSlot slot = appointment.getDoctorSlot();
-        slot.setStatus(DoctorSlot.SlotStatus.AVAILABLE);
-        doctorSlotRepository.save(slot);
+        slotService.releaseSlot(slot.getDoctor().getId(), slot.getDate(), slot.getStartTime());
+        
         appointmentRepository.save(appointment);
     }
     public List<AppointmentResponse> getAppointmentsByUser(User user) {

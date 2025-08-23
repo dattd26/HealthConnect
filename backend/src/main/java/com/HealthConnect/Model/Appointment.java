@@ -60,7 +60,7 @@ public class Appointment {
     private String zoomMeetingId;
     @Column
     private String zoomJoinUrl;
-    @Column
+    @Column(length = 1000)
     private String zoomStartUrl;
     @Column
     private String zoomPassword;

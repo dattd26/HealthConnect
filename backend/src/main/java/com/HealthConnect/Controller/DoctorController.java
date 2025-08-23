@@ -9,40 +9,67 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import java.time.LocalDate;
 
 import com.HealthConnect.Dto.AvailabilityDto;
 import com.HealthConnect.Dto.DoctorSlotDTO;
+import com.HealthConnect.Exception.ResourceNotFoundException;
 import com.HealthConnect.Model.Doctor;
 import com.HealthConnect.Service.DoctorService;
+import com.HealthConnect.Service.SlotService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
+import org.springframework.format.annotation.DateTimeFormat;
 
-@RestController
-@RequestMapping("/api/doctors")
+    @RestController
+    @RequestMapping("/api/doctors")
 public class DoctorController {
     
     @Autowired
-    DoctorService doctorService;
+    private DoctorService doctorService;
+    
+    @Autowired
+    private SlotService slotService;
     
     @GetMapping("/{id}/availability")
-    public ResponseEntity<?> getAvailableTimeSlots(@PathVariable Long id) {
-        return ResponseEntity.ok(doctorService.getAvailability(id).getAvailabilities());
+    public ResponseEntity<List<AvailabilityDto>> getAvailableTimeSlots(
+            @PathVariable @Positive(message = "Doctor ID must be positive") Long id) {
+        Doctor doctor = doctorService.getById(id);
+        if (doctor == null) {
+            throw new ResourceNotFoundException("Doctor", "id", id);
+        }
+        return ResponseEntity.ok(doctorService.getAvailability(id));
     }
 
     @GetMapping("/{id}/available-slots")
-    public ResponseEntity<List<DoctorSlotDTO>> getAvailableSlotsTest(@PathVariable Long id) {
-        return ResponseEntity.ok(doctorService.getAvailableSlot(id));
+    public ResponseEntity<List<DoctorSlotDTO>> getAvailableSlots(
+            @PathVariable @Positive(message = "Doctor ID must be positive") Long id) {
+        return ResponseEntity.ok(slotService.getAvailableSlots(id));
+    }
+    
+    @GetMapping("/{id}/slots")
+    public ResponseEntity<List<DoctorSlotDTO>> getSlotsByDateRange(
+            @PathVariable @Positive(message = "Doctor ID must be positive") Long id,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        return ResponseEntity.ok(slotService.getSlotsByDateRange(id, startDate, endDate));
     }
     
     @PostMapping("/{id}/availability")
-    public ResponseEntity<?> updateAvailability(@PathVariable Long id, @RequestBody List<AvailabilityDto> availability) {
-        try {
-            Doctor doctor = doctorService.getById(id);
-            if (doctor == null) {
-                return ResponseEntity.badRequest().body("Doctor not found");
-            }
-            return ResponseEntity.ok(doctorService.updateDoctorAvailability(doctor, availability));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+    public ResponseEntity<Object> updateAvailability(
+            @PathVariable @Positive(message = "Doctor ID must be positive") Long id, 
+            @Valid @RequestBody List<AvailabilityDto> availability) {
+        
+        Doctor doctor = doctorService.getById(id);
+        if (doctor == null) {
+            throw new ResourceNotFoundException("Doctor", "id", id);
         }
+        
+        Object result = doctorService.updateDoctorAvailability(doctor, availability);
+        // Regenerate slots after availability update
+        slotService.regenerateSlots(id);
+        return ResponseEntity.ok(result);
     }
 }

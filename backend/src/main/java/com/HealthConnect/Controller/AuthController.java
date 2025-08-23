@@ -53,6 +53,7 @@ public class AuthController {
         
             return ResponseEntity.ok("Registration successful! Please check your email to verify your account.");
         } catch (MailException e) {
+            System.out.println(e.getMessage());
             return ResponseEntity.internalServerError().body("Cant not send mail");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Registration failed");
@@ -125,6 +126,7 @@ public class AuthController {
             User user = userService.getUserByUsername(username);
             UserDTO userDTORes = UserDTO
                     .builder()
+                    .username(user.getUsername())
                     .fullName(user.getFullName())
                     .gender(user.getGender())
                     .email(user.getEmail())
@@ -133,13 +135,8 @@ public class AuthController {
                     .address(user.getAddress())
                     .role(user.getRole())
                     .build();
-            // Trả về thông tin user hoặc chỉ xác nhận token hợp lệ
 
-            return ResponseEntity.ok(Map.of("userData", userDTORes, "tokenValid", true));
-            // return ResponseEntity.ok(Map.of("userData", new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getRole()), "tokenValid", true));
-
-            // return ResponseEntity.ok(Map.of("userData", userDTORes, "tokenValid", true));
-//            return ResponseEntity.ok(token);
+            return ResponseEntity.ok(Map.of("userData", userDTORes, "token", token, "tokenValid", true));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("Xác thực token thất bại: " + e.getMessage());
