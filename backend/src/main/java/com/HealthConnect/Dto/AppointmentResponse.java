@@ -12,7 +12,7 @@ import lombok.Setter;
 public class AppointmentResponse {
     private Long id;
     private String doctorName;
-    // private PatientResponse patient;
+    private UserDTO patient;
     private String date;
     private String time;
     private DoctorSlotDTO doctorSlot;

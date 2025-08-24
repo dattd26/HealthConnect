@@ -40,7 +40,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
-        // Kiểm tra email/phone đã tồn tại
+            
         if (userService.checkExistsEmail(request.getEmail())) {
             throw new RuntimeException("Email đã được sử dụng!");
         }
@@ -70,6 +70,7 @@ public class AuthController {
             User user = userService.getUserByUsername(request.getUsername());
             UserDTO userDTORes = UserDTO
                     .builder()
+                    .id(user.getId())
                     .username(user.getUsername())
                     .fullName(user.getFullName())
                     .gender(user.getGender())
@@ -79,7 +80,7 @@ public class AuthController {
                     .address(user.getAddress())
                     .role(user.getRole())
                     .build();
-            // Kiểm tra xác thực
+            
             if (!user.isVerified()) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(new LoginResponse(null, userDTORes));
@@ -113,19 +114,20 @@ public class AuthController {
                 return ResponseEntity.badRequest().body("Token không được cung cấp");
             }
 
-            // Kiểm tra tính hợp lệ của token
+            
             if (!jwtTokenProvider.validateToken(token)) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body("Token không hợp lệ hoặc đã hết hạn");
             }
 
-            // Lấy username từ token
+
             String username = jwtTokenProvider.getUserFromJWT(token);
 
-            // Lấy thông tin user từ username (tùy chọn)
+            
             User user = userService.getUserByUsername(username);
             UserDTO userDTORes = UserDTO
                     .builder()
+                    .id(user.getId())
                     .username(user.getUsername())
                     .fullName(user.getFullName())
                     .gender(user.getGender())

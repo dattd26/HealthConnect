@@ -299,4 +299,12 @@ public class SlotService {
         int dateCompare = a.getDate().compareTo(b.getDate());
         return dateCompare != 0 ? dateCompare : a.getStartTime().compareTo(b.getStartTime());
     }
+    
+    // New method for getting slots by specific date
+    public List<DoctorSlotDTO> getSlotsByDate(Long doctorId, LocalDate date) {
+        List<DoctorSlot> slots = doctorSlotRepository.findByDoctorIdAndDate(doctorId, date);
+        return slots.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
 }

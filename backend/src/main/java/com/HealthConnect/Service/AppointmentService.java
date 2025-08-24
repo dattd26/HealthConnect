@@ -6,7 +6,7 @@ import com.HealthConnect.Model.Appointment;
 import com.HealthConnect.Model.DoctorSlot;
 import com.HealthConnect.Model.User;
 import com.HealthConnect.Repository.AppointmentRepository;
-import com.HealthConnect.Repository.DoctorSlotRepository;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.time.LocalDate;
 
 @Service
 public class AppointmentService {
@@ -74,5 +75,42 @@ public class AppointmentService {
     public Appointment getAppointmentById(Long appointmentId) {
         return appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
+    }
+    
+    // New methods for doctor dashboard
+    public List<Appointment> getTodayAppointmentsByDoctor(Long doctorId) {
+        return appointmentRepository.findByDoctorIdAndDate(doctorId, LocalDate.now());
+    }
+    
+    public List<Appointment> getUpcomingAppointmentsByDoctor(Long doctorId, int days) {
+        LocalDate startDate = LocalDate.now();
+        LocalDate endDate = startDate.plusDays(days);
+        return appointmentRepository.findByDoctorIdAndDateBetween(doctorId, startDate, endDate);
+    }
+    
+    public List<Appointment> getAppointmentsByDoctorAndDate(Long doctorId, LocalDate date) {
+        return appointmentRepository.findByDoctorIdAndDate(doctorId, date);
+    }
+    
+    public List<Appointment> getAppointmentsByDoctorAndStatus(Long doctorId, String status) {
+        Appointment.AppointmentStatus appointmentStatus = Appointment.AppointmentStatus.valueOf(status.toUpperCase());
+        return appointmentRepository.findByDoctorIdAndStatus(doctorId, appointmentStatus);
+    }
+
+    // Get appointments by doctor and date range
+    public List<Appointment> getAppointmentsByDoctorAndDateRange(Long doctorId, LocalDate startDate, LocalDate endDate) {
+        return appointmentRepository.findByDoctorIdAndDateBetween(doctorId, startDate, endDate);
+    }
+    
+    // Get all appointments by doctor with details
+    public List<Appointment> getAppointmentsByDoctorWithDetails(Long doctorId) {
+        return appointmentRepository.findByDoctorIdWithDetails(doctorId);
+    }
+
+    // Update appointment status
+    public Appointment updateAppointmentStatus(Long appointmentId, String status) {
+        Appointment appointment = getAppointmentById(appointmentId);
+        appointment.setStatus(Appointment.AppointmentStatus.valueOf(status.toUpperCase()));
+        return appointmentRepository.save(appointment);
     }
 }

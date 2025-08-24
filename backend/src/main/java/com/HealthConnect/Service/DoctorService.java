@@ -1,12 +1,12 @@
 package com.HealthConnect.Service;
 
-import java.time.DayOfWeek;
-import java.time.Duration;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
 
 import java.util.stream.Collectors;
 
@@ -24,6 +24,7 @@ import com.HealthConnect.Model.DoctorSlot;
 import com.HealthConnect.Repository.DoctorAvailabilityRepository;
 import com.HealthConnect.Repository.DoctorRepository;
 import com.HealthConnect.Repository.DoctorSlotRepository;
+import com.HealthConnect.Model.Appointment;
 
 @Service
 public class DoctorService {
@@ -99,6 +100,128 @@ public class DoctorService {
                 })
                 .collect(Collectors.toList());
     }
+
+    // Get dashboard statistics
+    public Map<String, Object> getDashboardStatistics(Long doctorId, int days) {
+        Map<String, Object> stats = new HashMap<>();
+        
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusDays(days);
+        
+        // Get appointment statistics
+        List<Appointment> appointments = appointmentService.getAppointmentsByDoctorAndDateRange(doctorId, startDate, endDate);
+        
+        long totalAppointments = appointments.size();
+        long confirmedAppointments = appointments.stream()
+                .filter(a -> Appointment.AppointmentStatus.CONFIRMED.equals(a.getStatus()))
+                .count();
+        long cancelledAppointments = appointments.stream()
+                .filter(a -> Appointment.AppointmentStatus.CANCELLED.equals(a.getStatus()))
+                .count();
+        long waitingAppointments = appointments.stream()
+                .filter(a -> Appointment.AppointmentStatus.WAITING.equals(a.getStatus()))
+                .count();
+        
+        stats.put("totalAppointments", totalAppointments);
+        stats.put("confirmedAppointments", confirmedAppointments);
+        stats.put("cancelledAppointments", cancelledAppointments);
+        stats.put("waitingAppointments", waitingAppointments);
+        stats.put("completionRate", totalAppointments > 0 ? (double) confirmedAppointments / totalAppointments : 0);
+        
+        // Get slot statistics
+        List<DoctorSlot> slots = doctorSlotRepository.findByDoctorIdAndDateBetween(doctorId, startDate, endDate);
+        long totalSlots = slots.size();
+        long availableSlots = slots.stream()
+                .filter(slot -> "AVAILABLE".equals(slot.getStatus()))
+                .count();
+        long bookedSlots = slots.stream()
+                .filter(slot -> "BOOKED".equals(slot.getStatus()))
+                .count();
+        
+        stats.put("totalSlots", totalSlots);
+        stats.put("availableSlots", availableSlots);
+        stats.put("bookedSlots", bookedSlots);
+        stats.put("utilizationRate", totalSlots > 0 ? (double) bookedSlots / totalSlots : 0);
+        
+        return stats;
+    }
+
+    // Get appointment calendar
+    public Map<String, Object> getAppointmentCalendar(Long doctorId, LocalDate month, boolean includeSlots) {
+        Map<String, Object> calendar = new HashMap<>();
+        
+        LocalDate startOfMonth = month.withDayOfMonth(1);
+        LocalDate endOfMonth = month.withDayOfMonth(month.lengthOfMonth());
+        
+        List<Appointment> monthAppointments = appointmentService.getAppointmentsByDoctorAndDateRange(doctorId, startOfMonth, endOfMonth);
+        List<DoctorSlot> monthSlots = doctorSlotRepository.findByDoctorIdAndDateBetween(doctorId, startOfMonth, endOfMonth);
+        
+        // Group appointments by date
+        Map<LocalDate, List<Appointment>> appointmentsByDate = monthAppointments.stream()
+                .collect(Collectors.groupingBy(a -> a.getDoctorSlot().getDate()));
+        
+        // Group slots by date
+        Map<LocalDate, List<DoctorSlot>> slotsByDate = monthSlots.stream()
+                .collect(Collectors.groupingBy(DoctorSlot::getDate));
+        
+        calendar.put("month", month);
+        calendar.put("appointmentsByDate", appointmentsByDate);
+        if (includeSlots) {
+            calendar.put("slotsByDate", slotsByDate);
+        }
+        
+        return calendar;
+    }
+
+    // Get patient health records for appointment
+    public Map<String, Object> getPatientHealthRecordsForAppointment(Long doctorId, Long appointmentId) {
+        Map<String, Object> records = new HashMap<>();
+        
+        // This would typically involve getting patient health data
+        // For now, returning basic structure
+        records.put("appointmentId", appointmentId);
+        records.put("patientRecords", new ArrayList<>());
+        records.put("healthMetrics", new HashMap<>());
+        
+        return records;
+    }
+
+    // Get doctor schedule for specific date
+    public Map<String, Object> getDoctorSchedule(Long doctorId, LocalDate date) {
+        Map<String, Object> schedule = new HashMap<>();
+        
+        List<DoctorSlot> daySlots = doctorSlotRepository.findByDoctorIdAndDate(doctorId, date);
+        List<Appointment> dayAppointments = appointmentService.getAppointmentsByDoctorAndDate(doctorId, date);
+        
+        schedule.put("date", date);
+        schedule.put("slots", daySlots);
+        schedule.put("appointments", dayAppointments);
+        
+        return schedule;
+    }
+
+    // Get weekly schedule
+    public Map<String, Object> getWeeklySchedule(Long doctorId, LocalDate weekStart) {
+        Map<String, Object> weeklySchedule = new HashMap<>();
+        
+        LocalDate weekEnd = weekStart.plusDays(6);
+        List<DoctorSlot> weekSlots = doctorSlotRepository.findByDoctorIdAndDateBetween(doctorId, weekStart, weekEnd);
+        List<Appointment> weekAppointments = appointmentService.getAppointmentsByDoctorAndDateRange(doctorId, weekStart, weekEnd);
+        
+        // Group by day
+        Map<LocalDate, List<DoctorSlot>> slotsByDay = weekSlots.stream()
+                .collect(Collectors.groupingBy(DoctorSlot::getDate));
+        Map<LocalDate, List<Appointment>> appointmentsByDay = weekAppointments.stream()
+                .collect(Collectors.groupingBy(a -> a.getDoctorSlot().getDate()));
+        
+        weeklySchedule.put("weekStart", weekStart);
+        weeklySchedule.put("weekEnd", weekEnd);
+        weeklySchedule.put("slotsByDay", slotsByDay);
+        weeklySchedule.put("appointmentsByDay", appointmentsByDay);
+        
+        return weeklySchedule;
+    }
+
     // Deprecated: Use SlotService.getAvailableSlots() instead
     @Deprecated
     public List<DoctorSlotDTO> getAvailableSlot(Long doctorId) {
@@ -129,5 +252,10 @@ public class DoctorService {
     }
     public List<Doctor> getAllDoctors() {
         return doctorRepository.findAll();
+    }
+    
+    // New method for updating doctor profile
+    public Doctor updateDoctor(Doctor doctor) {
+        return doctorRepository.save(doctor);
     }
 }
