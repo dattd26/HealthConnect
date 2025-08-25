@@ -8,28 +8,27 @@ import axios from "axios";
 import { AuthContext } from "../../context/AuthContext";
 
 import { Link } from "react-router-dom";
-import { Calendar, User, FileText, MessageSquare } from "lucide-react";
+import { Calendar, User, FileText, MessageSquare, Heart } from "lucide-react";
 
 const QuickActions = () => {
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold mb-4">Hành động nhanh</h2>
       <div className="grid grid-cols-2 gap-3">
-        <Link to="/appointments" className="bg-blue-600 text-white rounded-lg p-3 flex items-center justify-center hover:bg-blue-700 transition duration-300">
-          <Calendar className="w-5 h-5 mr-2" />
-          <span>Đặt lịch khám</span>
+        <Link to="/appointments" className="button button-primary p-4 flex flex-col items-center justify-center text-center hover:scale-105 transition-transform">
+          <Calendar className="w-6 h-6 mb-2" />
+          <span className="text-sm font-medium">Đặt lịch khám</span>
         </Link>
-        <Link to="/profile" className="bg-green-600 text-white rounded-lg p-3 flex items-center justify-center hover:bg-green-700 transition duration-300">
-          <User className="w-5 h-5 mr-2" />
-          <span>Hồ sơ của tôi</span>
+        <Link to="/profile" className="button button-secondary p-4 flex flex-col items-center justify-center text-center hover:scale-105 transition-transform">
+          <User className="w-6 h-6 mb-2" />
+          <span className="text-sm font-medium">Hồ sơ của tôi</span>
         </Link>
-        <button className="bg-purple-600 text-white rounded-lg p-3 flex items-center justify-center hover:bg-purple-700 transition duration-300">
-          <MessageSquare className="w-5 h-5 mr-2" />
-          <span>Tư vấn trực tuyến</span>
+        <button className="button button-success p-4 flex flex-col items-center justify-center text-center hover:scale-105 transition-transform">
+          <MessageSquare className="w-6 h-6 mb-2" />
+          <span className="text-sm font-medium">Tư vấn trực tuyến</span>
         </button>
-        <Link to="/profile/medical-history" className="bg-amber-600 text-white rounded-lg p-3 flex items-center justify-center hover:bg-amber-700 transition duration-300">
-          <FileText className="w-5 h-5 mr-2" />
-          <span>Lịch sử khám</span>
+        <Link to="/profile/medical-history" className="button button-warning p-4 flex flex-col items-center justify-center text-center hover:scale-105 transition-transform">
+          <FileText className="w-6 h-6 mb-2" />
+          <span className="text-sm font-medium">Lịch sử khám</span>
         </Link>
       </div>
     </div>
@@ -61,54 +60,116 @@ const PatientDashboard = () => {
     fetchData();
   }, []);
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center" style={{background: 'linear-gradient(135deg, var(--primary-50) 0%, var(--secondary-50) 100%)'}}>
+      <div className="text-center">
+        <div className="loading-spinner mb-4"></div>
+        <p className="text-secondary">Đang tải thông tin...</p>
+      </div>
+    </div>
+  );
+  
+  if (error) return (
+    <div className="min-h-screen flex items-center justify-center" style={{background: 'linear-gradient(135deg, var(--primary-50) 0%, var(--secondary-50) 100%)'}}>
+      <div className="card p-8 text-center max-w-md">
+        <div className="w-16 h-16 rounded-full bg-error-100 flex items-center justify-center mx-auto mb-4">
+          <Heart className="w-8 h-8 text-error-600" />
+        </div>
+        <h2 className="text-xl font-semibold text-error-600 mb-2">Có lỗi xảy ra</h2>
+        <p className="text-secondary">{error}</p>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
+    <div className="min-h-screen p-4" style={{background: 'linear-gradient(135deg, var(--primary-50) 0%, var(--secondary-50) 100%)'}}>
       {/* Header */}
-      <header className="bg-gradient-to-r from-blue-500 to-blue-700 text-white p-6 rounded-lg shadow-md flex justify-between items-center">
-        <h1 className="text-2xl font-semibold">Chào mừng trở lại, {userInfor.fullName}!</h1>
-        {/* <EmergencyButton /> */}
+      <header className="p-6 rounded-2xl shadow-lg mb-6 fade-in" style={{background: 'linear-gradient(135deg, var(--primary-600) 0%, var(--secondary-600) 100%)'}}>
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-2">Chào mừng trở lại!</h1>
+            <p className="text-white/90 text-lg">{userInfor.fullName}</p>
+          </div>
+          <div className="flex items-center space-x-2 text-white/90">
+            <Heart className="w-8 h-8" />
+          </div>
+        </div>
       </header>
 
-      {/* Grid Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-        <p className="col-span-full text-lg font-semibold p-4 bg-white rounded-lg shadow-md">
-          Here's your health overview
-        </p>
+      {/* Overview Banner */}
+      <div className="card p-6 mb-6 text-center slide-in-up" style={{animationDelay: '0.2s'}}>
+        <h2 className="text-2xl font-bold text-primary mb-2">Tổng quan sức khỏe của bạn</h2>
+        <p className="text-secondary">Theo dõi và quản lý sức khỏe một cách hiệu quả</p>
+      </div>
 
+      {/* Grid Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Health Overview */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
+        <div className="card p-6 fade-in" style={{animationDelay: '0.3s'}}>
+          <div className="flex items-center mb-4">
+            <div className="w-10 h-10 rounded-lg bg-primary-100 flex items-center justify-center mr-3">
+              <User className="w-5 h-5 text-primary-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-primary">Chỉ số sức khỏe</h3>
+          </div>
           <HealthMetrics />
         </div>
 
         {/* Real-time Charts */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
+        <div className="card p-6 fade-in" style={{animationDelay: '0.4s'}}>
+          <div className="flex items-center mb-4">
+            <div className="w-10 h-10 rounded-lg bg-secondary-100 flex items-center justify-center mr-3">
+              <FileText className="w-5 h-5 text-secondary-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-primary">Biểu đồ sức khỏe</h3>
+          </div>
           <HealthChart />
         </div>
 
+        {/* Quick Actions */}
+        <div className="card p-6 fade-in" style={{animationDelay: '0.5s'}}>
+          <div className="flex items-center mb-4">
+            <div className="w-10 h-10 rounded-lg bg-success-100 flex items-center justify-center mr-3">
+              <Calendar className="w-5 h-5 text-success-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-primary">Thao tác nhanh</h3>
+          </div>
+          <QuickActions />
+        </div>
+
         {/* Upcoming Appointments */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Lịch hẹn sắp tới</h2>
+        <div className="card p-6 fade-in" style={{animationDelay: '0.6s'}}>
+          <div className="flex items-center mb-4">
+            <div className="w-10 h-10 rounded-lg bg-warning-100 flex items-center justify-center mr-3">
+              <Calendar className="w-5 h-5 text-warning-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-primary">Lịch hẹn sắp tới</h3>
+          </div>
           <AppointmentsList userId={user.id} role={user.role}/>
         </div>
 
         {/* Recent Messages */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Tin nhắn gần đây</h2>
-          {/* Add a component to display recent messages */}
-          {/* <RecentMessages /> */}
-          <p className="text-gray-500 italic">Không có tin nhắn nào</p>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <QuickActions />
+        <div className="card p-6 fade-in" style={{animationDelay: '0.7s'}}>
+          <div className="flex items-center mb-4">
+            <div className="w-10 h-10 rounded-lg bg-error-100 flex items-center justify-center mr-3">
+              <MessageSquare className="w-5 h-5 text-error-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-primary">Tin nhắn gần đây</h3>
+          </div>
+          <div className="text-center py-8">
+            <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+            <p className="text-muted italic">Không có tin nhắn nào</p>
+          </div>
         </div>
 
         {/* Health Tips */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
+        <div className="card p-6 fade-in" style={{animationDelay: '0.8s'}}>
+          <div className="flex items-center mb-4">
+            <div className="w-10 h-10 rounded-lg bg-primary-100 flex items-center justify-center mr-3">
+              <Heart className="w-5 h-5 text-primary-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-primary">Mẹo sức khỏe</h3>
+          </div>
           <HealthTips />
         </div>
       </div>

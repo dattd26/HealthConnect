@@ -272,12 +272,19 @@ Chuyên gia chuyên tham vấn các rối nhiễu tâm lý, loạn thần, đị
                 dayMap={dayMap}
               />
             ))}
+            {/* <DateButton
+                key={today.format('YYYY-MM-DD')} // Use date as key for better performance
+                date={today}
+                selectedDate={selectedDate}
+                slotsGroupedByDate={slotsGroupedByDate}
+                onDateSelect={handleDateSelect}
+                dayMap={dayMap}
+              /> */}
           </div>
 
           {/* Các slot tương ứng */}
           <div className="flex flex-wrap gap-2 min-h-[40px]">
             {loading && !hasCachedData ? (
-              // Loading skeleton for slots
               [1, 2, 3, 4].map(i => (
                 <div key={i} className="h-8 w-12 bg-gray-200 rounded-full animate-pulse"></div>
               ))

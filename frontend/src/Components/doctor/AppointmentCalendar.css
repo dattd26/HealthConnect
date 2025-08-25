@@ -1,0 +1,480 @@
+.appointment-calendar {
+    margin-bottom: 2rem;
+}
+
+.calendar-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f8fafc;
+}
+
+.calendar-navigation {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.nav-button {
+    background: white;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-button:hover {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+}
+
+.nav-button:active {
+    transform: scale(0.95);
+}
+
+.current-month {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+    min-width: 200px;
+    text-align: center;
+}
+
+.calendar-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.current-month-btn {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.current-month-btn:hover {
+    background: #2563eb;
+}
+
+.slots-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #374151;
+    cursor: pointer;
+}
+
+.slots-toggle input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
+    accent-color: #3b82f6;
+}
+
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: #f1f5f9;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.weekday {
+    padding: 1rem 0.5rem;
+    text-align: center;
+    font-weight: 600;
+    color: #475569;
+    font-size: 0.875rem;
+    border-right: 1px solid #e5e7eb;
+    min-width: 0; /* Đảm bảo cột không bị kéo dài */
+}
+
+.weekday:last-child {
+    border-right: none;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    min-height: 400px;
+}
+
+.calendar-day {
+    border-right: 1px solid #e5e7eb;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 0.5rem;
+    min-height: 80px;
+    position: relative;
+    background: white;
+    min-width: 0; /* Đảm bảo cột không bị kéo dài */
+    overflow: hidden; /* Ẩn nội dung tràn ra ngoài */
+}
+
+.calendar-day:nth-child(7n) {
+    border-right: none;
+}
+
+.calendar-day.empty {
+    background: #f8fafc;
+}
+
+.calendar-day.today {
+    background: #eff6ff;
+    border-left: 4px solid #3b82f6;
+}
+
+.day-number {
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.day-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    max-width: 100%; /* Giới hạn chiều rộng tối đa */
+    max-height: calc(100% - 2rem); /* Giới hạn chiều cao để tránh tràn */
+    overflow-y: auto; /* Cho phép scroll dọc nếu có nhiều appointment */
+}
+
+.appointment-item {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    max-width: 100%; /* Giới hạn chiều rộng tối đa */
+    overflow: hidden; /* Ẩn nội dung tràn ra ngoài */
+    word-wrap: break-word; /* Cho phép từ dài bị ngắt */
+    hyphens: auto; /* Tự động ngắt từ */
+    flex-shrink: 0; /* Không cho phép item bị co lại */
+    min-height: 0; /* Cho phép item có chiều cao linh hoạt */
+}
+
+/* Xử lý trường hợp có nhiều appointment */
+.calendar-day:has(.day-content:has(.appointment-item:nth-child(3))) {
+    overflow-y: auto;
+}
+
+.calendar-day:has(.day-content:has(.appointment-item:nth-child(4))) {
+    overflow-y: auto;
+}
+
+.appointment-item:hover {
+    background: #e0f2fe;
+    transform: scale(1.02);
+    z-index: 10; /* Đảm bảo hover item hiển thị trên các item khác */
+    position: relative;
+}
+
+.appointment-time {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: #0369a1;
+    font-weight: 500;
+    white-space: nowrap; /* Giữ thời gian trên một dòng */
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.appointment-patient {
+    color: #1e293b;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%; /* Giới hạn chiều rộng tối đa */
+}
+
+.appointment-status {
+    font-size: 0.625rem;
+    padding: 0.125rem 0.25rem;
+    border-radius: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap; /* Giữ status trên một dòng */
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.status-pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-confirmed {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.status-completed {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-cancelled {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.slots-info {
+    background: #f3e8ff;
+    border: 1px solid #c4b5fd;
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+    text-align: center;
+}
+
+.slots-count {
+    font-size: 0.75rem;
+    color: #7c3aed;
+    font-weight: 500;
+}
+
+.calendar-legend {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-top: 1px solid #e5e7eb;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #374151;
+}
+
+.legend-color {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 2px;
+}
+
+.legend-color.status-pending {
+    background: #fef3c7;
+    border: 1px solid #f59e0b;
+}
+
+.legend-color.status-confirmed {
+    background: #dbeafe;
+    border: 1px solid #3b82f6;
+}
+
+.legend-color.status-completed {
+    background: #d1fae5;
+    border: 1px solid #10b981;
+}
+
+.legend-color.status-cancelled {
+    background: #fee2e2;
+    border: 1px solid #ef4444;
+}
+
+.legend-color.slots {
+    background: #f3e8ff;
+    border: 1px solid #8b5cf6;
+}
+
+/* Loading and Error States */
+.appointment-calendar-loading,
+.appointment-calendar-error {
+    text-align: center;
+    padding: 3rem;
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+}
+
+.loading-spinner {
+    width: 3rem;
+    height: 3rem;
+    border: 3px solid #e5e7eb;
+    border-top: 3px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.appointment-calendar-error p {
+    color: #dc2626;
+    margin-bottom: 1rem;
+}
+
+.retry-button {
+    padding: 0.5rem 1rem;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: background 0.2s ease;
+}
+
+.retry-button:hover {
+    background: #2563eb;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .calendar-header {
+        padding: 1rem;
+    }
+    
+    .calendar-navigation {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .current-month {
+        min-width: auto;
+        font-size: 1.25rem;
+    }
+    
+    .calendar-controls {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .calendar-weekdays {
+        font-size: 0.75rem;
+    }
+    
+    .weekday {
+        padding: 0.75rem 0.25rem;
+    }
+    
+    .calendar-day {
+        min-height: 60px;
+        padding: 0.25rem;
+    }
+    
+    .day-number {
+        font-size: 0.75rem;
+    }
+    
+    .appointment-item {
+        font-size: 0.625rem;
+        padding: 0.125rem 0.25rem;
+    }
+    
+    .calendar-legend {
+        gap: 1rem;
+        padding: 0.75rem;
+    }
+    
+    .legend-item {
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .calendar-grid {
+        min-height: 300px;
+    }
+    
+    .calendar-day {
+        min-height: 50px;
+    }
+    
+    .appointment-item {
+        font-size: 0.5rem;
+        padding: 0.125rem;
+    }
+    
+    .calendar-legend {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+}
+
+/* Grid Layout Fixes */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr)); /* Đảm bảo các cột có kích thước đồng đều */
+    min-height: 400px;
+    width: 100%;
+}
+
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr)); /* Đảm bảo các cột có kích thước đồng đều */
+    background: #f1f5f9;
+    border-bottom: 1px solid #e5e7eb;
+    width: 100%;
+}
+
+/* Đảm bảo container có width cố định */
+.appointment-calendar {
+    margin-bottom: 2rem;
+    width: 100%;
+    overflow-x: auto; /* Cho phép scroll ngang nếu cần */
+}
+
+.calendar-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    min-width: 0; /* Đảm bảo card không bị kéo dài */
+}
+
+/* Đảm bảo các cột có kích thước đồng đều trên mọi màn hình */
+@media (min-width: 1024px) {
+    .calendar-grid {
+        grid-template-columns: repeat(7, 1fr);
+    }
+    
+    .calendar-weekdays {
+        grid-template-columns: repeat(7, 1fr);
+    }
+}
+
+@media (max-width: 1023px) and (min-width: 769px) {
+    .calendar-grid {
+        grid-template-columns: repeat(7, 1fr);
+    }
+    
+    .calendar-weekdays {
+        grid-template-columns: repeat(7, 1fr);
+    }
+}

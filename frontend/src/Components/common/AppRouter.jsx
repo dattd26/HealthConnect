@@ -10,6 +10,12 @@ import BookAppointmentPage from "../../pages/BookAppointmentPage";
 import ProfilePage from "../../pages/ProfilePage";
 import ZoomMeeting from "../../pages/ZoomTest";
 import AppointmentMeetingPage from "../../pages/AppointmentMeetingPage";
+import DoctorDashboardPage from "../../pages/DoctorDashboardPage";
+import DoctorAppointmentsPage from "../../pages/DoctorAppointmentsPage";
+import DoctorSchedulePage from "../../pages/DoctorSchedulePage";
+import DoctorPatientsPage from "../../pages/DoctorPatientsPage";
+import DoctorMedicalRecordsPage from "../../pages/DoctorMedicalRecordsPage";
+import DoctorSettingsPage from "../../pages/DoctorSettingsPage";
 
 const AppRouter = () => {
     // const { user } = useContext(AuthContext);
@@ -42,6 +48,38 @@ const AppRouter = () => {
             <Route path="/profile" element={
                 <ProtectedRoute allowedRoles={['PATIENT']}>
                     <ProfilePage />
+                </ProtectedRoute>
+            } />
+
+            {/* Doctor Routes */}
+            <Route path="/doctor/dashboard" element={
+                <ProtectedRoute allowedRoles={['DOCTOR']}>
+                    <DoctorDashboardPage />
+                </ProtectedRoute>
+            } />
+            <Route path="/doctor/appointments" element={
+                <ProtectedRoute allowedRoles={['DOCTOR']}>
+                    <DoctorAppointmentsPage />
+                </ProtectedRoute>
+            } />
+            <Route path="/doctor/schedule" element={
+                <ProtectedRoute allowedRoles={['DOCTOR']}>
+                    <DoctorSchedulePage />
+                </ProtectedRoute>
+            } />
+            <Route path="/doctor/patients" element={
+                <ProtectedRoute allowedRoles={['DOCTOR']}>
+                    <DoctorPatientsPage />
+                </ProtectedRoute>
+            } />
+            <Route path="/doctor/medical-records" element={
+                <ProtectedRoute allowedRoles={['DOCTOR']}>
+                    <DoctorMedicalRecordsPage />
+                </ProtectedRoute>
+            } />
+            <Route path="/doctor/settings" element={
+                <ProtectedRoute allowedRoles={['DOCTOR']}>
+                    <DoctorSettingsPage />
                 </ProtectedRoute>
             } />
         </Routes>
