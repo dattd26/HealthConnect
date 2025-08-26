@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { appointmentService } from "../../services/appointmentService";
 import AppointmentCard from "./AppointmentCard";
+import axios from "axios";
 
 const AppointmentsList = ({ userId, role }) => {
   const [appointments, setAppointments] = useState([]);
@@ -20,6 +21,78 @@ const AppointmentsList = ({ userId, role }) => {
     };
     fetchAppointments();
   }, [userId, role]);
+
+  const handleCancel = async (appointmentId) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.put(
+        `http://localhost:8080/api/appointments/${appointmentId}/cancel`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert("Lịch hẹn đã được hủy.");
+      // Refresh danh sách
+      const data = await appointmentService.getAppointments(userId, role);
+      setAppointments(data);
+    } catch (err) {
+      console.error("Lỗi hủy lịch hẹn:", err);
+      alert("Không thể hủy lịch hẹn này.");
+    }
+  };
+
+  const handleConfirm = async (appointmentId) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.put(
+        `http://localhost:8080/api/appointments/${appointmentId}/confirm`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert("Lịch hẹn đã được xác nhận.");
+      // Refresh danh sách
+      const data = await appointmentService.getAppointments(userId, role);
+      setAppointments(data);
+    } catch (err) {
+      console.error("Lỗi xác nhận lịch hẹn:", err);
+      alert("Không thể xác nhận lịch hẹn này.");
+    }
+  };
+
+  const handleStart = async (appointmentId) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.put(
+        `http://localhost:8080/api/appointments/${appointmentId}/start`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert("Lịch hẹn đã bắt đầu.");
+      // Refresh danh sách
+      const data = await appointmentService.getAppointments(userId, role);
+      setAppointments(data);
+    } catch (err) {
+      console.error("Lỗi bắt đầu lịch hẹn:", err);
+      alert("Không thể bắt đầu lịch hẹn này.");
+    }
+  };
+
+  const handleComplete = async (appointmentId) => {
+    try {
+      const token = localStorage.getItem("token");
+      await axios.put(
+        `http://localhost:8080/api/appointments/${appointmentId}/complete`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert("Lịch hẹn đã hoàn thành.");
+      // Refresh danh sách
+      const data = await appointmentService.getAppointments(userId, role);
+      setAppointments(data);
+    } catch (err) {
+      console.error("Lỗi hoàn thành lịch hẹn:", err);
+      alert("Không thể hoàn thành lịch hẹn này.");
+    }
+  };
 
   const filteredAppointments = appointments.filter(appointment => {
     const appointmentDate = new Date(appointment.date);
@@ -100,7 +173,10 @@ const AppointmentsList = ({ userId, role }) => {
             <AppointmentCard
               key={appointment.id}
               appointment={appointment}
-              role={role}
+              onCancel={handleCancel}
+              onConfirm={handleConfirm}
+              onStart={handleStart}
+              onComplete={handleComplete}
             />
           ))}
         </div>

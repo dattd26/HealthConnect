@@ -132,6 +132,32 @@ const CreateAppointment = ({ doctors }) => {
       return;
     }
 
+    if (!selectedDoctor) {
+      alert("Vui lòng chọn bác sĩ và thời gian khám.");
+      return;
+    }
+
+    if (!preferredTimeSlot) {
+      alert("Vui lòng chọn thời gian khám.");
+      return;
+    }
+
+    // Validate appointment time
+    const appointmentDate = new Date(preferredTimeSlot.date + 'T' + preferredTimeSlot.startTime);
+    const now = new Date();
+    const minTime = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours from now
+    const maxTime = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 days from now
+
+    if (appointmentDate < minTime) {
+      alert("Cần đặt lịch hẹn trước ít nhất 24 giờ.");
+      return;
+    }
+
+    if (appointmentDate > maxTime) {
+      alert("Không thể đặt lịch hẹn trước quá 30 ngày.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -139,16 +165,43 @@ const CreateAppointment = ({ doctors }) => {
         doctorId: parseInt(selectedDoctor.id, 10),
         date: preferredTimeSlot.date,
         startTime: preferredTimeSlot.startTime,
-        notes: `Triệu chứng: ${symptoms}\nTiền sử: ${medicalHistory}\nGhi chú: ${noteForDoctor}\nHình thức: ${consultationType === "inperson" ? "Khám trực tiếp" : "Khám online"}`,
+        notes: `Triệu chứng: ${symptoms}\nTiền sử: ${medicalHistory}\nGhi chú: ${noteForDoctor}\nHình thức: Khám online`,
       };
 
       const data = await appointmentService.createAppointment(appointmentData);
-      console.log(data);
-      alert("Lịch hẹn đã được tạo thành công! Bạn sẽ nhận được email xác nhận trong ít phút.");
-      navigate("/book-appointment");
+      console.log("Appointment created:", data);
+      
+      // Sau khi tạo lịch hẹn thành công, chuyển đến bước thanh toán
+      // Lưu thông tin lịch hẹn vào localStorage để sử dụng trong trang thanh toán
+      localStorage.setItem('pendingAppointment', JSON.stringify({
+        appointmentId: data.id,
+        doctorName: selectedDoctor.name,
+        specialty: selectedDoctor.specialty,
+        date: preferredTimeSlot.date,
+        startTime: preferredTimeSlot.startTime,
+        consultationType: consultationType,
+        amount: 500000 // Số tiền cố định, có thể thay đổi sau
+      }));
+      
+      // Chuyển hướng đến trang thanh toán
+      navigate("/payment", { 
+        state: { 
+          appointment: data,
+          doctor: selectedDoctor,
+          timeSlot: preferredTimeSlot,
+          consultationType: consultationType
+        }
+      });
+      
     } catch (err) {
       console.error("Lỗi tạo lịch hẹn:", err);
-      alert("Đã xảy ra lỗi khi đặt lịch. Vui lòng thử lại sau.");
+      let errorMessage = "Đã xảy ra lỗi khi đặt lịch. Vui lòng thử lại sau.";
+      
+      if (err.response && err.response.data) {
+        errorMessage = err.response.data.message || errorMessage;
+      }
+      
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }

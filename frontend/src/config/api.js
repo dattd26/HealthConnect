@@ -1,5 +1,121 @@
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
 
+
+// API Client object for making HTTP requests
+const api = {
+    get: async (url, config = {}) => {
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...config.headers
+                },
+                ...config
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            return response.json();
+        } catch (error) {
+            console.error('API GET request failed:', error);
+            throw error;
+        }
+    },
+    
+    post: async (url, data = null, config = {}) => {
+        try {
+            // Xử lý params nếu có
+            let finalUrl = url;
+            if (config.params) {
+                const params = new URLSearchParams();
+                Object.keys(config.params).forEach(key => {
+                    if (config.params[key] !== null && config.params[key] !== undefined) {
+                        params.append(key, config.params[key]);
+                    }
+                });
+                finalUrl = `${url}?${params.toString()}`;
+            }
+            
+            const response = await fetch(finalUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...config.headers
+                },
+                body: data ? JSON.stringify(data) : null
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            return response.json();
+        } catch (error) {
+            console.error('API POST request failed:', error);
+            throw error;
+        }
+    },
+    
+    put: async (url, data = null, config = {}) => {
+        try {
+            // Xử lý params nếu có
+            let finalUrl = url;
+            if (config.params) {
+                const params = new URLSearchParams();
+                Object.keys(config.params).forEach(key => {
+                    if (config.params[key] !== null && config.params[key] !== undefined) {
+                        params.append(key, config.params[key]);
+                    }
+                });
+                finalUrl = `${url}?${params.toString()}`;
+            }
+            
+            const response = await fetch(finalUrl, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...config.headers
+                },
+                body: data ? JSON.stringify(data) : null
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            return response.json();
+        } catch (error) {
+            console.error('API PUT request failed:', error);
+            throw error;
+        }
+    },
+    
+    delete: async (url, config = {}) => {
+        try {
+            const response = await fetch(url, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...config.headers
+                },
+                ...config
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            return response.json();
+        } catch (error) {
+            console.error('API DELETE request failed:', error);
+            throw error;
+        }
+    }
+};
+
 export const API_ENDPOINTS = {
     // Auth endpoints
     AUTH: {
@@ -47,4 +163,7 @@ export const API_ENDPOINTS = {
         ALL: `${API_BASE_URL}/specialties`,
         GET: (code) => `${API_BASE_URL}/specialties/${code}`
     }
-}; 
+};
+
+// Export the API client as default
+export default api; 
