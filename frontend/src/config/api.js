@@ -133,7 +133,9 @@ export const API_ENDPOINTS = {
         DELETE: (id) => `${API_BASE_URL}/appointments/${id}`,
         CANCEL: `${API_BASE_URL}/appointments`,
         GET: (id) => `${API_BASE_URL}/appointments/${id}`,
-        USER: `${API_BASE_URL}/appointments`
+        USER: `${API_BASE_URL}/appointments`,
+        UPDATE_DOCTOR_JOINED: (id) => `${API_BASE_URL}/appointments/${id}/doctor-joined`,
+        CHECK_DOCTOR_STATUS: (id) => `${API_BASE_URL}/appointments/${id}/doctor-status`
     },
     
     // Patient endpoints

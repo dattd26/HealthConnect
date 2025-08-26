@@ -6,6 +6,8 @@ import doctorService from '../../services/doctorService';
 import DashboardStats from './DashboardStats';
 import AppointmentCalendar from './AppointmentCalendar';
 import './DoctorDashboard.css';
+import { appointmentService } from '../../services/appointmentService';
+import { useNavigate } from 'react-router-dom';
 
 const DoctorDashboard = () => {
     const { user, token } = useContext(AuthContext);
@@ -13,7 +15,8 @@ const DoctorDashboard = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [activeTab, setActiveTab] = useState('overview');
-
+    const navigate = useNavigate();
+    
     useEffect(() => {
         if (user && user.id) {
             console.log('Fetching dashboard data for user:', user.id);
@@ -52,7 +55,11 @@ const DoctorDashboard = () => {
             day: 'numeric',
         });
     };
-
+    const handleHostMeeting = (appointmentId) => {
+        const response = appointmentService.updateDoctorJoined(appointmentId, 1);
+        console.log(response);
+        navigate(`/appointments/${appointmentId}/meeting`);
+    }
     if (loading) {
         return (
             <div className="doctor-dashboard-loading">
@@ -177,6 +184,11 @@ const DoctorDashboard = () => {
                                             </div>
                                             <div className={`appointment-status status-${appointment.status?.toLowerCase()}`}>
                                                 {appointment.status}
+                                            </div>
+                                            <div className='host-meeting-btn'>
+                                                <button className='host-meeting-btn-text' onClick={() => handleHostMeeting(appointment.id)}>
+                                                    Bắt đầu
+                                                </button>
                                             </div>
                                         </div>
                                     ))

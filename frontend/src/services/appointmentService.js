@@ -71,5 +71,24 @@ export const appointmentService = {
             }
             throw error;
         }
+    },
+    updateDoctorJoined: async (appointmentId, isDoctorJoined) => {
+        const response = await axios.put(
+          API_ENDPOINTS.APPOINTMENTS.UPDATE_DOCTOR_JOINED(appointmentId),
+          isDoctorJoined,
+          {
+            headers: {
+              ...getAuthHeader(),
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+        return response.data;
+    },
+    checkDoctorStatus: async (appointmentId) => {
+        const response = await axios.get(API_ENDPOINTS.APPOINTMENTS.CHECK_DOCTOR_STATUS(appointmentId), {
+            headers: getAuthHeader()
+        });
+        return response.data;
     }
 }

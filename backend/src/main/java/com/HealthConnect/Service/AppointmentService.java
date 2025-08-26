@@ -219,4 +219,7 @@ public class AppointmentService {
         appointment.setStatus(AppointmentStatus.valueOf(status.toUpperCase()));
         return appointmentRepository.save(appointment);
     }
+    public Appointment updateAppointment(Appointment appointment) {
+        return appointmentRepository.save(appointment);
+    }
 }

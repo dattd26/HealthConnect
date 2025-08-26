@@ -76,4 +76,7 @@ public class Appointment {
     
     @OneToOne(mappedBy = "appointment", cascade = CascadeType.ALL)
     private Payment payment;
+
+    @Column
+    private boolean isDoctorJoined;
 }

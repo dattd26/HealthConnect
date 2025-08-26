@@ -37,4 +37,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     @Query("SELECT a FROM Appointment a WHERE a.status = :status AND a.doctorSlot.date < :cutoffDate")
     List<Appointment> findByStatusAndDateTimeBefore(@Param("status") Appointment.AppointmentStatus status, 
                                                    @Param("cutoffDate") LocalDate cutoffDate);
+
+    // @Query("SELECT a FROM Appointment a WHERE a.id = :id")
+    // Appointment findByIdWithDetails(@Param("id") Long id);
 }

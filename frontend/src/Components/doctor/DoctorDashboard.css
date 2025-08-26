@@ -579,3 +579,12 @@
     gap: var(--space-sm);
   }
 }
+.host-meeting-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 10px;
+}
+.host-meeting-btn-text {
+  background-color: var(--primary-600);
+}

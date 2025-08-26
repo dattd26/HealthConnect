@@ -28,6 +28,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.HashMap;
+
 
 @RestController
 @RequestMapping("/api/appointments")
@@ -221,6 +224,28 @@ public class AppointmentController {
         response.setZoomStartUrl(appointment.getZoomStartUrl());
         response.setZoomMeetingId(appointment.getZoomMeetingId());
         response.setZoomPassword(appointment.getZoomPassword());
+        return ResponseEntity.ok(response);
+    }
+    // Trong AppointmentController.java
+    @GetMapping("/{id}/doctor-status")
+    public ResponseEntity<Map<String, Boolean>> getDoctorStatus(@PathVariable Long id) {
+        // Logic kiểm tra xem bác sĩ đã tham gia Zoom meeting chưa
+        Appointment appointment = appointmentService.getAppointmentById(id);
+        System.out.println("concac" + appointment.getId());
+        boolean isDoctorJoined = appointment.isDoctorJoined();
+        
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("isDoctorJoined", isDoctorJoined);
+        
+        return ResponseEntity.ok(response);
+    }
+    @PutMapping("/{id}/doctor-joined")
+    public ResponseEntity<Map<String, Boolean>> updateDoctorJoined(@PathVariable Long id, @RequestBody boolean isDoctorJoined) {
+        Appointment appointment = appointmentService.getAppointmentById(id);
+        appointment.setDoctorJoined(isDoctorJoined);
+        Appointment updatedAppointment = appointmentService.updateAppointment(appointment);
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("isDoctorJoined", updatedAppointment.isDoctorJoined());
         return ResponseEntity.ok(response);
     }
 }
