@@ -6,7 +6,7 @@ import com.HealthConnect.Model.Appointment;
 import com.HealthConnect.Model.DoctorSlot;
 import com.HealthConnect.Model.User;
 import com.HealthConnect.Repository.AppointmentRepository;
-
+import com.HealthConnect.Model.Appointment.AppointmentStatus;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Service
 public class AppointmentService {
@@ -32,8 +34,37 @@ public class AppointmentService {
         return appointmentRepository.findByDoctorId(doctorId);
     }
 
+    @Transactional
     public Appointment createAppointment(Appointment appointment) {
+        // Validate appointment time
+        validateAppointmentTime(appointment);
+        
+        // Set initial status
+        appointment.setStatus(AppointmentStatus.PENDING_PAYMENT);
+        
         return appointmentRepository.save(appointment);
+    }
+    
+    private void validateAppointmentTime(Appointment appointment) {
+        LocalDateTime appointmentDateTime = LocalDateTime.of(
+            appointment.getDoctorSlot().getDate(), 
+            appointment.getDoctorSlot().getStartTime()
+        );
+        
+        // Không cho phép đặt lịch trong quá khứ
+        if (appointmentDateTime.isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Không thể đặt lịch hẹn trong quá khứ");
+        }
+        
+        // Không cho phép đặt lịch quá sớm (trước 24h)
+        if (appointmentDateTime.isBefore(LocalDateTime.now().plusHours(24))) {
+            throw new RuntimeException("Cần đặt lịch hẹn trước ít nhất 24 giờ");
+        }
+        
+        // Không cho phép đặt lịch quá xa (trước 30 ngày)
+        if (appointmentDateTime.isAfter(LocalDateTime.now().plusDays(30))) {
+            throw new RuntimeException("Không thể đặt lịch hẹn trước quá 30 ngày");
+        }
     }
 
     @Transactional
@@ -41,14 +72,89 @@ public class AppointmentService {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new RuntimeException("Lịch hẹn không tồn tại"));
         
-        appointment.setStatus(Appointment.AppointmentStatus.CANCELLED);
+        // Chỉ cho phép hủy khi chưa thanh toán hoặc chưa xác nhận
+        if (appointment.getStatus() == AppointmentStatus.CONFIRMED || 
+            appointment.getStatus() == AppointmentStatus.IN_PROGRESS) {
+            throw new RuntimeException("Không thể hủy lịch hẹn đã được xác nhận");
+        }
         
-  
-        DoctorSlot slot = appointment.getDoctorSlot();
-        slotService.releaseSlot(slot.getDoctor().getId(), slot.getDate(), slot.getStartTime());
+        appointment.setStatus(AppointmentStatus.CANCELLED);
+        
+        // Giải phóng slot nếu đã được xác nhận
+        if (appointment.getStatus() == AppointmentStatus.CONFIRMED) {
+            DoctorSlot slot = appointment.getDoctorSlot();
+            slotService.releaseSlot(slot.getDoctor().getId(), slot.getDate(), slot.getStartTime());
+        }
         
         appointmentRepository.save(appointment);
     }
+    
+    @Transactional
+    public Appointment confirmAppointment(Long appointmentId) {
+        Appointment appointment = getAppointmentById(appointmentId);
+        
+        if (appointment.getStatus() != AppointmentStatus.PAYMENT_PENDING) {
+            throw new RuntimeException("Chỉ có thể xác nhận lịch hẹn đã thanh toán");
+        }
+        
+        appointment.setStatus(AppointmentStatus.CONFIRMED);
+        return appointmentRepository.save(appointment);
+    }
+    
+    @Transactional
+    public Appointment startAppointment(Long appointmentId) {
+        Appointment appointment = getAppointmentById(appointmentId);
+        
+        if (appointment.getStatus() != AppointmentStatus.CONFIRMED) {
+            throw new RuntimeException("Chỉ có thể bắt đầu lịch hẹn đã được xác nhận");
+        }
+        
+        // Kiểm tra thời gian hiện tại có phù hợp không
+        LocalDateTime appointmentTime = LocalDateTime.of(
+            appointment.getDoctorSlot().getDate(), 
+            appointment.getDoctorSlot().getStartTime()
+        );
+        
+        LocalDateTime now = LocalDateTime.now();
+        if (now.isBefore(appointmentTime.minusMinutes(15))) {
+            throw new RuntimeException("Chưa đến thời gian khám bệnh");
+        }
+        
+        if (now.isAfter(appointmentTime.plusMinutes(30))) {
+            appointment.setStatus(AppointmentStatus.NO_SHOW);
+            return appointmentRepository.save(appointment);
+        }
+        
+        appointment.setStatus(AppointmentStatus.IN_PROGRESS);
+        return appointmentRepository.save(appointment);
+    }
+    
+    @Transactional
+    public Appointment completeAppointment(Long appointmentId) {
+        Appointment appointment = getAppointmentById(appointmentId);
+        
+        if (appointment.getStatus() != AppointmentStatus.IN_PROGRESS) {
+            throw new RuntimeException("Chỉ có thể hoàn thành lịch hẹn đang diễn ra");
+        }
+        
+        appointment.setStatus(AppointmentStatus.COMPLETED);
+        return appointmentRepository.save(appointment);
+    }
+    
+    @Transactional
+    public void expireAppointments() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDate cutoffDate = now.minusMinutes(30).toLocalDate();
+        
+        List<Appointment> expiredAppointments = appointmentRepository
+            .findByStatusAndDateTimeBefore(AppointmentStatus.CONFIRMED, cutoffDate);
+        
+        for (Appointment appointment : expiredAppointments) {
+            appointment.setStatus(AppointmentStatus.EXPIRED);
+            appointmentRepository.save(appointment);
+        }
+    }
+
     public List<AppointmentResponse> getAppointmentsByUser(User user) {
         List<Appointment> appointments = appointmentRepository.findByPatientOrDoctor(user, user);
         return appointments.stream().map(appointment -> {
@@ -93,7 +199,7 @@ public class AppointmentService {
     }
     
     public List<Appointment> getAppointmentsByDoctorAndStatus(Long doctorId, String status) {
-        Appointment.AppointmentStatus appointmentStatus = Appointment.AppointmentStatus.valueOf(status.toUpperCase());
+        AppointmentStatus appointmentStatus = AppointmentStatus.valueOf(status.toUpperCase());
         return appointmentRepository.findByDoctorIdAndStatus(doctorId, appointmentStatus);
     }
 
@@ -110,7 +216,7 @@ public class AppointmentService {
     // Update appointment status
     public Appointment updateAppointmentStatus(Long appointmentId, String status) {
         Appointment appointment = getAppointmentById(appointmentId);
-        appointment.setStatus(Appointment.AppointmentStatus.valueOf(status.toUpperCase()));
+        appointment.setStatus(AppointmentStatus.valueOf(status.toUpperCase()));
         return appointmentRepository.save(appointment);
     }
 }

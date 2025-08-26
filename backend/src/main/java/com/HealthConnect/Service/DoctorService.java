@@ -25,6 +25,7 @@ import com.HealthConnect.Repository.DoctorAvailabilityRepository;
 import com.HealthConnect.Repository.DoctorRepository;
 import com.HealthConnect.Repository.DoctorSlotRepository;
 import com.HealthConnect.Model.Appointment;
+import com.HealthConnect.Model.Appointment.AppointmentStatus;
 
 @Service
 public class DoctorService {
@@ -113,19 +114,20 @@ public class DoctorService {
         
         long totalAppointments = appointments.size();
         long confirmedAppointments = appointments.stream()
-                .filter(a -> Appointment.AppointmentStatus.CONFIRMED.equals(a.getStatus()))
+                .filter(a -> AppointmentStatus.CONFIRMED.equals(a.getStatus()))
                 .count();
         long cancelledAppointments = appointments.stream()
-                .filter(a -> Appointment.AppointmentStatus.CANCELLED.equals(a.getStatus()))
+                .filter(a -> AppointmentStatus.CANCELLED.equals(a.getStatus()))
                 .count();
-        long waitingAppointments = appointments.stream()
-                .filter(a -> Appointment.AppointmentStatus.WAITING.equals(a.getStatus()))
+        long pendingAppointments = appointments.stream()
+                .filter(a -> AppointmentStatus.PENDING_PAYMENT.equals(a.getStatus()) || 
+                           AppointmentStatus.PAYMENT_PENDING.equals(a.getStatus()))
                 .count();
         
         stats.put("totalAppointments", totalAppointments);
         stats.put("confirmedAppointments", confirmedAppointments);
         stats.put("cancelledAppointments", cancelledAppointments);
-        stats.put("waitingAppointments", waitingAppointments);
+        stats.put("waitingAppointments", pendingAppointments);
         stats.put("completionRate", totalAppointments > 0 ? (double) confirmedAppointments / totalAppointments : 0);
         
         // Get slot statistics

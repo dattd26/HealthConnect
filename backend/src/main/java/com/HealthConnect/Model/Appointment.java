@@ -1,6 +1,7 @@
 package com.HealthConnect.Model;
 
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
@@ -35,9 +36,14 @@ public class Appointment {
     private AppointmentStatus status;
 
     public enum AppointmentStatus {
-        WAITING,
-        CONFIRMED,
-        CANCELLED
+        PENDING_PAYMENT,    // Chờ thanh toán
+        PAYMENT_PENDING,    // Đã thanh toán, chờ xác nhận
+        CONFIRMED,          // Bác sĩ đã xác nhận
+        IN_PROGRESS,        // Đang khám bệnh
+        COMPLETED,          // Hoàn thành khám
+        CANCELLED,          // Đã hủy
+        EXPIRED,            // Hết hạn (quá thời gian)
+        NO_SHOW             // Bệnh nhân không tham gia
     }
 
     @Column
@@ -64,4 +70,10 @@ public class Appointment {
     private String zoomStartUrl;
     @Column
     private String zoomPassword;
+    
+    @Column
+    private BigDecimal amount;
+    
+    @OneToOne(mappedBy = "appointment", cascade = CascadeType.ALL)
+    private Payment payment;
 }

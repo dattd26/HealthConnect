@@ -9,6 +9,7 @@ import com.HealthConnect.Dto.Zoom.ZoomMeetingResponse;
 import com.HealthConnect.Exception.BusinessException;
 import com.HealthConnect.Exception.ResourceNotFoundException;
 import com.HealthConnect.Model.Appointment;
+import com.HealthConnect.Model.Appointment.AppointmentStatus;
 import com.HealthConnect.Model.Doctor;
 import com.HealthConnect.Model.DoctorSlot;
 import com.HealthConnect.Model.User;
@@ -120,7 +121,7 @@ public class AppointmentController {
         appointment.setDoctor(doctor);
         appointment.setDoctorSlot(slot);
         appointment.setPatient(patientService.getByUsername(userDetails.getUsername()));
-        appointment.setStatus(Appointment.AppointmentStatus.WAITING);
+        appointment.setStatus(AppointmentStatus.PENDING_PAYMENT);
         appointment.setNotes(request.getNotes());
         appointment.setZoomJoinUrl(zoomMeeting.getJoinUrl());
         appointment.setZoomStartUrl(zoomMeeting.getStartUrl());
@@ -156,6 +157,39 @@ public class AppointmentController {
     public ResponseEntity<String> cancelAppointment(@PathVariable Long appointmentId) {
         appointmentService.cancelAppointment(appointmentId);
         return ResponseEntity.ok("Cancel appointment successfully");
+    }
+    
+    @PutMapping("/{appointmentId}/confirm")
+    public ResponseEntity<AppointmentResponse> confirmAppointment(@PathVariable Long appointmentId) {
+        try {
+            Appointment appointment = appointmentService.confirmAppointment(appointmentId);
+            AppointmentResponse response = buildAppointmentResponse(appointment, null);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    
+    @PutMapping("/{appointmentId}/start")
+    public ResponseEntity<AppointmentResponse> startAppointment(@PathVariable Long appointmentId) {
+        try {
+            Appointment appointment = appointmentService.startAppointment(appointmentId);
+            AppointmentResponse response = buildAppointmentResponse(appointment, null);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    
+    @PutMapping("/{appointmentId}/complete")
+    public ResponseEntity<AppointmentResponse> completeAppointment(@PathVariable Long appointmentId) {
+        try {
+            Appointment appointment = appointmentService.completeAppointment(appointmentId);
+            AppointmentResponse response = buildAppointmentResponse(appointment, null);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
     @GetMapping
     public ResponseEntity<List<AppointmentResponse>> getUserAppointments(
