@@ -395,8 +395,8 @@ const UsersSection = ({ users, onUpdateRole }) => {
                                     </span>
                                 </td>
                                 <td>
-                                    <span className={`admin-status-badge ${user.isVerified ? 'verified' : 'pending'}`}>
-                                        {user.isVerified ? 'Đã xác thực' : 'Chờ xác thực'}
+                                    <span className={`admin-status-badge ${user.verified ? 'verified' : 'pending'}`}>
+                                        {user.verified ? 'Đã xác thực' : 'Chờ xác thực'}
                                     </span>
                                 </td>
                                 <td>

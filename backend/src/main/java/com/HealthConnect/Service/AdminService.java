@@ -275,6 +275,7 @@ public class AdminService {
                 .gender(user.getGender())
                 .dateOfBirth(user.getDateOfBirth())
                 .role(user.getRole())
+                .isVerified(user.isVerified())
                 .build();
     }
 
