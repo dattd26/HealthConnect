@@ -92,7 +92,7 @@ public class AuthController {
         }
         catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("Dang nhap khong thang cong");
+                    .body("Đăng nhập không thành công: " + e.getMessage());
         }
     }
     @GetMapping("/verify")

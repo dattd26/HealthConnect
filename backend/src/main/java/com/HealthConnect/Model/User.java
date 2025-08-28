@@ -23,4 +23,5 @@ public abstract class User {
     private String role; // PATIENT, DOCTOR, ADMIN
 
     private boolean isVerified = false;
+    private boolean isBlocked = false; // Trường mới để khóa/mở khóa người dùng
 }

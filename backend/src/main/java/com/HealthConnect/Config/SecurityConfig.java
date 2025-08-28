@@ -37,7 +37,9 @@ public class SecurityConfig {
         }));
         http.authorizeHttpRequests((auth) -> auth
                 .requestMatchers(HttpMethod.POST,"/api/auth/**", "/api/zoom/**").permitAll()
-                .requestMatchers("/", "/error/**", "/api/auth/**", "/zoom", "/zoom/callback").permitAll()
+                .requestMatchers("/", "/error/**", "/api/auth/**", "/zoom", "/zoom/callback", "/api/auth/verify", "/api/specialties/**").permitAll()
+                // Admin endpoints - chỉ ADMIN mới truy cập được
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated())
                 // .formLogin(Customizer.withDefaults())
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);

@@ -164,6 +164,24 @@ export const API_ENDPOINTS = {
     SPECIALTY: {
         ALL: `${API_BASE_URL}/specialties`,
         GET: (code) => `${API_BASE_URL}/specialties/${code}`
+    },
+
+    // Admin endpoints
+    ADMIN: {
+        DOCTOR_REQUESTS: `${API_BASE_URL}/admin/doctor-requests`,
+        APPROVE_DOCTOR: (requestId) => `${API_BASE_URL}/admin/doctor-requests/${requestId}/approve`,
+        REJECT_DOCTOR: (requestId) => `${API_BASE_URL}/admin/doctor-requests/${requestId}/reject`,
+        CREATE_SPECIALTY: `${API_BASE_URL}/admin/specialties`,
+        UPDATE_SPECIALTY: (id) => `${API_BASE_URL}/admin/specialties/${id}`,
+        DELETE_SPECIALTY: (id) => `${API_BASE_URL}/admin/specialties/${id}`,
+        ALL_SPECIALTIES: `${API_BASE_URL}/admin/specialties`,
+        ALL_USERS: `${API_BASE_URL}/admin/users`,
+        GET_USER: (id) => `${API_BASE_URL}/admin/users/${id}`,
+        VERIFY_USER: (id) => `${API_BASE_URL}/admin/users/${id}/verify`,
+        BLOCK_USER: (id) => `${API_BASE_URL}/admin/users/${id}/block`,
+        UNBLOCK_USER: (id) => `${API_BASE_URL}/admin/users/${id}/unblock`,
+        UPDATE_USER_ROLE: (id) => `${API_BASE_URL}/admin/users/${id}/role`,
+        DASHBOARD_STATS: `${API_BASE_URL}/admin/dashboard/stats`
     }
 };
 
