@@ -16,10 +16,12 @@ import DoctorSchedulePage from "../../pages/DoctorSchedulePage";
 import DoctorPatientsPage from "../../pages/DoctorPatientsPage";
 import DoctorMedicalRecordsPage from "../../pages/DoctorMedicalRecordsPage";
 import DoctorSettingsPage from "../../pages/DoctorSettingsPage";
+import DoctorAvailabilityPage from "../../pages/DoctorAvailabilityPage";
 import PaymentPage from "../../pages/PaymentPage";
 import PaymentSuccessPage from "../../pages/PaymentSuccessPage";
 import PaymentCancelPage from "../../pages/PaymentCancelPage";
 import ProfilePage from "../../pages/ProfilePage";
+import AdminDashboardPage from "../../pages/AdminDashboardPage";
 
 const AppRouter = () => {
     // const { user } = useContext(AuthContext);
@@ -95,6 +97,18 @@ const AppRouter = () => {
             <Route path="/doctor/settings" element={
                 <ProtectedRoute allowedRoles={['DOCTOR']}>
                     <DoctorSettingsPage />
+                </ProtectedRoute>
+            } />
+            <Route path="/doctor/availability" element={
+                <ProtectedRoute allowedRoles={['DOCTOR']}>
+                    <DoctorAvailabilityPage />
+                </ProtectedRoute>
+            } />
+
+            {/* Admin Routes */}
+            <Route path="/admin/dashboard" element={
+                <ProtectedRoute allowedRoles={['ADMIN']}>
+                    <AdminDashboardPage />
                 </ProtectedRoute>
             } />
         </Routes>

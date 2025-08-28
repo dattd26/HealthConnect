@@ -34,9 +34,25 @@ public class RegisterRequest {
     private String role;
 
     // Chỉ dành cho DOCTOR
+    @AssertTrue(message = "Specialties are required for DOCTOR role")
+    public boolean isSpecialtiesValid() {
+        if ("DOCTOR".equals(role)) {
+            return specialties != null && !specialties.isEmpty();
+        }
+        return true;
+    }
+    
     private List<SpecialtyRequest> specialties;
     
     // Chỉ dành cho DOCTOR
+    @AssertTrue(message = "License is required for DOCTOR role")
+    public boolean isLicenseValid() {
+        if ("DOCTOR".equals(role)) {
+            return license != null && !license.trim().isEmpty();
+        }
+        return true;
+    }
+    
     @Size(max = 50, message = "License number cannot exceed 50 characters")
     private String license;
 }

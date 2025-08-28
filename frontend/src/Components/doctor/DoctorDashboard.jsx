@@ -212,9 +212,9 @@ const DoctorDashboard = () => {
                                     <BarChart3 className="icon" />
                                     <span>Thống kê</span>
                                 </button>
-                                <button className="quick-action-btn">
+                                <button className="quick-action-btn" onClick={() => navigate('/doctor/availability')}>
                                     <Clock className="icon" />
-                                    <span>Quản lý slot</span>
+                                    <span>Thiết lập lịch làm việc</span>
                                 </button>
                                 <button className="quick-action-btn">
                                     <FileText className="icon" />

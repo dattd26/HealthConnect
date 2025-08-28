@@ -39,6 +39,11 @@ const DoctorNavbar = () => {
             icon: Clock
         },
         {
+            path: '/doctor/availability',
+            label: 'Thiết lập lịch',
+            icon: Clock
+        },
+        {
             path: '/doctor/patients',
             label: 'Bệnh nhân',
             icon: Users

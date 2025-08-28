@@ -80,10 +80,19 @@ public class DoctorController {
         if (doctor == null) {
             throw new ResourceNotFoundException("Doctor", "id", id);
         }
-        
-        Object result = doctorService.updateDoctorAvailability(doctor, availability);
-        
-        slotService.regenerateSlots(id);
+        // return ResponseEntity.ok("test hehe");
+        Object result = null;
+        try{
+            result = doctorService.updateDoctorAvailability(doctor, availability);
+        } catch (Exception e) {
+            System.err.println("Error updating doctor availability: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of(
+                "error", "Internal server error",
+                "message", "Failed to update doctor availability: " + e.getMessage()
+            ));
+        }
+        // slotService.regenerateSlots(id);
         return ResponseEntity.ok(result);
     }
     

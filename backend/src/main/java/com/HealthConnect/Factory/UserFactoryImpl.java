@@ -48,16 +48,26 @@ public class UserFactoryImpl implements UserFactory {
     }
     private Doctor buildDoctor(RegisterRequest req, PasswordEncoder passwordEncoder) {
         Doctor d = new Doctor();
-        System.out.println("concac" + req.getSpecialties());
+        System.out.println("Building doctor with specialties: " + req.getSpecialties());
         populateCommonFields(d, req, passwordEncoder);
         d.setLicense(req.getLicense()); 
+        
         Set<MedicalSpecialty> specialties = new HashSet<MedicalSpecialty>();
-        for (SpecialtyRequest s : req.getSpecialties()) {
-            MedicalSpecialty specialty = specialtyService.findByCode(s.getCode());
-            if (specialty != null) {
-                specialties.add(specialty);
+        
+        // Kiểm tra specialties không null và không rỗng
+        if (req.getSpecialties() != null && !req.getSpecialties().isEmpty()) {
+            for (SpecialtyRequest s : req.getSpecialties()) {
+                if (s.getCode() != null && !s.getCode().trim().isEmpty()) {
+                    MedicalSpecialty specialty = specialtyService.findByCode(s.getCode());
+                    if (specialty != null) {
+                        specialties.add(specialty);
+                    } else {
+                        System.out.println("Warning: Specialty with code '" + s.getCode() + "' not found");
+                    }
+                }
             }
         }
+        
         d.setSpecialties(specialties);
         d.setVerified(false);
         return d;
