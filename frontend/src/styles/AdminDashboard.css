@@ -62,6 +62,11 @@
     min-height: 400px;
 }
 
+/* Dashboard Overview */
+.admin-dashboard .admin-dashboard-overview {
+    padding: 20px 0;
+}
+
 /* Stats */
 .admin-dashboard .admin-stats-grid {
     display: grid;
@@ -135,13 +140,262 @@
     background: #475569;
 }
 
+.admin-dashboard .admin-btn-small {
+    background: #64748b;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: background 0.2s ease;
+}
+
+.admin-dashboard .admin-btn-small:hover {
+    background: #475569;
+}
+
+/* Empty State */
+.admin-dashboard .admin-empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #64748b;
+    font-size: 1.1rem;
+}
+
+/* Doctor Requests Section */
+.admin-dashboard .admin-doctor-requests-section {
+    padding: 20px 0;
+}
+
+.admin-dashboard .admin-doctor-requests-section h2 {
+    color: #1e293b;
+    margin-bottom: 25px;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.admin-dashboard .admin-requests-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+.admin-dashboard .admin-request-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.admin-dashboard .admin-request-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.admin-dashboard .admin-request-header h3 {
+    color: #1e293b;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.admin-dashboard .admin-status.pending {
+    background: #fef3c7;
+    color: #92400e;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.admin-dashboard .admin-request-details {
+    margin-bottom: 20px;
+}
+
+.admin-dashboard .admin-request-details p {
+    margin: 8px 0;
+    color: #475569;
+    font-size: 0.9rem;
+}
+
+.admin-dashboard .admin-request-details strong {
+    color: #334155;
+}
+
+.admin-dashboard .admin-request-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.admin-dashboard .admin-btn-approve {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s ease;
+}
+
+.admin-dashboard .admin-btn-approve:hover {
+    background: #059669;
+}
+
+.admin-dashboard .admin-reject-section {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.admin-dashboard .admin-reject-section input {
+    padding: 6px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    min-width: 150px;
+}
+
+.admin-dashboard .admin-btn-reject {
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.2s ease;
+}
+
+.admin-dashboard .admin-btn-reject:hover {
+    background: #dc2626;
+}
+
+/* Specialties Section */
+.admin-dashboard .admin-specialties-section {
+    padding: 20px 0;
+}
+
+.admin-dashboard .admin-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.admin-dashboard .admin-section-header h2 {
+    color: #1e293b;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.admin-dashboard .admin-create-specialty-form {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 30px;
+}
+
+.admin-dashboard .admin-form-group {
+    margin-bottom: 20px;
+}
+
+.admin-dashboard .admin-form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #334155;
+    font-weight: 500;
+}
+
+.admin-dashboard .admin-form-group input,
+.admin-dashboard .admin-form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: border-color 0.2s ease;
+}
+
+.admin-dashboard .admin-form-group input:focus,
+.admin-dashboard .admin-form-group textarea:focus {
+    outline: none;
+    border-color: #0ea5e9;
+}
+
+.admin-dashboard .admin-form-group textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.admin-dashboard .admin-specialties-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.admin-dashboard .admin-specialty-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 20px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-dashboard .admin-specialty-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.admin-dashboard .admin-specialty-card h3 {
+    color: #1e293b;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.admin-dashboard .admin-specialty-card p {
+    color: #64748b;
+    margin: 8px 0;
+    font-size: 0.9rem;
+}
+
+.admin-dashboard .admin-specialty-card strong {
+    color: #334155;
+}
+
+/* Users Section */
+.admin-dashboard .admin-users-section {
+    padding: 20px 0;
+}
+
+.admin-dashboard .admin-users-section h2 {
+    color: #1e293b;
+    margin-bottom: 25px;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
 /* Table */
+.admin-dashboard .admin-users-table {
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
 .admin-dashboard .admin-users-table table {
     width: 100%;
     border-collapse: collapse;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    overflow: hidden;
+    background: white;
 }
 
 .admin-dashboard .admin-users-table th,
@@ -155,10 +409,20 @@
     background: #f8fafc;
     color: #334155;
     font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.admin-dashboard .admin-users-table td {
+    color: #475569;
+    font-size: 0.875rem;
 }
 
 .admin-dashboard .admin-users-table tr:hover {
     background: #f1f5f9;
+}
+
+.admin-dashboard .admin-users-table tr:last-child td {
+    border-bottom: none;
 }
 
 /* Role & Status Badges */
@@ -185,6 +449,13 @@
     color: #d97706;
 }
 
+.admin-dashboard .admin-status-badge {
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
 .admin-dashboard .admin-status-badge.verified {
     background: #dcfce7;
     color: #15803d;
@@ -193,4 +464,123 @@
 .admin-dashboard .admin-status-badge.pending {
     background: #fde68a;
     color: #92400e;
+}
+
+/* Modal */
+.admin-dashboard .admin-role-update-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.admin-dashboard .admin-modal-content {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.admin-dashboard .admin-modal-content h3 {
+    color: #1e293b;
+    margin-bottom: 15px;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.admin-dashboard .admin-modal-content p {
+    color: #64748b;
+    margin-bottom: 20px;
+}
+
+.admin-dashboard .admin-modal-content select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    margin-bottom: 25px;
+}
+
+.admin-dashboard .admin-modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .admin-dashboard {
+        padding: 15px;
+    }
+    
+    .admin-dashboard .admin-tabs {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .admin-dashboard .admin-tab-button {
+        width: 100%;
+        max-width: 300px;
+    }
+    
+    .admin-dashboard .admin-content {
+        padding: 20px;
+    }
+    
+    .admin-dashboard .admin-stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .admin-dashboard .admin-requests-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .admin-dashboard .admin-specialties-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .admin-dashboard .admin-request-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .admin-dashboard .admin-reject-section {
+        flex-direction: column;
+    }
+    
+    .admin-dashboard .admin-modal-content {
+        margin: 20px;
+        padding: 20px;
+    }
+    
+    .admin-dashboard .admin-modal-actions {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-dashboard .admin-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .admin-dashboard .admin-content {
+        padding: 15px;
+    }
+    
+    .admin-dashboard .admin-stat-card {
+        padding: 15px;
+    }
+    
+    .admin-dashboard .admin-stat-number {
+        font-size: 1.5rem;
+    }
 }
