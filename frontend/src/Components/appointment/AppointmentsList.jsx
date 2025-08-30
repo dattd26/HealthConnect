@@ -94,6 +94,16 @@ const AppointmentsList = ({ userId, role }) => {
     }
   };
 
+  const handlePayment = async (appointmentId) => {
+    try {
+      // Chuyển hướng đến trang thanh toán với ID cuộc hẹn
+      window.location.href = `/payment/${appointmentId}`;
+    } catch (err) {
+      console.error("Lỗi chuyển hướng thanh toán:", err);
+      alert("Không thể chuyển hướng đến trang thanh toán.");
+    }
+  };
+
   const filteredAppointments = appointments.filter(appointment => {
     const appointmentDate = new Date(appointment.date);
     const now = new Date();
@@ -177,6 +187,7 @@ const AppointmentsList = ({ userId, role }) => {
               onConfirm={handleConfirm}
               onStart={handleStart}
               onComplete={handleComplete}
+              onPayment={handlePayment}
             />
           ))}
         </div>

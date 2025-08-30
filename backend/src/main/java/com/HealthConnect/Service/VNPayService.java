@@ -25,6 +25,8 @@ import com.HealthConnect.Model.Payment;
 import com.HealthConnect.Model.Payment.PaymentStatus;
 import com.HealthConnect.Model.Payment.PaymentMethod;
 import com.HealthConnect.Repository.PaymentRepository;
+import com.HealthConnect.Model.Appointment;
+import com.HealthConnect.Repository.AppointmentRepository;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,9 +40,17 @@ public class VNPayService {
     @Autowired
     private PaymentRepository paymentRepository;
     
+    @Autowired
+    private AppointmentRepository appointmentRepository;
+    
     public VNPayPaymentResponse createPaymentUrl(VNPayPaymentRequest request) {
         try {
             log.info("Creating VNPay payment URL for request: {}", request);
+            
+            // Validate required fields
+            if (request.getAppointmentId() == null || request.getAmount() == null) {
+                throw new RuntimeException("Appointment ID and Amount are required");
+            }
             
             String vnp_Version   = vnpayConfig.getVersion();      // 2.1.0
             String vnp_Command   = vnpayConfig.getCommand();      // pay
@@ -54,8 +64,9 @@ public class VNPayService {
                 vnp_ReturnUrl = vnpayConfig.getReturnUrl();
             }
     
-            String vnp_TxnRef    = generateTxnRef();
-            String vnp_OrderInfo = request.getDescription();      // Ví dụ: "Thanh toán lịch hẹn - 6"
+            String vnp_TxnRef    = request.getOrderId() != null ? request.getOrderId() : generateTxnRef();
+            String vnp_OrderInfo = request.getDescription() != null ? request.getDescription() : 
+                "Thanh toán lịch hẹn khám bệnh - " + request.getAppointmentId();
             String vnp_OrderType = "billpayment";
             String vnp_Amount    = String.valueOf(request.getAmount().longValue() * 100); // VND * 100
             String vnp_Locale    = vnpayConfig.getLocale();       // vn
@@ -63,8 +74,8 @@ public class VNPayService {
             String vnp_IpAddr    = "127.0.0.1";
             String vnp_CreateDate= LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
     
-            log.info("VNPay parameters - TmnCode: {}, ReturnUrl: {}, Amount: {}, OrderInfo: {}", 
-                    vnp_TmnCode, vnp_ReturnUrl, vnp_Amount, vnp_OrderInfo);
+            log.info("VNPay parameters - TmnCode: {}, ReturnUrl: {}, Amount: {}, OrderInfo: {}, TxnRef: {}", 
+                    vnp_TmnCode, vnp_ReturnUrl, vnp_Amount, vnp_OrderInfo, vnp_TxnRef);
     
             // Dùng TreeMap để tự sort key tăng dần
             Map<String, String> vnp_Params = new TreeMap<>();
@@ -80,7 +91,7 @@ public class VNPayService {
             vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
             vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
             vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
-    
+            
             StringBuilder dataToSign = new StringBuilder();
             StringBuilder query = new StringBuilder();
             for (Map.Entry<String, String> e : vnp_Params.entrySet()) {
@@ -107,8 +118,9 @@ public class VNPayService {
     
             VNPayPaymentResponse res = new VNPayPaymentResponse();
             res.setPaymentUrl(paymentUrl);
-            res.setOrderId(request.getOrderId());
+            res.setOrderId(vnp_TxnRef);
             res.setVnpayTxnRef(vnp_TxnRef);
+            res.setSecureHash(vnp_SecureHash);
             res.setStatus("SUCCESS");
             res.setMessage("Payment URL created successfully");
             return res;
@@ -268,9 +280,21 @@ public class VNPayService {
                     payment.setStatus(PaymentStatus.SUCCESS);
                     payment.setVnpayTransactionId(callbackRequest.getVnp_TransactionNo());
                     payment.setVnpayResponseCode(callbackRequest.getVnp_ResponseCode());
+                    payment.setVnpaySecureHash(callbackRequest.getVnp_SecureHash());
                     payment.setVnpayResponseMessage("Payment successful");
                     payment.setPaymentDate(LocalDateTime.now());
                     log.info("Updated payment status to SUCCESS for payment ID: {}", payment.getId());
+                    
+                    // Cập nhật trạng thái appointment thành PAYMENT_PENDING
+                    Appointment appointment = payment.getAppointment();
+                    if (appointment != null) {
+                        appointment.setStatus(Appointment.AppointmentStatus.PAYMENT_PENDING);
+                        // Lưu appointment
+                        appointmentRepository.save(appointment);
+                        log.info("Updated appointment status to PAYMENT_PENDING for appointment ID: {}", appointment.getId());
+                    } else {
+                        log.warn("No appointment found for payment ID: {}", payment.getId());
+                    }
                 } else {
                     payment.setStatus(PaymentStatus.FAILED);
                     payment.setVnpayResponseCode(callbackRequest.getVnp_ResponseCode());

@@ -42,8 +42,8 @@ const Navbar = () => {
                     <Link to="/book-appointment" className="px-3 py-2 rounded-md text-sm font-medium text-white/90 hover:text-white hover:bg-white/10 transition-all">
                       Đặt lịch khám
                     </Link>
-                    <Link to="/profile" className="px-3 py-2 rounded-md text-sm font-medium text-white/90 hover:text-white hover:bg-white/10 transition-all">
-                      Hồ sơ của tôi
+                    <Link to="/patient/dashboard" className="px-3 py-2 rounded-md text-sm font-medium text-white/90 hover:text-white hover:bg-white/10 transition-all">
+                      Dashboard
                     </Link>
                   </>
                 )}

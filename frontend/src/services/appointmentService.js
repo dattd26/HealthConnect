@@ -90,5 +90,21 @@ export const appointmentService = {
             headers: getAuthHeader()
         });
         return response.data;
+    },
+
+    // Cập nhật trạng thái appointment
+    updateAppointmentStatus: async (appointmentId, status) => {
+        try {
+            const response = await axios.put(`${API_ENDPOINTS.APPOINTMENTS.UPDATE(appointmentId)}/status`, 
+                { status }, 
+                {
+                    headers: getAuthHeader()
+                }
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error updating appointment status:', error);
+            throw error;
+        }
     }
 }

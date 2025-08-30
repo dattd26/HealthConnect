@@ -1,18 +1,23 @@
 import React from 'react';
+import LoadingSpinner from './LoadingSpinner';
 
-const Loading = () => {
-  return (
-    // <div className="flex items-center justify-center min-h-screen">
-    //   <div className="relative">
-    //     <div className="w-12 h-12 rounded-full absolute border-4 border-solid border-gray-200"></div>
-    //     <div className="w-12 h-12 rounded-full animate-spin absolute border-4 border-solid border-blue-500 border-t-transparent"></div>
-    //   </div>
-    //   <span className="ml-4 text-lg font-semibold text-gray-700">Đang tải...</span>
-    // </div>
-    <div className="flex justify-center items-center min-h-screen">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-    </div>
-  );
+const Loading = ({ 
+  fullScreen = true, 
+  size = "large", 
+  message = "Đang tải...",
+  className = ""
+}) => {
+  if (fullScreen) {
+    return (
+      <div className={`flex justify-center items-center min-h-screen bg-gray-50 ${className}`}>
+        <div className="text-center">
+          <LoadingSpinner size={size} color="blue" showMessage={true} message={message} />
+        </div>
+      </div>
+    );
+  }
+
+  return <LoadingSpinner size={size} color="blue" showMessage={true} message={message} />;
 };
 
 export default Loading; 

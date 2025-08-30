@@ -21,7 +21,9 @@ import PaymentPage from "../../pages/PaymentPage";
 import PaymentSuccessPage from "../../pages/PaymentSuccessPage";
 import PaymentCancelPage from "../../pages/PaymentCancelPage";
 import ProfilePage from "../../pages/ProfilePage";
+import AllAppointmentsPage from "../../pages/AllAppointmentsPage";
 import AdminDashboardPage from "../../pages/AdminDashboardPage";
+import PatientLayout from "../patient/PatientLayout";
 
 const AppRouter = () => {
     // const { user } = useContext(AuthContext);
@@ -47,6 +49,7 @@ const AppRouter = () => {
             
             {/* Payment Routes */}
             <Route path="/payment" element={<PaymentPage/>}/>
+            <Route path="/payment/:appointmentId" element={<PaymentPage/>}/>
             <Route path="/payment-success" element={<PaymentSuccessPage/>}/>
             <Route path="/payment-cancel" element={<PaymentCancelPage/>}/>
             
@@ -67,7 +70,41 @@ const AppRouter = () => {
                     <PatientDashboardPage />
                 </ProtectedRoute>
             } />
-
+            <Route path="/all-appointments" element={
+                <ProtectedRoute allowedRoles={['PATIENT']}>
+                    <AllAppointmentsPage />
+                </ProtectedRoute>
+            } />
+            <Route path="/medical-records" element={
+                <ProtectedRoute allowedRoles={['PATIENT']}>
+                    <PatientLayout>
+                        <div>
+                            <h1>Lịch sử khám bệnh</h1>
+                            <p>Trang này sẽ hiển thị lịch sử khám bệnh của bạn.</p>
+                        </div>
+                    </PatientLayout>
+                </ProtectedRoute>
+            } />
+            <Route path="/payments" element={
+                <ProtectedRoute allowedRoles={['PATIENT']}>
+                    <PatientLayout>
+                        <div>
+                            <h1>Thanh toán</h1>
+                            <p>Trang này sẽ hiển thị thanh toán của bạn.</p>
+                        </div>
+                    </PatientLayout>
+                </ProtectedRoute>
+            } />
+            <Route path="/settings" element={
+                <ProtectedRoute allowedRoles={['PATIENT']}>
+                    <PatientLayout>
+                        <div>
+                            <h1>Cài đặt</h1>
+                            <p>Trang này sẽ hiển thị cài đặt của bạn.</p>
+                        </div>
+                    </PatientLayout>
+                </ProtectedRoute>
+            } />
             {/* Doctor Routes */}
             <Route path="/doctor/dashboard" element={
                 <ProtectedRoute allowedRoles={['DOCTOR']}>

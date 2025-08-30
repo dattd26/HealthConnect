@@ -93,6 +93,16 @@
 .psp__error-ring{width:80px;height:80px;margin:0 auto 16px;color:#ef4444}
 .psp__error-ring svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:2}
 
+/* Update Status */
+.psp__update-status{display:flex;align-items:center;gap:12px;padding:16px;background:var(--brand-50);border:1px solid var(--brand-100);border-radius:12px;margin-top:16px}
+.psp__update-status .psp__spinner{width:24px;height:24px;margin:0;border-width:2px}
+.psp__update-status p{margin:0;color:var(--brand-700);font-size:14px;font-weight:500}
+
+/* Update Success */
+.psp__update-success{display:flex;align-items:center;gap:12px;padding:16px;background:var(--success-50);border:1px solid var(--success-100);border-radius:12px;margin-top:16px}
+.psp__success-icon{width:24px;height:24px;border-radius:50%;background:var(--success-600);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:14px}
+.psp__update-success p{margin:0;color:var(--success-700);font-size:14px;font-weight:500}
+
 /* Responsive */
 @media (max-width:900px){
   .psp__header{grid-template-columns:72px 1fr}

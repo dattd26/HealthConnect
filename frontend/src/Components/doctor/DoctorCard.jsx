@@ -87,11 +87,17 @@ const SlotButton = memo(function SlotButton({ slot, selectedSlot, onSelectSlot }
   );
 });
   
-const DoctorCardContent = memo(function DoctorCardContent({ doctor, onSelect, isDisabled, comfirmed }) {
+const DoctorCardContent = memo(function DoctorCardContent({ doctor, onSelect, isDisabled, comfirmed: initialConfirmed }) {
   const today = useMemo(() => dayjs(), []); // Cache today value
   const [selectedDate, setSelectedDate] = useState(today);
   const [selectedSlot, setSelectedSlot] = useState(null);
+  const [confirmed, setConfirmed] = useState(initialConfirmed);
   const toast = useToast();
+
+  // Cập nhật confirmed khi initialConfirmed thay đổi
+  useEffect(() => {
+    setConfirmed(initialConfirmed);
+  }, [initialConfirmed]);
 
   // Memoize the error handler to prevent hook re-creation
   const handleError = useCallback((err) => {
@@ -164,6 +170,7 @@ const DoctorCardContent = memo(function DoctorCardContent({ doctor, onSelect, is
   const handleSelectDoctor = useCallback(() => {
     if (selectedSlot) {
       onSelect(doctor, selectedSlot);
+      setConfirmed(true); // Cập nhật trạng thái confirmed khi chọn bác sĩ
     }
   }, [selectedSlot, onSelect, doctor]);
 
@@ -215,28 +222,26 @@ const DoctorCardContent = memo(function DoctorCardContent({ doctor, onSelect, is
       </Card>
     );
   }
+
   return (
-    <Card className={`w-full max-w-full mx-auto rounded-2xl shadow-lg ${isDisabled ? "pointer-events-none opacity-50" : ""}`}>
-      <CardContent className="p-4 flex flex-col gap-4">
-        <div className="flex items-center gap-4">
-          <img
-            // src={doctor.avatarUrl}
-            alt={doctor.fullName}
-            className="w-16 h-16 rounded-full object-cover"
-          />
-          <div>
-            <h2 className="text-lg font-bold">{doctor.fullName}</h2>
-            <p className="text-sm text-gray-600">Chuyên gia tham vấn cá nhân và gia đình tại SUNNYCARE
-Hiện đang phụ trách Phòng tâm lý y học của Viện pháp y
-Chuyên gia chuyên tham vấn các rối nhiễu tâm lý, loạn thần, định hướng nghề nghiệp</p>
-            {/* <p className="text-sm text-gray-500">{doctor.hospital}</p> */}
+    <Card className={`w-full max-w-full mx-auto rounded-2xl shadow-lg border border-gray-200 hover:shadow-xl transition-shadow duration-200 ${isDisabled ? "pointer-events-none opacity-50" : ""}`}>
+      <CardContent className="p-6 flex flex-col gap-6">
+        <div className="flex items-start gap-4">
+          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-blue-600 text-xl font-bold flex-shrink-0">
+            {doctor.fullName.charAt(0)}
+          </div>
+          <div className="flex-1 min-w-0">
+            <h2 className="text-xl font-bold text-gray-800 mb-2">{doctor.fullName}</h2>
+            <p className="text-sm text-gray-600 leading-relaxed">
+              gioi thieu...
+            </p>
           </div>
         </div>
 
-        <div className="border-t pt-3">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-semibold flex items-center gap-1 text-blue-700">
-              <Clock className="w-4 h-4" /> Thời gian khám
+        <div className="border-t border-gray-100 pt-4">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-base font-semibold flex items-center gap-2 text-blue-700">
+              <Clock className="w-5 h-5" /> Thời gian khám
             </h3>
             <div className="flex items-center gap-2">
               {error && (
@@ -246,12 +251,12 @@ Chuyên gia chuyên tham vấn các rối nhiễu tâm lý, loạn thần, đị
                 </div>
               )}
               {hasCachedData && (
-                <div className="text-xs text-green-600">Cached</div>
+                <div className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">Cached</div>
               )}
               <button
                 onClick={handleRefresh}
                 disabled={loading}
-                className="text-gray-500 hover:text-blue-600 transition-colors"
+                className="text-gray-500 hover:text-blue-600 transition-colors p-1 rounded-full hover:bg-blue-50"
                 title="Làm mới lịch khám"
               >
                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -260,70 +265,74 @@ Chuyên gia chuyên tham vấn các rối nhiễu tâm lý, loạn thần, đị
           </div>
         
           {/* Menu chọn ngày */}
-          <div className={`${comfirmed ? "pointer-events-none opacity-50" : ""}`}> 
-            <div className="flex gap-2 flex-wrap mb-3">
-            {selectableDates.map((date, index) => (
-              <DateButton
-                key={date.format('YYYY-MM-DD')} // Use date as key for better performance
-                date={date}
-                selectedDate={selectedDate}
-                slotsGroupedByDate={slotsGroupedByDate}
-                onDateSelect={handleDateSelect}
-                dayMap={dayMap}
-              />
-            ))}
-            {/* <DateButton
-                key={today.format('YYYY-MM-DD')} // Use date as key for better performance
-                date={today}
-                selectedDate={selectedDate}
-                slotsGroupedByDate={slotsGroupedByDate}
-                onDateSelect={handleDateSelect}
-                dayMap={dayMap}
-              /> */}
-          </div>
-
-          {/* Các slot tương ứng */}
-          <div className="flex flex-wrap gap-2 min-h-[40px]">
-            {loading && !hasCachedData ? (
-              [1, 2, 3, 4].map(i => (
-                <div key={i} className="h-8 w-12 bg-gray-200 rounded-full animate-pulse"></div>
-              ))
-            ) : filteredSlots.length > 0 ? (
-              filteredSlots.map((slot) => (
-                <SlotButton
-                  key={`${slot.date}-${slot.startTime}`}
-                  slot={slot}
-                  selectedSlot={selectedSlot}
-                  onSelectSlot={handleSelectSlot}
+          <div className={`${confirmed ? "pointer-events-none opacity-50" : ""}`}> 
+            <div className="flex gap-2 flex-wrap mb-4">
+              {selectableDates.map((date, index) => (
+                <DateButton
+                  key={date.format('YYYY-MM-DD')}
+                  date={date}
+                  selectedDate={selectedDate}
+                  slotsGroupedByDate={slotsGroupedByDate}
+                  onDateSelect={handleDateSelect}
+                  dayMap={dayMap}
                 />
-              ))
-            ) : error ? (
-              <div className="text-sm text-red-500 flex items-center gap-1">
-                <AlertCircle className="w-4 h-4" />
-                <span>Không thể tải lịch khám</span>
+              ))}
+            </div>
+
+            {/* Các slot tương ứng */}
+            <div className="flex flex-wrap gap-2 min-h-[40px]">
+              {loading && !hasCachedData ? (
+                [1, 2, 3, 4].map(i => (
+                  <div key={i} className="h-8 w-12 bg-gray-200 rounded-full animate-pulse"></div>
+                ))
+              ) : filteredSlots.length > 0 ? (
+                filteredSlots.map((slot) => (
+                  <SlotButton
+                    key={`${slot.date}-${slot.startTime}`}
+                    slot={slot}
+                    selectedSlot={selectedSlot}
+                    onSelectSlot={handleSelectSlot}
+                  />
+                ))
+              ) : error ? (
+                <div className="text-sm text-red-500 flex items-center gap-1">
+                  <AlertCircle className="w-4 h-4" />
+                  <span>Không thể tải lịch khám</span>
+                </div>
+              ) : (
+                <span className="text-sm text-gray-500">Không có lịch trống</span>
+              )}
+            </div>
+            
+            {/* Slot selection feedback */}
+            {selectedSlot && !confirmed && (
+              <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-center gap-2 text-sm text-blue-700">
+                  <CheckCircle className="w-4 h-4" />
+                  <span>
+                    Đã chọn: {dayjs(selectedSlot.date).format("DD/MM/YYYY")} lúc {selectedSlot.startTime}
+                  </span>
+                </div>
               </div>
-            ) : (
-              <span className="text-sm text-gray-500">Không có lịch trống</span>
             )}
           </div>
         </div>
         
-      </div>
-        
         <Button
           type="button"
           className={`w-full mt-3 transition-all duration-200 ${
-            comfirmed ? "bg-red-500 hover:bg-red-600 text-white" : "bg-green-600 hover:bg-green-700 text-white"
+            confirmed ? "bg-red-500 hover:bg-red-600 text-white" : "bg-green-600 hover:bg-green-700 text-white"
           }`}
           onClick={() => {
-            if (comfirmed) {
+            if (confirmed) {
               setSelectedSlot(null);
               onSelect(null, null);
+              setConfirmed(false); // Reset trạng thái confirmed khi hủy chọn
               return;
             }
             handleSelectDoctor();
           }}
-          disabled={!comfirmed && (!selectedSlot || loading)}
+          disabled={!confirmed && (!selectedSlot || loading)}
         >
           <div className="flex items-center justify-center gap-2">
             {loading && !hasCachedData ? (
@@ -331,7 +340,7 @@ Chuyên gia chuyên tham vấn các rối nhiễu tâm lý, loạn thần, đị
                 <RefreshCw className="w-4 h-4 animate-spin" /> 
                 <span>Đang tải...</span>
               </>
-            ) : comfirmed ? (
+            ) : confirmed ? (
               <>
                 <XIcon className="w-4 h-4" />
                 <span>Hủy chọn</span>

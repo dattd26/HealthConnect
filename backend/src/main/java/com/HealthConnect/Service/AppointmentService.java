@@ -140,6 +140,19 @@ public class AppointmentService {
         appointment.setStatus(AppointmentStatus.COMPLETED);
         return appointmentRepository.save(appointment);
     }
+
+    @Transactional
+    public Appointment doctorJoinAppointment(Long appointmentId) {
+        Appointment appointment = getAppointmentById(appointmentId);
+        
+        if (appointment.getStatus() != AppointmentStatus.CONFIRMED) {
+            throw new RuntimeException("Chỉ có thể tham gia lịch hẹn đã được xác nhận");
+        }
+        
+        appointment.setDoctorJoined(true);
+        appointment.setStatus(AppointmentStatus.IN_PROGRESS);
+        return appointmentRepository.save(appointment);
+    }
     
     @Transactional
     public void expireAppointments() {

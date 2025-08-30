@@ -1,33 +1,66 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import PaymentForm from '../Components/payment/PaymentForm';
 import './PaymentPage.css';
 
 const PaymentPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { appointmentId } = useParams(); // Lấy appointmentId từ URL
   const [appointment, setAppointment] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Lấy thông tin lịch hẹn từ state hoặc localStorage
-    if (location.state?.appointment) {
-      setAppointment(location.state.appointment);
-      setLoading(false);
-    } else {
-      // Fallback: lấy từ localStorage
-      const pendingAppointment = localStorage.getItem('pendingAppointment');
-      if (pendingAppointment) {
-        try {
-          const appointmentData = JSON.parse(pendingAppointment);
+    const fetchAppointmentData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Nếu có appointmentId từ URL, gọi API để lấy thông tin
+        if (appointmentId) {
+          const token = localStorage.getItem('token');
+          const response = await fetch(`http://localhost:8080/api/appointments/${appointmentId}/payment-info`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error('Không thể lấy thông tin cuộc hẹn');
+          }
+
+          const appointmentData = await response.json();
           setAppointment(appointmentData);
-        } catch (error) {
-          console.error('Error parsing pending appointment:', error);
+        } else if (location.state?.appointment) {
+          // Fallback: lấy từ state
+          setAppointment(location.state.appointment);
+        } else {
+          // Fallback: lấy từ localStorage
+          const pendingAppointment = localStorage.getItem('pendingAppointment');
+          if (pendingAppointment) {
+            try {
+              const appointmentData = JSON.parse(pendingAppointment);
+              setAppointment(appointmentData);
+            } catch (error) {
+              console.error('Error parsing pending appointment:', error);
+              setError('Dữ liệu cuộc hẹn không hợp lệ');
+            }
+          } else {
+            setError('Không tìm thấy thông tin cuộc hẹn');
+          }
         }
+      } catch (err) {
+        console.error('Error fetching appointment data:', err);
+        setError(err.message || 'Không thể tải thông tin cuộc hẹn');
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
-    }
-  }, [location.state]);
+    };
+
+    fetchAppointmentData();
+  }, [appointmentId, location.state]);
 
   const handlePaymentSuccess = (payment) => {
     console.log('Payment successful:', payment);
@@ -45,8 +78,8 @@ const PaymentPage = () => {
   const handlePaymentCancel = () => {
     // Xóa thông tin lịch hẹn tạm thời
     localStorage.removeItem('pendingAppointment');
-    // Chuyển về trang đặt lịch
-    navigate('/book-appointment');
+    // Chuyển về trang dashboard hoặc danh sách cuộc hẹn
+    navigate('/patient-dashboard');
   };
 
   if (loading) {
@@ -60,7 +93,7 @@ const PaymentPage = () => {
     );
   }
 
-  if (!appointment) {
+  if (error || !appointment) {
     return (
       <div className="payment-page">
         <div className="error-container">
@@ -72,12 +105,12 @@ const PaymentPage = () => {
             </svg>
           </div>
           <h2>Không tìm thấy thông tin lịch hẹn</h2>
-          <p>Vui lòng quay lại trang đặt lịch để thực hiện lại.</p>
+          <p>{error || 'Vui lòng quay lại trang dashboard để thực hiện lại.'}</p>
           <button 
-            onClick={() => navigate('/book-appointment')}
+            onClick={() => navigate('/patient-dashboard')}
             className="btn-back"
           >
-            Quay lại đặt lịch
+            Quay lại Dashboard
           </button>
         </div>
       </div>
@@ -103,15 +136,15 @@ const PaymentPage = () => {
           <div className="summary-grid">
             <div className="summary-item">
               <span className="label">Mã lịch hẹn:</span>
-              <span className="value">#{appointment.id || 'N/A'}</span>
+              <span className="value">#{appointment.appointmentId || appointment.id || 'N/A'}</span>
             </div>
             <div className="summary-item">
               <span className="label">Bác sĩ:</span>
-              <span className="value">{appointment.doctorName || appointment.doctor?.name || 'N/A'}</span>
+              <span className="value">{appointment.doctorName || 'N/A'}</span>
             </div>
             <div className="summary-item">
-              <span className="label">Chuyên khoa:</span>
-              <span className="value">{appointment.specialty || appointment.doctor?.specialty || 'N/A'}</span>
+              <span className="label">Bệnh nhân:</span>
+              <span className="value">{appointment.patientName || 'N/A'}</span>
             </div>
             <div className="summary-item">
               <span className="label">Ngày khám:</span>
@@ -121,12 +154,26 @@ const PaymentPage = () => {
             </div>
             <div className="summary-item">
               <span className="label">Giờ khám:</span>
-              <span className="value">{appointment.startTime || 'N/A'}</span>
+              <span className="value">
+                {appointment.time ? new Date(`2000-01-01T${appointment.time}`).toLocaleTimeString('vi-VN', { 
+                  hour: '2-digit', 
+                  minute: '2-digit' 
+                }) : 'N/A'}
+              </span>
             </div>
             <div className="summary-item">
-              <span className="label">Hình thức:</span>
-              <span className="value">
-                {appointment.consultationType === 'online' ? 'Khám online' : 'Khám trực tiếp'}
+              <span className="label">Số tiền:</span>
+              <span className="value amount">
+                {appointment.amount ? new Intl.NumberFormat('vi-VN', { 
+                  style: 'currency', 
+                  currency: 'VND' 
+                }).format(appointment.amount) : 'N/A'}
+              </span>
+            </div>
+            <div className="summary-item">
+              <span className="label">Trạng thái:</span>
+              <span className="value status">
+                {appointment.status === 'PENDING_PAYMENT' ? 'Chờ thanh toán' : appointment.status}
               </span>
             </div>
           </div>

@@ -52,7 +52,7 @@ const PatientLayout = ({ children }) => {
                   </svg>
                 </button>
               )}
-              <h1>Patient Dashboard</h1>
+              <h1 className="h1">Patient Dashboard</h1>
             </div>
             <div className="header-actions">
               <button className="notification-btn" aria-label="Notifications">

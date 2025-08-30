@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Heart, User, Mail, Phone, Lock, Eye, EyeOff, UserPlus, Stethoscope, FileText } from "lucide-react";
+import medicalSpecialtyService from "../services/medicalSpecialtyService";
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -14,21 +15,43 @@ const RegisterPage = () => {
     specialties: [], // Chỉ hiển thị nếu role là DOCTOR
     license: "",
   });
+  const [specialties, setSpecialties] = useState([]); // Danh sách chuyên khoa từ API
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const [isRegistered, setIsRegistered] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  // Lấy danh sách chuyên khoa khi component mount
+  useEffect(() => {
+    const fetchSpecialties = async () => {
+      try {
+        const specs = await medicalSpecialtyService.getMedicalSpecialties();
+        setSpecialties(specs || []);
+      } catch (err) {
+        console.error("Error loading specialties:", err);
+      }
+    };
+    fetchSpecialties();
+  }, []);
+
   const handleSubmit = async (e) => {
     setIsRegistered(true);
     e.preventDefault();
     try {
-      console.log(formData)
-      const response = await axios.post("http://localhost:8080/api/auth/register", formData);
-      if (response.data.role === "DOCTOR") {
+      // Chuẩn bị dữ liệu gửi lên backend
+      const submitData = {
+        ...formData,
+        // Nếu là DOCTOR, gửi specialties dưới dạng array các object có code
+        specialties: formData.role === "DOCTOR" ? formData.specialties.map(code => ({ code })) : []
+      };
+      
+      console.log("Submitting data:", submitData);
+      const response = await axios.post("http://localhost:8080/api/auth/register", submitData);
+      
+      if (formData.role === "DOCTOR") {
         alert("Đăng ký thành công! Vui lòng chờ Admin xác thực.");
       } else {
-        alert("Đăng ký thành công!");
+        alert("Đăng ký thành công! check email để xác thực");
       }
       navigate("/login");
     } catch (err) {
@@ -37,21 +60,37 @@ const RegisterPage = () => {
     }
   };
 
+  // Xử lý chọn chuyên khoa
+  const handleSpecialtyChange = (e) => {
+    const selectedCode = e.target.value;
+    if (selectedCode) {
+      setFormData(prev => ({
+        ...prev,
+        specialties: [selectedCode] // Chỉ cho phép chọn 1 chuyên khoa
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        specialties: []
+      }));
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{background: 'linear-gradient(135deg, var(--primary-50) 0%, var(--secondary-50) 100%)'}}>
-      <div className="card max-w-lg w-full p-8 fade-in">
+      <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mb-4">
-            <Heart className="w-8 h-8 text-primary-600" />
+          <div className="flex justify-center mb-4">
+            <Heart className="w-12 h-12 text-primary-600" />
           </div>
-          <h1 className="text-3xl font-bold text-primary mb-2">HealthConnect</h1>
-          <p className="text-secondary">Tạo tài khoản mới</p>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">HealthConnect</h1>
+          <p className="text-gray-600">Tạo tài khoản mới</p>
         </div>
 
         {/* Error Message */}
         {error && (
-          <div className="error-message mb-6 p-3 bg-error-50 border border-error-200 rounded-lg">
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
             {error}
           </div>
         )}
@@ -67,7 +106,7 @@ const RegisterPage = () => {
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
-                onClick={() => setFormData({ ...formData, role: "PATIENT" })}
+                onClick={() => setFormData({ ...formData, role: "PATIENT", specialties: [], license: "" })}
                 className={`p-3 rounded-lg border-2 transition-all ${
                   formData.role === "PATIENT"
                     ? "border-primary-500 bg-primary-50 text-primary-700"
@@ -79,7 +118,7 @@ const RegisterPage = () => {
               </button>
               <button
                 type="button"
-                onClick={() => setFormData({ ...formData, role: "DOCTOR" })}
+                onClick={() => setFormData({ ...formData, role: "DOCTOR", specialties: [], license: "" })}
                 className={`p-3 rounded-lg border-2 transition-all ${
                   formData.role === "DOCTOR"
                     ? "border-primary-500 bg-primary-50 text-primary-700"
@@ -104,7 +143,7 @@ const RegisterPage = () => {
                 value={formData.fullName}
                 onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                 className="input"
-                placeholder="Nhập họ và tên"
+                placeholder="Nhập họ và tên đầy đủ"
                 required
               />
             </div>
@@ -174,11 +213,14 @@ const RegisterPage = () => {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
               >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
+            <p className="text-sm text-gray-500 mt-1">
+              Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường và số
+            </p>
           </div>
 
           {/* Doctor-specific fields */}
@@ -194,14 +236,19 @@ const RegisterPage = () => {
                   <Stethoscope className="w-4 h-4 inline mr-2" />
                   Chuyên khoa
                 </label>
-                <input
-                  type="text"
-                  value={formData.specialties}
-                  onChange={(e) => setFormData({ ...formData, specialties: [e.target.value] })}
+                <select
+                  value={formData.specialties[0] || ""}
+                  onChange={handleSpecialtyChange}
                   className="input"
-                  placeholder="Ví dụ: Tim mạch, Nhi khoa, ..."
                   required
-                />
+                >
+                  <option value="">-- Chọn chuyên khoa --</option>
+                  {specialties.map((specialty) => (
+                    <option key={specialty.code} value={specialty.code}>
+                      {specialty.name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="form-group mb-0">
@@ -226,25 +273,21 @@ const RegisterPage = () => {
             className="button button-primary w-full py-3"
             disabled={isRegistered}
           >
-            {isRegistered ? (
-              <div className="flex items-center justify-center">
-                <div className="loading-spinner w-4 h-4 mr-2"></div>
-                Đang đăng ký...
-              </div>
-            ) : (
-              "Đăng ký tài khoản"
-            )}
+            {isRegistered ? "Đang đăng ký..." : "Đăng ký"}
           </button>
-
-          <div className="text-center pt-4 border-t border-gray-200">
-            <p className="text-secondary">
-              Đã có tài khoản? {' '}
-              <a 
-                href="/login" 
-                className="text-primary-600 hover:text-primary-700 font-medium transition-colors"
+          {isRegistered && (
+            <p className="text-gray-600">Lưu ý: Ứng dụng sử dụng SMTP để gửi email xác thực, nên quá trình đăng ký có thể mất vài phút. Vui lòng kiểm tra hộp thư đến hoặc thư mục spam.</p>
+          )}
+          <div className="text-center">
+            <p className="text-gray-600">
+              Đã có tài khoản?{" "}
+              <button
+                type="button"
+                onClick={() => navigate("/login")}
+                className="text-primary-600 hover:text-primary-700 font-medium"
               >
                 Đăng nhập ngay
-              </a>
+              </button>
             </p>
           </div>
         </form>

@@ -48,22 +48,22 @@ const PatientNavbar = ({ onMobileToggle }) => {
             icon: FileText
         },
         {
-            path: '/profile',
+            path: '/all-appointments',
             label: 'Lịch hẹn',
             icon: Calendar
         },
         {
-            path: '/profile',
+            path: '/medical-records',
             label: 'Lịch sử khám',
             icon: History
         },
         {
-            path: '/profile',
+            path: '/payments',
             label: 'Thanh toán',
             icon: CreditCard
         },
         {
-            path: '/profile',
+            path: '/settings',
             label: 'Cài đặt',
             icon: Settings
         }

@@ -378,20 +378,51 @@ const CreateAppointment = ({ doctors }) => {
 
           {/* Doctor list */}
           <div className="mt-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Bác sĩ phù hợp</label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-gray-700">Bác sĩ phù hợp</label>
+              {doctorsList.length > 0 && (
+                <div className="text-sm text-gray-500">
+                  {doctorsList.length} bác sĩ có sẵn
+                </div>
+              )}
+            </div>
+            
             {doctorsList.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto pr-1">
-                {doctorsList.map((doctor) =>
-                  doctor ? (
-                    <DoctorCard
-                      key={doctor.id}
-                      doctor={doctor}
-                      onSelect={(d, slot) => handleSelectDoctor(d, slot)}
-                      isDisabled={selectedDoctor !== null && doctor.id !== selectedDoctor?.id}
-                      confirmed={selectedDoctor?.id === doctor.id}
-                      // tùy theo DoctorCard của bạn, hãy dùng prop đúng tên
-                    />
-                  ) : null
+              <div className="relative">
+                <div className="space-y-4 max-h-96 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                  {doctorsList.map((doctor) =>
+                    doctor ? (
+                      <DoctorCard
+                        key={doctor.id}
+                        doctor={doctor}
+                        onSelect={(d, slot) => handleSelectDoctor(d, slot)}
+                        isDisabled={selectedDoctor !== null && doctor.id !== selectedDoctor?.id}
+                        confirmed={selectedDoctor?.id === doctor.id}
+                      />
+                    ) : null
+                  )}
+                </div>
+                
+                {/* Scroll indicator */}
+                {doctorsList.length > 3 && (
+                  <div className="mt-2 text-center">
+                    <div className="inline-flex items-center gap-1 text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                      <span>↓ Cuộn xuống để xem thêm {doctorsList.length - 3} bác sĩ</span>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Quick selection hint */}
+                {doctorsList.length > 1 && !selectedDoctor && (
+                  <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div className="flex items-center gap-2 text-sm text-yellow-700">
+                      <span className="text-lg">💡</span>
+                      <span>
+                        Mẹo: Có {doctorsList.length} bác sĩ để lựa chọn. 
+                        Hãy cuộn xuống để xem tất cả và chọn bác sĩ phù hợp nhất.
+                      </span>
+                    </div>
+                  </div>
                 )}
               </div>
             ) : (
@@ -399,6 +430,7 @@ const CreateAppointment = ({ doctors }) => {
                 Vui lòng chọn chuyên khoa để xem danh sách bác sĩ.
               </div>
             )}
+            
             {/* Summary */}
             <div className="mt-4">
               <Summary />

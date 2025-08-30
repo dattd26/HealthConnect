@@ -18,45 +18,65 @@ const PaymentForm = ({ appointment, onPaymentSuccess, onPaymentCancel }) => {
 
     try {
       if (paymentMethod === 'VNPAY') {
-        const paymentData = {
-          appointmentId: appointment.id || appointment.appointmentId,
-          orderId: `HC${Date.now()}_${appointment.id || appointment.appointmentId}`,
-          amount: appointment.amount || 500000, // Default amount if not set
-          description: `Thanh toán lịh hẹn khám bệnh - ${appointment.id || appointment.appointmentId}`,
-          returnUrl: `${window.location.origin}/payment-success`,
-          cancelUrl: `${window.location.origin}/payment-cancel`
-        };
-
-        const response = await paymentService.createVNPayPayment(paymentData);
+        // Sử dụng API mới của backend
+        const appointmentId = appointment.appointmentId || appointment.id;
+        const returnUrl = `${window.location.origin}/payment-success`;
+        const cancelUrl = `${window.location.origin}/payment-cancel`;
         
-        if (response.status === 'SUCCESS' && response.paymentUrl) {
+        const response = await fetch(`http://localhost:8080/api/payments/vnpay/appointment/${appointmentId}?returnUrl=${encodeURIComponent(returnUrl)}&cancelUrl=${encodeURIComponent(cancelUrl)}`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Không thể tạo thanh toán VNPay');
+        }
+
+        const paymentResponse = await response.json();
+        
+        if (paymentResponse.status === 'SUCCESS' && paymentResponse.paymentUrl) {
           // Redirect to VNPay payment page
-          window.location.href = response.paymentUrl;
+          window.location.href = paymentResponse.paymentUrl;
         } else {
-          setError(response.message || 'Không thể tạo thanh toán VNPay');
+          setError(paymentResponse.message || 'Không thể tạo thanh toán VNPay');
         }
       } else if (paymentMethod === 'CASH') {
-        // Handle cash payment
-        const payment = await paymentService.createPayment(
-          appointment.id || appointment.appointmentId,
-          appointment.amount || 500000,
-          'CASH'
-        );
-        
-        if (payment) {
-          onPaymentSuccess(payment);
+        // Handle cash payment using new API
+        const appointmentId = appointment.appointmentId || appointment.id;
+        const response = await fetch(`http://localhost:8080/api/payments/appointment/${appointmentId}/create?method=CASH`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Không thể tạo thanh toán tiền mặt');
         }
+
+        const payment = await response.json();
+        onPaymentSuccess(payment);
       } else if (paymentMethod === 'BANK_TRANSFER') {
-        // Handle bank transfer
-        const payment = await paymentService.createPayment(
-          appointment.id || appointment.appointmentId,
-          appointment.amount || 500000,
-          'BANK_TRANSFER'
-        );
-        
-        if (payment) {
-          onPaymentSuccess(payment);
+        // Handle bank transfer using new API
+        const appointmentId = appointment.appointmentId || appointment.id;
+        const response = await fetch(`http://localhost:8080/api/payments/appointment/${appointmentId}/create?method=BANK_TRANSFER`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Không thể tạo thanh toán chuyển khoản');
         }
+
+        const payment = await response.json();
+        onPaymentSuccess(payment);
       }
     } catch (error) {
       console.error('Payment error:', error);

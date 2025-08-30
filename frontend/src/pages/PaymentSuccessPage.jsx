@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { paymentService } from '../services/paymentService';
+import { appointmentService } from '../services/appointmentService';
 import './PaymentSuccessPage.css';
 
 /* ====== Minimal SVG icons (no deps) ====== */
@@ -51,8 +52,11 @@ const PaymentSuccessPage = () => {
   const [payment, setPayment] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [updateCompleted, setUpdateCompleted] = useState(false);
   const navigate = useNavigate();
 
+  const vnpSecureHash = searchParams.get('vnp_SecureHash');
   const orderId = searchParams.get('orderId');
   const vnpResponseCode = searchParams.get('vnp_ResponseCode');
   const vnpTransactionStatus = searchParams.get('vnp_TransactionStatus');
@@ -69,7 +73,6 @@ const PaymentSuccessPage = () => {
   }, [orderId, vnpResponseCode, vnpTransactionStatus]);
 
   const checkVNPayResponse = () => {
-    // Only show success when both are "00"
     if (vnpResponseCode === '00' && vnpTransactionStatus === '00') {
       if (orderId) {
         fetchPaymentDetails();
@@ -103,11 +106,75 @@ const PaymentSuccessPage = () => {
     try {
       const paymentData = await paymentService.getPaymentByOrderId(orderId);
       setPayment(paymentData);
+      
+      // Xác nhận thanh toán thành công dựa vào VNPay response, không cần so sánh hash
+      // Hash verification đã được xử lý ở backend trong VNPay callback
+      if (vnpResponseCode === '00' && vnpTransactionStatus === '00') {
+        await updatePaymentAndAppointmentStatus(paymentData);
+      }
     } catch (err) {
       console.error('Error fetching payment details:', err);
       setError('Không thể tải thông tin thanh toán');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const updatePaymentAndAppointmentStatus = async (paymentData) => {
+    if (updatingStatus) return; // Tránh gọi nhiều lần
+    
+    setUpdatingStatus(true);
+    try {
+      let updateSuccess = true;
+      let errorMessages = [];
+
+      // 1. Cập nhật payment status thành SUCCESS nếu chưa phải
+      if (paymentData.status !== 'SUCCESS') {
+        try {
+          await paymentService.updatePaymentStatus(paymentData.id, 'SUCCESS');
+          console.log('Payment status updated to SUCCESS');
+        } catch (error) {
+          console.warn('Failed to update payment status:', error);
+          updateSuccess = false;
+          errorMessages.push('Không thể cập nhật trạng thái thanh toán');
+        }
+      }
+      
+      // 2. Cập nhật appointment status thành PAYMENT_PENDING nếu có appointment
+      if (paymentData.appointment && paymentData.appointment.id) {
+        try {
+          // Sử dụng appointmentService để cập nhật trạng thái
+          await appointmentService.updateAppointmentStatus(paymentData.appointment.id, 'CONFIRMED');
+          console.log('Appointment status updated to CONFIRMED');
+        } catch (error) {
+          console.warn('Failed to update appointment status:', error);
+          updateSuccess = false;
+          errorMessages.push('Không thể cập nhật trạng thái lịch hẹn');
+        }
+      } else {
+        console.log('No appointment found to update');
+      }
+      
+      // 3. Nếu cập nhật thành công, refresh payment data
+      if (updateSuccess) {
+        try {
+          const updatedPayment = await paymentService.getPaymentByOrderId(orderId);
+          setPayment(updatedPayment);
+          setUpdateCompleted(true);
+          console.log('Payment and appointment status updated successfully');
+        } catch (error) {
+          console.warn('Failed to refresh payment data:', error);
+        }
+      } else {
+        // Hiển thị cảnh báo nếu có lỗi cập nhật
+        console.warn('Some updates failed:', errorMessages.join(', '));
+        // Có thể hiển thị thông báo lỗi cho người dùng ở đây
+      }
+      
+    } catch (error) {
+      console.error('Error updating payment and appointment status:', error);
+    } finally {
+      setUpdatingStatus(false);
     }
   };
 
@@ -199,47 +266,84 @@ const PaymentSuccessPage = () => {
                 <span className="psp__label">Trạng thái:</span>
                 <span className="psp__status psp__status--success">{payment.status}</span>
               </div>
-              <div className="psp__row">
-                <span className="psp__label">Thời gian:</span>
-                <span className="psp__value">{formatDate(payment.paymentDate || payment.createdAt)}</span>
-              </div>
+              {payment.paymentDate && (
+                <div className="psp__row">
+                  <span className="psp__label">Ngày thanh toán:</span>
+                  <span className="psp__value">{formatDate(payment.paymentDate)}</span>
+                </div>
+              )}
             </div>
 
-            {payment.appointment && (
-              <div className="psp__card">
-                <h3 className="psp__h3">
-                  <IconCheckRing className="psp__h3-icon" />
-                  Thông tin lịch hẹn
-                </h3>
-                <div className="psp__kv">
-                  <div className="psp__row">
-                    <span className="psp__label">Mã lịch hẹn:</span>
-                    <span className="psp__value">#{payment.appointment.id}</span>
-                  </div>
-                  <div className="psp__row">
-                    <span className="psp__label">Bác sĩ:</span>
-                    <span className="psp__value">{payment.appointment.doctor?.name || 'N/A'}</span>
-                  </div>
-                  <div className="psp__row">
-                    <span className="psp__label">Ngày khám:</span>
-                    <span className="psp__value">
-                      {payment.appointment.doctorSlot?.startTime
-                        ? formatDate(payment.appointment.doctorSlot.startTime)
-                        : 'N/A'}
-                    </span>
-                  </div>
-                </div>
+            {/* Hiển thị trạng thái cập nhật */}
+            {updatingStatus && (
+              <div className="psp__update-status">
+                <div className="psp__spinner" />
+                <p>Đang cập nhật trạng thái thanh toán và lịch hẹn...</p>
+              </div>
+            )}
+
+            {/* Hiển thị thông báo thành công */}
+            {updateCompleted && !updatingStatus && (
+              <div className="psp__update-success">
+                <div className="psp__success-icon">✓</div>
+                <p>Đã cập nhật trạng thái thanh toán và lịch hẹn thành công!</p>
               </div>
             )}
           </section>
         )}
 
+        {/* Appointment Information */}
+        {payment && payment.appointment && (
+          <section className="psp__section">
+            <h2 className="psp__h2">
+              <IconCalendar className="psp__h2-icon" />
+              Thông tin lịch hẹn
+            </h2>
+            
+            <div className="psp__kv">
+              <div className="psp__row">
+                <span className="psp__label">Mã lịch hẹn:</span>
+                <span className="psp__value">#{payment.appointment.id}</span>
+              </div>
+              <div className="psp__row">
+                <span className="psp__label">Bác sĩ:</span>
+                <span className="psp__value">{payment.appointment.doctorSlot?.doctor?.fullName || 'N/A'}</span>
+              </div>
+              <div className="psp__row">
+                <span className="psp__label">Ngày khám:</span>
+                <span className="psp__value">
+                  {payment.appointment.doctorSlot?.date ? 
+                    new Date(payment.appointment.doctorSlot.date).toLocaleDateString('vi-VN') : 'N/A'}
+                </span>
+              </div>
+              <div className="psp__row">
+                <span className="psp__label">Giờ khám:</span>
+                <span className="psp__value">
+                  {payment.appointment.doctorSlot?.startTime ? 
+                    new Date(`2000-01-01T${payment.appointment.doctorSlot.startTime}`).toLocaleTimeString('vi-VN', { 
+                      hour: '2-digit', 
+                      minute: '2-digit' 
+                    }) : 'N/A'}
+                </span>
+              </div>
+              <div className="psp__row">
+                <span className="psp__label">Trạng thái lịch hẹn:</span>
+                <span className="psp__status psp__status--info">
+                  {payment.appointment.status === 'PAYMENT_PENDING' ? 'Chờ xác nhận từ bác sĩ' : 
+                   payment.appointment.status === 'CONFIRMED' ? 'Đã xác nhận' : 
+                   payment.appointment.status}
+                </span>
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Next steps */}
         <section className="psp__section">
-          <h3 className="psp__h3 psp__h3--center">Bước tiếp theo</h3>
+          {/* <h3 className="psp__h3 psp__h3--center">Bước tiếp theo</h3> */}
           <ul className="psp__list">
             {[
-              'Bạn sẽ nhận được email xác nhận trong vòng 5 phút',
+              // 'Bạn sẽ nhận được email xác nhận trong vòng 5 phút',
               'Vui lòng chú ý giờ khám và tham gia đúng hẹn để tránh việc bị hủy lịch hẹn',
               // '',
             ].map((t, i) => (
@@ -257,7 +361,7 @@ const PaymentSuccessPage = () => {
             <IconHome className="psp__btn-icon" />
             Về trang chủ
           </Link>
-          <Link to="/profile/appointments" className="psp__btn psp__btn--outline">
+          <Link to="/all-appointments" className="psp__btn psp__btn--outline">
             <IconCalendar className="psp__btn-icon" />
             Xem lịch hẹn
           </Link>

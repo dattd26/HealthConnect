@@ -102,7 +102,7 @@ const DoctorNavbar = () => {
                         <User size={24} />
                     </div>
                     <div className="doctor-details">
-                        <h3>BS. {user?.fullName}</h3>
+                        <h3 className="doctor-name-navbar">BS. {user?.fullName}</h3>
                         <p>{user?.email}</p>
                     </div>
                 </div>

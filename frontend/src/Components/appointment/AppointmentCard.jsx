@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { appointmentService } from '../../services/appointmentService';
 const baseUrl = process.env.REACT_APP_BASE_URL || 'http://localhost:3000';
-const AppointmentCard = ({ appointment, onCancel, onConfirm, onStart, onComplete }) => {
+const AppointmentCard = ({ appointment, onCancel, onConfirm, onStart, onComplete, onPayment }) => {
   const [isDoctorJoined, setIsDoctorJoined] = useState(false);
   const [isCheckingStatus, setIsCheckingStatus] = useState(false);
   const { token } = useAuth();
@@ -138,6 +138,7 @@ const AppointmentCard = ({ appointment, onCancel, onConfirm, onStart, onComplete
   const canConfirm = appointment.status === 'PAYMENT_PENDING';
   const canStart = appointment.status === 'CONFIRMED';
   const canComplete = appointment.status === 'IN_PROGRESS';
+  const canPay = appointment.status === 'PENDING_PAYMENT';
 
   return (
     <div className="bg-white rounded-lg shadow-md p-4 border-l-4 border-blue-500">
@@ -203,6 +204,18 @@ const AppointmentCard = ({ appointment, onCancel, onConfirm, onStart, onComplete
       )}
 
       <div className="flex flex-wrap gap-2">
+        {canPay && (
+          <button
+            onClick={() => onPayment(appointment.id)}
+            className="px-3 py-1 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors flex items-center"
+          >
+            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+            </svg>
+            Thanh toán
+          </button>
+        )}
+
         {canCancel && (
           <button
             onClick={() => onCancel(appointment.id)}
@@ -221,14 +234,14 @@ const AppointmentCard = ({ appointment, onCancel, onConfirm, onStart, onComplete
           </button>
         )}
 
-        {canStart && (
+        {/* {canStart && (
           <button
             onClick={() => onStart(appointment.id)}
             className="px-3 py-1 bg-purple-600 text-white text-sm rounded-md hover:bg-purple-700 transition-colors"
           >
             Bắt đầu khám
           </button>
-        )}
+        )} */}
 
         {canComplete && (
           <button

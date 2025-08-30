@@ -89,7 +89,7 @@
     border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
-.doctor-details h3 {
+.doctor-details .doctor-name-navbar {
     margin: 0;
     font-size: 1rem;
     font-weight: 600;

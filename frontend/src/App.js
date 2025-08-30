@@ -10,7 +10,7 @@ import { useLocation } from 'react-router-dom';
 const AppContent = () => {
   const location = useLocation();
   const isDoctorPage = location.pathname.startsWith('/doctor');
-  const isPatientPage = location.pathname.startsWith('/profile') || location.pathname.startsWith('/book-appointment') || location.pathname.startsWith('/patient');
+  const isPatientPage = location.pathname.startsWith('/profile') || location.pathname.startsWith('/book-appointment') || location.pathname.startsWith('/patient') || location.pathname.startsWith('/all-appointments');
   
   // Ẩn Header và Footer cho các trang có layout riêng
   const shouldShowHeaderFooter = !isDoctorPage && !isPatientPage;
