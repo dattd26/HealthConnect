@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.Map;
 import java.util.HashMap;
+import java.math.BigDecimal;
 
 
 @RestController
@@ -227,18 +228,31 @@ public class AppointmentController {
         return ResponseEntity.ok(response);
     }
     // Trong AppointmentController.java
-    @GetMapping("/{id}/doctor-status")
-    public ResponseEntity<Map<String, Boolean>> getDoctorStatus(@PathVariable Long id) {
-        // Logic kiểm tra xem bác sĩ đã tham gia Zoom meeting chưa
-        Appointment appointment = appointmentService.getAppointmentById(id);
-        System.out.println("concac" + appointment.getId());
-        boolean isDoctorJoined = appointment.isDoctorJoined();
-        
-        Map<String, Boolean> response = new HashMap<>();
-        response.put("isDoctorJoined", isDoctorJoined);
-        
-        return ResponseEntity.ok(response);
+    @GetMapping("/{appointmentId}/doctor-status")
+    public ResponseEntity<Map<String, Object>> checkDoctorStatus(@PathVariable Long appointmentId) {
+        try {
+            Appointment appointment = appointmentService.getAppointmentById(appointmentId);
+            Map<String, Object> response = new HashMap<>();
+            response.put("isDoctorJoined", appointment.isDoctorJoined());
+            response.put("appointmentId", appointmentId);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
     }
+
+    @PutMapping("/{appointmentId}/doctor-join")
+    public ResponseEntity<Appointment> doctorJoinAppointment(@PathVariable Long appointmentId) {
+        try {
+            Appointment updatedAppointment = appointmentService.doctorJoinAppointment(appointmentId);
+            return ResponseEntity.ok(updatedAppointment);
+        } catch (Exception e) {
+            throw new BusinessException("Không thể cập nhật trạng thái bác sĩ tham gia: " + e.getMessage());
+        }
+    }
+
     @PutMapping("/{id}/doctor-joined")
     public ResponseEntity<Map<String, Boolean>> updateDoctorJoined(@PathVariable Long id, @RequestBody boolean isDoctorJoined) {
         Appointment appointment = appointmentService.getAppointmentById(id);
@@ -247,5 +261,48 @@ public class AppointmentController {
         Map<String, Boolean> response = new HashMap<>();
         response.put("isDoctorJoined", updatedAppointment.isDoctorJoined());
         return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{appointmentId}/status")
+    public ResponseEntity<Appointment> updateAppointmentStatus(
+            @PathVariable Long appointmentId,
+            @RequestBody Map<String, String> request) {
+        try {
+            String status = request.get("status");
+            if (status == null) {
+                throw new BusinessException("Status is required");
+            }
+            
+            Appointment updatedAppointment = appointmentService.updateAppointmentStatus(appointmentId, status);
+            return ResponseEntity.ok(updatedAppointment);
+        } catch (Exception e) {
+            throw new BusinessException("Không thể cập nhật trạng thái cuộc hẹn: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/{appointmentId}/payment-info")
+    public ResponseEntity<Map<String, Object>> getAppointmentPaymentInfo(@PathVariable Long appointmentId) {
+        try {
+            Appointment appointment = appointmentService.getAppointmentById(appointmentId);
+            
+            if (appointment.getStatus() != Appointment.AppointmentStatus.PENDING_PAYMENT) {
+                throw new BusinessException("Cuộc hẹn này không thể thanh toán");
+            }
+            
+            Map<String, Object> paymentInfo = new HashMap<>();
+            paymentInfo.put("appointmentId", appointment.getId());
+            paymentInfo.put("amount", appointment.getAmount() != null ? appointment.getAmount() : new BigDecimal("200000"));
+            paymentInfo.put("doctorName", appointment.getDoctor().getFullName());
+            paymentInfo.put("patientName", appointment.getPatient().getFullName());
+            paymentInfo.put("date", appointment.getDoctorSlot().getDate());
+            paymentInfo.put("time", appointment.getDoctorSlot().getStartTime());
+            paymentInfo.put("status", appointment.getStatus().toString());
+            
+            return ResponseEntity.ok(paymentInfo);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
     }
 }
