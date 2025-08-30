@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Heart, User, Mail, Phone, Lock, Eye, EyeOff, UserPlus, Stethoscope, FileText } from "lucide-react";
 import medicalSpecialtyService from "../services/medicalSpecialtyService";
+import "./RegisterPage.css";
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -77,20 +78,20 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{background: 'linear-gradient(135deg, var(--primary-50) 0%, var(--secondary-50) 100%)'}}>
-      <div className="w-full max-w-md">
+    <div className="register-container">
+      <div className="register-card">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <Heart className="w-12 h-12 text-primary-600" />
+        <div className="register-header">
+          <div className="logo">
+            <Heart />
           </div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">HealthConnect</h1>
-          <p className="text-gray-600">Tạo tài khoản mới</p>
+          <h1>HealthConnect</h1>
+          <p>Tạo tài khoản mới</p>
         </div>
 
         {/* Error Message */}
         {error && (
-          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+          <div className="error-message">
             {error}
           </div>
         )}
@@ -103,36 +104,28 @@ const RegisterPage = () => {
               <UserPlus className="w-4 h-4 inline mr-2" />
               Loại tài khoản
             </label>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="role-buttons">
               <button
                 type="button"
                 onClick={() => setFormData({ ...formData, role: "PATIENT", specialties: [], license: "" })}
-                className={`p-3 rounded-lg border-2 transition-all ${
-                  formData.role === "PATIENT"
-                    ? "border-primary-500 bg-primary-50 text-primary-700"
-                    : "border-gray-200 hover:border-gray-300"
-                }`}
+                className={`role-button ${formData.role === "PATIENT" ? "active" : ""}`}
               >
-                <User className="w-6 h-6 mx-auto mb-2" />
-                <div className="text-sm font-medium">Bệnh nhân</div>
+                <User />
+                <div className="text">Bệnh nhân</div>
               </button>
               <button
                 type="button"
                 onClick={() => setFormData({ ...formData, role: "DOCTOR", specialties: [], license: "" })}
-                className={`p-3 rounded-lg border-2 transition-all ${
-                  formData.role === "DOCTOR"
-                    ? "border-primary-500 bg-primary-50 text-primary-700"
-                    : "border-gray-200 hover:border-gray-300"
-                }`}
+                className={`role-button ${formData.role === "DOCTOR" ? "active" : ""}`}
               >
-                <Stethoscope className="w-6 h-6 mx-auto mb-2" />
-                <div className="text-sm font-medium">Bác sĩ</div>
+                <Stethoscope />
+                <div className="text">Bác sĩ</div>
               </button>
             </div>
           </div>
 
           {/* Basic Information */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="form-grid">
             <div className="form-group">
               <label className="form-label">
                 <User className="w-4 h-4 inline mr-2" />
@@ -164,7 +157,7 @@ const RegisterPage = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="form-grid">
             <div className="form-group">
               <label className="form-label">
                 <Mail className="w-4 h-4 inline mr-2" />
@@ -201,7 +194,7 @@ const RegisterPage = () => {
               <Lock className="w-4 h-4 inline mr-2" />
               Mật khẩu
             </label>
-            <div className="relative">
+            <div className="password-container">
               <input
                 type={showPassword ? "text" : "password"}
                 value={formData.password}
@@ -213,20 +206,20 @@ const RegisterPage = () => {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                className="password-toggle"
               >
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="help-text">
               Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường và số
             </p>
           </div>
 
           {/* Doctor-specific fields */}
           {formData.role === "DOCTOR" && (
-            <div className="space-y-4 p-4 bg-secondary-50 rounded-lg border border-secondary-200">
-              <h3 className="font-semibold text-secondary-800 flex items-center">
+            <div className="doctor-section">
+              <h3>
                 <Stethoscope className="w-4 h-4 mr-2" />
                 Thông tin bác sĩ
               </h3>
@@ -270,21 +263,26 @@ const RegisterPage = () => {
 
           <button 
             type="submit" 
-            className="button button-primary w-full py-3"
+            className="button button-primary"
             disabled={isRegistered}
           >
             {isRegistered ? "Đang đăng ký..." : "Đăng ký"}
           </button>
+          
           {isRegistered && (
-            <p className="text-gray-600">Lưu ý: Ứng dụng sử dụng SMTP để gửi email xác thực, nên quá trình đăng ký có thể mất vài phút. Vui lòng kiểm tra hộp thư đến hoặc thư mục spam.</p>
+            <p className="help-text">
+              Lưu ý: Ứng dụng sử dụng SMTP để gửi email xác thực, nên quá trình đăng ký có thể mất vài phút. 
+              Vui lòng kiểm tra hộp thư đến hoặc thư mục spam.
+            </p>
           )}
+          
           <div className="text-center">
             <p className="text-gray-600">
               Đã có tài khoản?{" "}
               <button
                 type="button"
                 onClick={() => navigate("/login")}
-                className="text-primary-600 hover:text-primary-700 font-medium"
+                className="link"
               >
                 Đăng nhập ngay
               </button>
