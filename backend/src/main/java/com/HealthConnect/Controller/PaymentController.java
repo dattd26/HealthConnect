@@ -63,14 +63,56 @@ public class PaymentController {
         }
     }
     
+    @PostMapping("/appointment/{appointmentId}/create")
+    public ResponseEntity<Payment> createPaymentForAppointment(
+            @PathVariable Long appointmentId,
+            @RequestParam PaymentMethod method) {
+        try {
+            Payment payment = paymentService.createPaymentForAppointment(appointmentId, method);
+            return ResponseEntity.ok(payment);
+        } catch (Exception e) {
+            log.error("Error creating payment for appointment: ", e);
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PostMapping("/vnpay/appointment/{appointmentId}")
+    public ResponseEntity<VNPayPaymentResponse> createVNPayPaymentForAppointment(
+            @PathVariable Long appointmentId,
+            @RequestParam String returnUrl,
+            @RequestParam String cancelUrl) {
+        try {
+            log.info("Creating VNPay payment for appointment: {}", appointmentId);
+            
+            VNPayPaymentResponse response = paymentService.createVNPayPaymentForAppointment(
+                appointmentId, returnUrl, cancelUrl);
+            
+            log.info("VNPay payment response: {}", response);
+            
+            if ("SUCCESS".equals(response.getStatus())) {
+                return ResponseEntity.ok(response);
+            } else {
+                log.warn("VNPay payment creation failed: {}", response.getMessage());
+                return ResponseEntity.badRequest().body(response);
+            }
+        } catch (Exception e) {
+            log.error("Error creating VNPay payment for appointment: ", e);
+            VNPayPaymentResponse errorResponse = new VNPayPaymentResponse();
+            errorResponse.setStatus("ERROR");
+            errorResponse.setMessage("Failed to create VNPay payment: " + e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+    }
+    
     @GetMapping("/order/{orderId}")
-    public ResponseEntity<Payment> getPaymentByOrderId(@PathVariable String orderId) {
+    public ResponseEntity<?> getPaymentByOrderId(@PathVariable String orderId) {
         try {
             Payment payment = paymentService.getPaymentByOrderId(orderId);
+            payment.getAppointment().getDoctorSlot().getDoctor().setPassword("mat khau gia | chưa thiết kế lại API response");
             return ResponseEntity.ok(payment);
         } catch (Exception e) {
             log.error("Error getting payment by order ID: ", e);
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
     
