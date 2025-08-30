@@ -114,19 +114,7 @@
   }
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .zoom-meeting-header {
-    background: rgba(17, 24, 39, 0.95);
-    border-bottom-color: #374151;
-  }
-  
-  .zoom-info-overlay {
-    background: rgba(17, 24, 39, 0.95);
-    border-color: #374151;
-    color: #f9fafb;
-  }
-}
+
 
 /* Zoom meeting controls styling */
 .zoom-controls {
