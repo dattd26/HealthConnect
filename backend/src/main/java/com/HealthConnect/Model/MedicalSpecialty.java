@@ -1,11 +1,11 @@
 package com.HealthConnect.Model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
 import lombok.Data;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @Entity
@@ -13,8 +13,14 @@ import lombok.Data;
 public class MedicalSpecialty {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
 
-    String name;
-    String description;
+    private String name;
+    private String description;
+    private String code;
+
+    // Many-to-many relationship
+    @JsonManagedReference(value = "doctor-specialties")
+    @ManyToMany(mappedBy = "specialties")
+    private Set<Doctor> doctors = new HashSet<>();
 }

@@ -1,22 +1,44 @@
-import React, { createContext, useEffect, useState } from "react";
+import React, { createContext, useEffect, useState, useContext } from "react";
 import { authService } from "../services/authService";
 export const AuthContext = createContext(null);
+
+export const useAuth = () => {
+    const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error('useAuth must be used within an AuthProvider');
+    }
+    return context;
+};
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [token, setToken] = useState(() => {
 
+        return localStorage.getItem('token');
+    });
+    
     useEffect(() => {
         const validateToken = async () => {
-            const token = localStorage.getItem('token');
-            if (token) {
+            const storedToken = localStorage.getItem('token');
+            if (storedToken) {
                 try {
-                    const data = await authService.validate(token);
+                    const data = await authService.validate(storedToken);
+                    
+                    const finalToken = data.token || storedToken;
                     
                     setUser(data.userData);
+                    setToken(finalToken);
+                    
+
+                    if (data.token && data.token !== storedToken) {
+                        localStorage.setItem('token', data.token);
+                    }
                 } catch (error) {
                     console.error("Lỗi xác thực token:", error);
-                    logout();
+
+                    setToken(storedToken);
+                    setLoading(false);
                 } finally {
                     setLoading(false);
                 }
@@ -26,11 +48,11 @@ export const AuthProvider = ({ children }) => {
         };
 
         validateToken();
-
     }, []);
 
     const logout = () => {
         localStorage.removeItem("token");
+        setToken(null);
         setUser(null);
     };
 
@@ -42,8 +64,8 @@ export const AuthProvider = ({ children }) => {
 
             localStorage.setItem('token', token);
             setUser(user);
-            console.log(user.role);
-            console.log(localStorage.getItem('token'));
+            setToken(token);
+            localStorage.setItem('role', user.role);
             return user.role;
         } catch (error) {
             throw new Error('Login failed');
@@ -59,7 +81,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     return (
-        <AuthContext.Provider value={{ user, setUser, login, logout, loading }}>
+        <AuthContext.Provider value={{ user, setUser, login, logout, loading, token }}>
             {children}
         </AuthContext.Provider>
     );

@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Builder
 public class UserDTO {
-//    private Long id;
+    private Long id;
     private String gender;
     private String fullName;
     private LocalDate dateOfBirth;
@@ -23,5 +23,5 @@ public class UserDTO {
 
     private String phone;
     private String address;
-
+    private boolean isVerified;
 }

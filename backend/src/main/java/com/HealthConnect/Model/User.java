@@ -7,7 +7,7 @@ import java.time.LocalDate;
 @Table(name = "users")
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-public class User {
+public abstract class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,4 +23,5 @@ public class User {
     private String role; // PATIENT, DOCTOR, ADMIN
 
     private boolean isVerified = false;
+    private boolean isBlocked = false; // Trường mới để khóa/mở khóa người dùng
 }

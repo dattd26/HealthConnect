@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import "./RegisterPage.css";
+import { Heart, User, Mail, Phone, Lock, Eye, EyeOff, UserPlus, Stethoscope, FileText } from "lucide-react";
+import medicalSpecialtyService from "../services/medicalSpecialtyService";
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -11,23 +12,46 @@ const RegisterPage = () => {
     phone: "",
     password: "",
     role: "PATIENT", // Mặc định là PATIENT
-    specialty: [], // Chỉ hiển thị nếu role là DOCTOR
+    specialties: [], // Chỉ hiển thị nếu role là DOCTOR
     license: "",
   });
+  const [specialties, setSpecialties] = useState([]); // Danh sách chuyên khoa từ API
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const [isRegistered, setIsRegistered] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Lấy danh sách chuyên khoa khi component mount
+  useEffect(() => {
+    const fetchSpecialties = async () => {
+      try {
+        const specs = await medicalSpecialtyService.getMedicalSpecialties();
+        setSpecialties(specs || []);
+      } catch (err) {
+        console.error("Error loading specialties:", err);
+      }
+    };
+    fetchSpecialties();
+  }, []);
 
   const handleSubmit = async (e) => {
     setIsRegistered(true);
     e.preventDefault();
     try {
-      console.log(formData)
-      const response = await axios.post("http://localhost:8080/api/auth/register", formData);
-      if (response.data.role === "DOCTOR") {
+      // Chuẩn bị dữ liệu gửi lên backend
+      const submitData = {
+        ...formData,
+        // Nếu là DOCTOR, gửi specialties dưới dạng array các object có code
+        specialties: formData.role === "DOCTOR" ? formData.specialties.map(code => ({ code })) : []
+      };
+      
+      console.log("Submitting data:", submitData);
+      const response = await axios.post("http://localhost:8080/api/auth/register", submitData);
+      
+      if (formData.role === "DOCTOR") {
         alert("Đăng ký thành công! Vui lòng chờ Admin xác thực.");
       } else {
-        alert("Đăng ký thành công!");
+        alert("Đăng ký thành công! check email để xác thực");
       }
       navigate("/login");
     } catch (err) {
@@ -36,106 +60,238 @@ const RegisterPage = () => {
     }
   };
 
+  // Xử lý chọn chuyên khoa
+  const handleSpecialtyChange = (e) => {
+    const selectedCode = e.target.value;
+    if (selectedCode) {
+      setFormData(prev => ({
+        ...prev,
+        specialties: [selectedCode] // Chỉ cho phép chọn 1 chuyên khoa
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        specialties: []
+      }));
+    }
+  };
+
   return (
-    <div className="register-container">
-      <form onSubmit={handleSubmit} className="register-form">
-        <h2>Đăng ký tài khoản</h2>
-        {error && <div className="error-message">{error}</div>}
-
-        <div className="form-group">
-          <label>Họ và tên</label>
-          <input
-            type="text"
-            value={formData.fullName}
-            onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-            required
-          />
+    <div className="min-h-screen flex items-center justify-center p-4" style={{background: 'linear-gradient(135deg, var(--primary-50) 0%, var(--secondary-50) 100%)'}}>
+      <div className="w-full max-w-md">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="flex justify-center mb-4">
+            <Heart className="w-12 h-12 text-primary-600" />
+          </div>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">HealthConnect</h1>
+          <p className="text-gray-600">Tạo tài khoản mới</p>
         </div>
 
-        <div className="form-group">
-          <label>Tên người dùng</label>
-          <input
-            type="text"
-            value={formData.username}
-            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Email</label>
-          <input
-            type="email"
-            value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Số điện thoại</label>
-          <input
-            type="tel"
-            value={formData.phone}
-            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Mật khẩu</label>
-          <input
-            type="password"
-            value={formData.password}
-            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Bạn là:</label>
-          <select
-            value={formData.role}
-            onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-          >
-            <option value="PATIENT">Người dùng</option>
-            <option value="DOCTOR">Bác sĩ</option>
-          </select>
-        </div>
-
-        {/* Hiển thị thêm trường cho Bác sĩ */}
-        {formData.role === "DOCTOR" && (
-          <>
-            <div className="form-group">
-              <label>Chuyên khoa</label>
-              <input
-                type="text"
-                value={formData.specialty}
-                onChange={(e) => setFormData({ ...formData, specialty: [e.target.value] })}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Số giấy phép hành nghề</label>
-              <input
-                type="text"
-                value={formData.license}
-                onChange={(e) => setFormData({ ...formData, license: e.target.value })}
-                required
-              />
-            </div>
-          </>
+        {/* Error Message */}
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+            {error}
+          </div>
         )}
 
-        <button type="submit" className="register-button">
-          {!isRegistered ? "Đăng ký" : "Đang đăng ký..."}
-        </button>
+        {/* Register Form */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Role Selection */}
+          <div className="form-group">
+            <label className="form-label">
+              <UserPlus className="w-4 h-4 inline mr-2" />
+              Loại tài khoản
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, role: "PATIENT", specialties: [], license: "" })}
+                className={`p-3 rounded-lg border-2 transition-all ${
+                  formData.role === "PATIENT"
+                    ? "border-primary-500 bg-primary-50 text-primary-700"
+                    : "border-gray-200 hover:border-gray-300"
+                }`}
+              >
+                <User className="w-6 h-6 mx-auto mb-2" />
+                <div className="text-sm font-medium">Bệnh nhân</div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, role: "DOCTOR", specialties: [], license: "" })}
+                className={`p-3 rounded-lg border-2 transition-all ${
+                  formData.role === "DOCTOR"
+                    ? "border-primary-500 bg-primary-50 text-primary-700"
+                    : "border-gray-200 hover:border-gray-300"
+                }`}
+              >
+                <Stethoscope className="w-6 h-6 mx-auto mb-2" />
+                <div className="text-sm font-medium">Bác sĩ</div>
+              </button>
+            </div>
+          </div>
 
-        <p className="login-link">
-          Đã có tài khoản? <a href="/login">Đăng nhập ngay</a>
-        </p>
-      </form>
+          {/* Basic Information */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="form-group">
+              <label className="form-label">
+                <User className="w-4 h-4 inline mr-2" />
+                Họ và tên
+              </label>
+              <input
+                type="text"
+                value={formData.fullName}
+                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                className="input"
+                placeholder="Nhập họ và tên đầy đủ"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">
+                <User className="w-4 h-4 inline mr-2" />
+                Tên đăng nhập
+              </label>
+              <input
+                type="text"
+                value={formData.username}
+                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                className="input"
+                placeholder="Nhập tên đăng nhập"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="form-group">
+              <label className="form-label">
+                <Mail className="w-4 h-4 inline mr-2" />
+                Email
+              </label>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="input"
+                placeholder="Nhập địa chỉ email"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">
+                <Phone className="w-4 h-4 inline mr-2" />
+                Số điện thoại
+              </label>
+              <input
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                className="input"
+                placeholder="Nhập số điện thoại"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">
+              <Lock className="w-4 h-4 inline mr-2" />
+              Mật khẩu
+            </label>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                className="input pr-10"
+                placeholder="Nhập mật khẩu"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              >
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
+            </div>
+            <p className="text-sm text-gray-500 mt-1">
+              Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường và số
+            </p>
+          </div>
+
+          {/* Doctor-specific fields */}
+          {formData.role === "DOCTOR" && (
+            <div className="space-y-4 p-4 bg-secondary-50 rounded-lg border border-secondary-200">
+              <h3 className="font-semibold text-secondary-800 flex items-center">
+                <Stethoscope className="w-4 h-4 mr-2" />
+                Thông tin bác sĩ
+              </h3>
+              
+              <div className="form-group mb-0">
+                <label className="form-label">
+                  <Stethoscope className="w-4 h-4 inline mr-2" />
+                  Chuyên khoa
+                </label>
+                <select
+                  value={formData.specialties[0] || ""}
+                  onChange={handleSpecialtyChange}
+                  className="input"
+                  required
+                >
+                  <option value="">-- Chọn chuyên khoa --</option>
+                  {specialties.map((specialty) => (
+                    <option key={specialty.code} value={specialty.code}>
+                      {specialty.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group mb-0">
+                <label className="form-label">
+                  <FileText className="w-4 h-4 inline mr-2" />
+                  Số giấy phép hành nghề
+                </label>
+                <input
+                  type="text"
+                  value={formData.license}
+                  onChange={(e) => setFormData({ ...formData, license: e.target.value })}
+                  className="input"
+                  placeholder="Nhập số giấy phép"
+                  required
+                />
+              </div>
+            </div>
+          )}
+
+          <button 
+            type="submit" 
+            className="button button-primary w-full py-3"
+            disabled={isRegistered}
+          >
+            {isRegistered ? "Đang đăng ký..." : "Đăng ký"}
+          </button>
+          {isRegistered && (
+            <p className="text-gray-600">Lưu ý: Ứng dụng sử dụng SMTP để gửi email xác thực, nên quá trình đăng ký có thể mất vài phút. Vui lòng kiểm tra hộp thư đến hoặc thư mục spam.</p>
+          )}
+          <div className="text-center">
+            <p className="text-gray-600">
+              Đã có tài khoản?{" "}
+              <button
+                type="button"
+                onClick={() => navigate("/login")}
+                className="text-primary-600 hover:text-primary-700 font-medium"
+              >
+                Đăng nhập ngay
+              </button>
+            </p>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

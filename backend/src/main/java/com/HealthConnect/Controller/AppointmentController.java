@@ -1,17 +1,37 @@
 package com.HealthConnect.Controller;
 
 import com.HealthConnect.Dto.AppointmentRequest;
+import com.HealthConnect.Dto.AppointmentResponse;
+
+import com.HealthConnect.Dto.DoctorSlotDTO;
+import com.HealthConnect.Dto.Zoom.CreateMeetingRequest;
+import com.HealthConnect.Dto.Zoom.ZoomMeetingResponse;
+import com.HealthConnect.Exception.BusinessException;
+import com.HealthConnect.Exception.ResourceNotFoundException;
 import com.HealthConnect.Model.Appointment;
+import com.HealthConnect.Model.Appointment.AppointmentStatus;
+import com.HealthConnect.Model.Doctor;
+import com.HealthConnect.Model.DoctorSlot;
 import com.HealthConnect.Model.User;
 import com.HealthConnect.Service.AppointmentService;
-import com.HealthConnect.Service.UserService;
+import com.HealthConnect.Service.DoctorService;
+import com.HealthConnect.Service.PatientService;
+import com.HealthConnect.Service.SlotService;
+import com.HealthConnect.Service.ZoomService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.HashMap;
+import java.math.BigDecimal;
+
 
 @RestController
 @RequestMapping("/api/appointments")
@@ -21,12 +41,36 @@ public class AppointmentController {
     private AppointmentService appointmentService;
 
     @Autowired
-    private UserService userService;
-
+    private DoctorService doctorService;
+    @Autowired
+    private PatientService patientService;
+    @Autowired
+    private SlotService slotService;
+    @Autowired
+    private ZoomService zoomService;
+    
     @GetMapping("/patient/{patientId}")
-    public ResponseEntity<List<Appointment>> getAppointmentsByPatient(@PathVariable Long patientId) {
+    public ResponseEntity<List<AppointmentResponse>> getAppointmentsByPatient(@PathVariable Long patientId) {
         List<Appointment> appointments = appointmentService.getAppointmentsByPatient(patientId);
-        return ResponseEntity.ok(appointments);
+        List<AppointmentResponse> appointmentResponses = appointments.stream()
+            .map(appointment -> {
+                AppointmentResponse response = new AppointmentResponse();
+                response.setId(appointment.getId());
+                response.setDate(appointment.getDoctorSlot().getDate().toString());
+                response.setTime(appointment.getDoctorSlot().getStartTime().toString());
+                response.setStatus(appointment.getStatus().toString());
+                response.setNotes(appointment.getNotes());
+                response.setDoctorName(appointment.getDoctor().getFullName());
+                response.setDoctorSlot(new DoctorSlotDTO(appointment.getDoctorSlot().getId(), appointment.getDoctorSlot().getDate(),
+                appointment.getDoctorSlot().getStartTime(), appointment.getDoctorSlot().getEndTime(), appointment.getDoctorSlot().getDuration(), appointment.getDoctorSlot().getStatus().toString()));
+                response.setZoomJoinUrl(appointment.getZoomJoinUrl());
+                response.setZoomStartUrl(appointment.getZoomStartUrl());
+                response.setZoomMeetingId(appointment.getZoomMeetingId());
+                response.setZoomPassword(appointment.getZoomPassword());
+                return response;
+            })
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(appointmentResponses);
     }
 
     @GetMapping("/doctor/{doctorId}")
@@ -36,29 +80,229 @@ public class AppointmentController {
     }
 
     @PostMapping
-    public ResponseEntity<Appointment> createAppointment(@AuthenticationPrincipal UserDetails userDetails, @RequestBody AppointmentRequest request) {
-
-
-        Appointment newAppointment = new Appointment();
-        newAppointment.setAppointmentTime(request.getAppointmentTime());
-        newAppointment.setDoctor(userService.getUserById(request.getDoctorId()));
-        newAppointment.setPatient(userService.getUserByUsername(userDetails.getUsername()));
-        newAppointment.setStatus("SCHEDULED");
-        newAppointment.setNotes(request.getNotes());
-
-        return ResponseEntity.ok(appointmentService.createAppointment(newAppointment));
+    public ResponseEntity<AppointmentResponse> createAppointment(
+            @AuthenticationPrincipal UserDetails userDetails, 
+            @Valid @RequestBody AppointmentRequest request) {
+        
+        Doctor doctor = doctorService.getById(request.getDoctorId());
+        if (doctor == null) {
+            throw new ResourceNotFoundException("Doctor", "id", request.getDoctorId());
+        }
+        
+        // Use SlotService for atomic booking with optimistic locking
+        DoctorSlot slot = slotService.bookSlot(
+                request.getDoctorId(), request.getDate(), request.getStartTime());
+        
+        // Create Zoom meeting
+        CreateMeetingRequest meetingRequest = buildMeetingRequest(doctor, request, slot);
+        ZoomMeetingResponse zoomMeeting = zoomService.createMeeting(meetingRequest);
+        
+        // Create appointment
+        Appointment newAppointment = buildAppointment(userDetails, request, doctor, slot, zoomMeeting);
+        
+        // Save appointment (slot is already booked by SlotService)
+        appointmentService.createAppointment(newAppointment);
+        
+        // Build response
+        AppointmentResponse response = buildAppointmentResponse(newAppointment, zoomMeeting);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+    
+    private CreateMeetingRequest buildMeetingRequest(Doctor doctor, AppointmentRequest request, DoctorSlot slot) {
+        CreateMeetingRequest meetingRequest = new CreateMeetingRequest();
+        meetingRequest.setTopic("Appointment with " + doctor.getFullName());
+        meetingRequest.setAgenda(request.getNotes());
+        meetingRequest.setDuration((int) slot.getDuration().toMinutes());
+        meetingRequest.setStartTime(slot.getDate().toString() + "T" + slot.getStartTime().toString() + ":00Z");
+        meetingRequest.setTimezone("Asia/Ho_Chi_Minh");
+        meetingRequest.setDoctorEmail(doctor.getEmail());
+        return meetingRequest;
+    }
+    
+    private Appointment buildAppointment(UserDetails userDetails, AppointmentRequest request, 
+                                       Doctor doctor, DoctorSlot slot, ZoomMeetingResponse zoomMeeting) {
+        Appointment appointment = new Appointment();
+        appointment.setDoctor(doctor);
+        appointment.setDoctorSlot(slot);
+        appointment.setPatient(patientService.getByUsername(userDetails.getUsername()));
+        appointment.setStatus(AppointmentStatus.PENDING_PAYMENT);
+        appointment.setNotes(request.getNotes());
+        appointment.setZoomJoinUrl(zoomMeeting.getJoinUrl());
+        appointment.setZoomStartUrl(zoomMeeting.getStartUrl());
+        appointment.setZoomMeetingId(String.valueOf(zoomMeeting.getId()));
+        appointment.setZoomPassword(zoomMeeting.getPassword());
+        return appointment;
+    }
+    
+    private AppointmentResponse buildAppointmentResponse(Appointment appointment, ZoomMeetingResponse zoomMeeting) {
+        AppointmentResponse response = new AppointmentResponse();
+        response.setId(appointment.getId());
+        response.setDoctorName(appointment.getDoctor().getFullName());
+        response.setNotes(appointment.getNotes());
+        response.setStatus(appointment.getStatus().toString());
+        response.setDate(appointment.getDoctorSlot().getDate().toString());
+        response.setTime(appointment.getDoctorSlot().getStartTime().toString());
+        response.setDoctorSlot(new DoctorSlotDTO(
+                appointment.getDoctorSlot().getId(),
+                appointment.getDoctorSlot().getDate(),
+                appointment.getDoctorSlot().getStartTime(),
+                appointment.getDoctorSlot().getEndTime(),
+                appointment.getDoctorSlot().getDuration(),
+                appointment.getDoctorSlot().getStatus().toString()
+        ));
+        response.setZoomJoinUrl(zoomMeeting.getJoinUrl());
+        response.setZoomStartUrl(zoomMeeting.getStartUrl());
+        response.setZoomMeetingId(String.valueOf(zoomMeeting.getId()));
+        response.setZoomPassword(zoomMeeting.getPassword());
+        return response;
     }
 
     @PutMapping("/{appointmentId}/cancel")
-    public ResponseEntity<Void> cancelAppointment(@PathVariable Long appointmentId) {
+    public ResponseEntity<String> cancelAppointment(@PathVariable Long appointmentId) {
         appointmentService.cancelAppointment(appointmentId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok("Cancel appointment successfully");
+    }
+    
+    @PutMapping("/{appointmentId}/confirm")
+    public ResponseEntity<AppointmentResponse> confirmAppointment(@PathVariable Long appointmentId) {
+        try {
+            Appointment appointment = appointmentService.confirmAppointment(appointmentId);
+            AppointmentResponse response = buildAppointmentResponse(appointment, null);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    
+    @PutMapping("/{appointmentId}/start")
+    public ResponseEntity<AppointmentResponse> startAppointment(@PathVariable Long appointmentId) {
+        try {
+            Appointment appointment = appointmentService.startAppointment(appointmentId);
+            AppointmentResponse response = buildAppointmentResponse(appointment, null);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    
+    @PutMapping("/{appointmentId}/complete")
+    public ResponseEntity<AppointmentResponse> completeAppointment(@PathVariable Long appointmentId) {
+        try {
+            Appointment appointment = appointmentService.completeAppointment(appointmentId);
+            AppointmentResponse response = buildAppointmentResponse(appointment, null);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
     @GetMapping
-    public ResponseEntity<List<Appointment>> getUserAppointments(
+    public ResponseEntity<List<AppointmentResponse>> getUserAppointments(
             @AuthenticationPrincipal User user
     ) {
-        List<Appointment> appointments = appointmentService.getAppointmentsByUser(user);
+        List<AppointmentResponse> appointments = appointmentService.getAppointmentsByUser(user);
         return ResponseEntity.ok(appointments);
+    }
+
+    @GetMapping("/{appointmentId}")
+    public ResponseEntity<AppointmentResponse> getAppointmentById(@PathVariable Long appointmentId) {
+        Appointment appointment = appointmentService.getAppointmentById(appointmentId);
+        AppointmentResponse response = new AppointmentResponse();
+        response.setId(appointment.getId());
+        response.setDoctorName(appointment.getDoctor().getFullName());
+        response.setNotes(appointment.getNotes());
+        response.setStatus(appointment.getStatus().toString());
+        response.setDate(appointment.getDoctorSlot().getDate().toString());
+        response.setTime(appointment.getDoctorSlot().getStartTime().toString());
+        response.setDoctorSlot(new DoctorSlotDTO(
+                appointment.getDoctorSlot().getId(),
+                appointment.getDoctorSlot().getDate(),
+                appointment.getDoctorSlot().getStartTime(),
+                appointment.getDoctorSlot().getEndTime(),
+                appointment.getDoctorSlot().getDuration(),
+                appointment.getDoctorSlot().getStatus().toString()
+        ));
+        response.setZoomJoinUrl(appointment.getZoomJoinUrl());
+        response.setZoomStartUrl(appointment.getZoomStartUrl());
+        response.setZoomMeetingId(appointment.getZoomMeetingId());
+        response.setZoomPassword(appointment.getZoomPassword());
+        return ResponseEntity.ok(response);
+    }
+    // Trong AppointmentController.java
+    @GetMapping("/{appointmentId}/doctor-status")
+    public ResponseEntity<Map<String, Object>> checkDoctorStatus(@PathVariable Long appointmentId) {
+        try {
+            Appointment appointment = appointmentService.getAppointmentById(appointmentId);
+            Map<String, Object> response = new HashMap<>();
+            response.put("isDoctorJoined", appointment.isDoctorJoined());
+            response.put("appointmentId", appointmentId);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+    }
+
+    @PutMapping("/{appointmentId}/doctor-join")
+    public ResponseEntity<Appointment> doctorJoinAppointment(@PathVariable Long appointmentId) {
+        try {
+            Appointment updatedAppointment = appointmentService.doctorJoinAppointment(appointmentId);
+            return ResponseEntity.ok(updatedAppointment);
+        } catch (Exception e) {
+            throw new BusinessException("Không thể cập nhật trạng thái bác sĩ tham gia: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}/doctor-joined")
+    public ResponseEntity<Map<String, Boolean>> updateDoctorJoined(@PathVariable Long id, @RequestBody boolean isDoctorJoined) {
+        Appointment appointment = appointmentService.getAppointmentById(id);
+        appointment.setDoctorJoined(isDoctorJoined);
+        Appointment updatedAppointment = appointmentService.updateAppointment(appointment);
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("isDoctorJoined", updatedAppointment.isDoctorJoined());
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{appointmentId}/status")
+    public ResponseEntity<Appointment> updateAppointmentStatus(
+            @PathVariable Long appointmentId,
+            @RequestBody Map<String, String> request) {
+        try {
+            String status = request.get("status");
+            if (status == null) {
+                throw new BusinessException("Status is required");
+            }
+            
+            Appointment updatedAppointment = appointmentService.updateAppointmentStatus(appointmentId, status);
+            return ResponseEntity.ok(updatedAppointment);
+        } catch (Exception e) {
+            throw new BusinessException("Không thể cập nhật trạng thái cuộc hẹn: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/{appointmentId}/payment-info")
+    public ResponseEntity<Map<String, Object>> getAppointmentPaymentInfo(@PathVariable Long appointmentId) {
+        try {
+            Appointment appointment = appointmentService.getAppointmentById(appointmentId);
+            
+            if (appointment.getStatus() != Appointment.AppointmentStatus.PENDING_PAYMENT) {
+                throw new BusinessException("Cuộc hẹn này không thể thanh toán");
+            }
+            
+            Map<String, Object> paymentInfo = new HashMap<>();
+            paymentInfo.put("appointmentId", appointment.getId());
+            paymentInfo.put("amount", appointment.getAmount() != null ? appointment.getAmount() : new BigDecimal("200000"));
+            paymentInfo.put("doctorName", appointment.getDoctor().getFullName());
+            paymentInfo.put("patientName", appointment.getPatient().getFullName());
+            paymentInfo.put("date", appointment.getDoctorSlot().getDate());
+            paymentInfo.put("time", appointment.getDoctorSlot().getStartTime());
+            paymentInfo.put("status", appointment.getStatus().toString());
+            
+            return ResponseEntity.ok(paymentInfo);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
     }
 }

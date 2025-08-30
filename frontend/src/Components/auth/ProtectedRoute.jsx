@@ -10,7 +10,7 @@ export const ProtectedRoute = ( { children, allowedRoles }  ) => {
         return <div>Đang tải...</div>;
     }
     if (!user) {
-        alert("Dang nhap di may`")
+        alert("Vui lòng đăng nhập trước")
         return <Navigate to="/login" state={ { from: location } } replace/>
     }
 

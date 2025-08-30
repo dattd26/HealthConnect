@@ -14,7 +14,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -37,11 +36,11 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    @GetMapping("/doctors")
-    public ResponseEntity<List<User>> getAllDoctors() {
-        List<User> doctors = userService.getAllDoctors();
-        return ResponseEntity.ok(doctors);
-    }
+    // @GetMapping("/doctors")
+    // public ResponseEntity<List<User>> getAllDoctors() {
+    //     List<User> doctors = userService.getAllDoctors();
+    //     return ResponseEntity.ok(doctors);
+    // }
     @GetMapping("/profile")
     public ResponseEntity<UserDTO> getUserProfile(@AuthenticationPrincipal UserDetails user) {
         if (user == null) {

@@ -12,7 +12,6 @@ import com.HealthConnect.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.MailException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
@@ -40,7 +39,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
-        // Kiểm tra email/phone đã tồn tại
+            
         if (userService.checkExistsEmail(request.getEmail())) {
             return ResponseEntity.badRequest().body("Email has been used");
         }
@@ -52,7 +51,8 @@ public class AuthController {
             userService.saveUser(user);
             
             return ResponseEntity.ok("Registration successful! Please check your email to verify your account.");
-        } catch (RuntimeException e) {
+        } catch (MailException e) {
+            System.out.println(e.getMessage());
             return ResponseEntity.internalServerError().body("Cant not send mail");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Registration failed");
@@ -69,6 +69,7 @@ public class AuthController {
             User user = userService.getUserByUsername(request.getUsername());
             UserDTO userDTORes = UserDTO
                     .builder()
+                    .id(user.getId())
                     .username(user.getUsername())
                     .fullName(user.getFullName())
                     .gender(user.getGender())
@@ -78,7 +79,7 @@ public class AuthController {
                     .address(user.getAddress())
                     .role(user.getRole())
                     .build();
-            // Kiểm tra xác thực
+            
             if (!user.isVerified()) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(new LoginResponse(null, userDTORes));
@@ -90,7 +91,7 @@ public class AuthController {
         }
         catch (AuthenticationException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("Dang nhap khong thang cong");
+                    .body("Đăng nhập không thành công: " + e.getMessage());
         }
     }
     @GetMapping("/verify")
@@ -112,19 +113,21 @@ public class AuthController {
                 return ResponseEntity.badRequest().body("Token không được cung cấp");
             }
 
-            // Kiểm tra tính hợp lệ của token
+            
             if (!jwtTokenProvider.validateToken(token)) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body("Token không hợp lệ hoặc đã hết hạn");
             }
 
-            // Lấy username từ token
+
             String username = jwtTokenProvider.getUserFromJWT(token);
 
-            // Lấy thông tin user từ username (tùy chọn)
+            
             User user = userService.getUserByUsername(username);
             UserDTO userDTORes = UserDTO
                     .builder()
+                    .id(user.getId())
+                    .username(user.getUsername())
                     .fullName(user.getFullName())
                     .gender(user.getGender())
                     .email(user.getEmail())
@@ -133,13 +136,8 @@ public class AuthController {
                     .address(user.getAddress())
                     .role(user.getRole())
                     .build();
-            // Trả về thông tin user hoặc chỉ xác nhận token hợp lệ
 
-            return ResponseEntity.ok(Map.of("userData", userDTORes, "tokenValid", true));
-            // return ResponseEntity.ok(Map.of("userData", new UserDTO(user.getId(), user.getUsername(), user.getEmail(), user.getRole()), "tokenValid", true));
-
-            // return ResponseEntity.ok(Map.of("userData", userDTORes, "tokenValid", true));
-//            return ResponseEntity.ok(token);
+            return ResponseEntity.ok(Map.of("userData", userDTORes, "token", token, "tokenValid", true));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("Xác thực token thất bại: " + e.getMessage());
