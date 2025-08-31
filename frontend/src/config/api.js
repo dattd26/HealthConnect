@@ -1,4 +1,6 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api';
+import { config } from './config.js';
+
+const API_BASE_URL = config.API_BASE_URL;
 
 
 // API Client object for making HTTP requests

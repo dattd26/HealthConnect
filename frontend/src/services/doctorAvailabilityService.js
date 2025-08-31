@@ -1,7 +1,9 @@
 import axios from 'axios';
 import { getAuthHeader } from '../utils/getAuthHeader';
 
-const API_BASE_URL = 'http://localhost:8080/api';
+import { config } from '../config/config.js';
+
+const API_BASE_URL = config.API_BASE_URL;
 
 class DoctorAvailabilityService {
     /**

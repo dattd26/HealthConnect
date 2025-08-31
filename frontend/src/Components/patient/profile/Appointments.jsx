@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { config } from '../../../config/config.js';
 import { Calendar, Clock, MapPin, User, AlertCircle } from 'lucide-react';
 
 const Appointments = ({ userId }) => {
@@ -12,7 +13,7 @@ const Appointments = ({ userId }) => {
     const fetchAppointments = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get(`http://localhost:8080/api/appointments/patient/${userId}`, {
+        const response = await axios.get(`${config.API_BASE_URL}/appointments/patient/${userId}`, {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + token
@@ -34,7 +35,7 @@ const Appointments = ({ userId }) => {
       try {
         setLoading(true);
         const token = localStorage.getItem('token');
-        await axios.put(`http://localhost:8080/api/appointments/${appointmentId}/cancel`, 
+        await axios.put(`${config.API_BASE_URL}/appointments/${appointmentId}/cancel`, 
           { reason: "Hủy bởi người dùng" },
           {
             headers: {

@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react';
 import { Eye, EyeOff, Lock, Bell, Shield, Trash2 } from 'lucide-react';
 import { AuthContext } from '../../../context/AuthContext';
 import axios from 'axios';
+import { config } from '../../../config/config.js';
 
 const Settings = () => {
   const { user, logout } = useContext(AuthContext);
@@ -95,7 +96,7 @@ const Settings = () => {
     try {
       setSaving(true);
       const token = localStorage.getItem('token');
-      await axios.post("http://localhost:8080/api/user/change-password", passwordData, {
+      await axios.post(`${config.API_BASE_URL}/user/change-password`, passwordData, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ' + token
@@ -119,7 +120,7 @@ const Settings = () => {
     try {
       setSaving(true);
       const token = localStorage.getItem('token');
-      await axios.put("http://localhost:8080/api/user/settings/notifications", notificationSettings, {
+              await axios.put(`${config.API_BASE_URL}/user/settings/notifications`, notificationSettings, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ' + token
@@ -138,7 +139,7 @@ const Settings = () => {
     try {
       setSaving(true);
       const token = localStorage.getItem('token');
-      await axios.put("http://localhost:8080/api/user/settings/privacy", privacySettings, {
+              await axios.put(`${config.API_BASE_URL}/user/settings/privacy`, privacySettings, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ' + token
@@ -168,7 +169,7 @@ const Settings = () => {
       try {
         setSaving(true);
         const token = localStorage.getItem('token');
-        await axios.delete("http://localhost:8080/api/user/delete-account", {
+        await axios.delete(`${config.API_BASE_URL}/user/delete-account`, {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + token

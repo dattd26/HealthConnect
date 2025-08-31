@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import PaymentForm from '../Components/payment/PaymentForm';
+import { config } from '../config/config.js';
 import './PaymentPage.css';
 
 const PaymentPage = () => {
@@ -20,7 +21,7 @@ const PaymentPage = () => {
         // Nếu có appointmentId từ URL, gọi API để lấy thông tin
         if (appointmentId) {
           const token = localStorage.getItem('token');
-          const response = await fetch(`http://localhost:8080/api/appointments/${appointmentId}/payment-info`, {
+          const response = await fetch(`${config.API_BASE_URL}/appointments/${appointmentId}/payment-info`, {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'

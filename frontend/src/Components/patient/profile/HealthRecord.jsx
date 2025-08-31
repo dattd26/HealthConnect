@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { config } from '../../../config/config.js';
 import { Plus, Trash2, Save } from 'lucide-react';
 
 const HealthRecord = ({ userData }) => {
@@ -25,7 +26,7 @@ const HealthRecord = ({ userData }) => {
     const fetchHealthData = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get("http://localhost:8080/api/user/health-record", {
+        const response = await axios.get(`${config.API_BASE_URL}/user/health-record`, {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + token
@@ -134,7 +135,7 @@ const HealthRecord = ({ userData }) => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.put("http://localhost:8080/api/user/health-record/update", healthData, {
+              await axios.put(`${config.API_BASE_URL}/user/health-record/update`, healthData, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ' + token
@@ -154,7 +155,7 @@ const HealthRecord = ({ userData }) => {
     const fetchHealthData = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get("http://localhost:8080/api/user/health-record", {
+        const response = await axios.get(`${config.API_BASE_URL}/user/health-record`, {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + token

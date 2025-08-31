@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
+import { config } from '../../../config/config.js';
 import { Calendar, Clock, Download, CreditCard, DollarSign } from 'lucide-react';
 import { AuthContext } from '../../../context/AuthContext';
 
@@ -16,7 +17,7 @@ const Payments = () => {
     const fetchTransactions = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get(`http://localhost:8080/api/payments/user/${user.id}`, {
+        const response = await axios.get(`${config.API_BASE_URL}/payments/user/${user.id}`, {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + token

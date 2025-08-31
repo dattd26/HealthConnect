@@ -1,7 +1,9 @@
 import api from '../config/api';
 import { getAuthHeader } from '../utils/getAuthHeader';
-const PAYMENT_API_BASE = 'http://localhost:8080/api/payments';
-const VNPAY_API_BASE = 'http://localhost:8080/api/vnpay';
+import { config } from '../config/config.js';
+
+const PAYMENT_API_BASE = `${config.API_BASE_URL}/payments`;
+const VNPAY_API_BASE = `${config.API_BASE_URL}/vnpay`;
 
 export const paymentService = {
   // Tạo thanh toán thông thường

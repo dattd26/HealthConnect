@@ -1,11 +1,11 @@
 import axios from 'axios';
-
+import { config } from '../config/config.js';
 
 export async function getSignature(meetingNumber, role, token) {
   try {
     console.log(meetingNumber, role, token);
     const response = await axios.post(
-      'http://localhost:8080/api/zoom',
+      `${config.API_BASE_URL}/zoom`,
       {
         meetingNumber,
         role

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
+import { config } from '../../../config/config.js';
 import { Calendar, User, FileText, Download, Share2 } from 'lucide-react';
 import { AuthContext } from '../../../context/AuthContext';
 
@@ -16,7 +17,7 @@ const MedicalHistory = () => {
     const fetchMedicalRecords = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get(`http://localhost:8080/api/medical-records/patient/${user.id}`, {
+        const response = await axios.get(`${config.API_BASE_URL}/medical-records/patient/${user.id}`, {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + token

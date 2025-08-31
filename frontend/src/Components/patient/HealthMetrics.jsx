@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Activity, Heart, Thermometer, Droplet } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import axios from "axios";
+import { config } from "../../config/config.js";
 
 // Map type từ API tới title và icon
 const metricMap = {
@@ -110,7 +111,7 @@ export function HealthMetrics() {
         Authorization: "Bearer " + token,
       };
       // Lấy tất cả các loại chỉ số sức khỏe, không chỉ HEART_RATE
-      const response = await axios.get("http://localhost:8080/api/health-data", { headers });
+              const response = await axios.get(`${config.API_BASE_URL}/health-data`, { headers });
       setMetrics(response.data);
       setError(null);
     } catch (error) {
@@ -161,7 +162,7 @@ export function HealthMetrics() {
         return;
       }
       
-      await axios.post("http://localhost:8080/api/health-data", metricToSend, { headers });
+              await axios.post(`${config.API_BASE_URL}/health-data`, metricToSend, { headers });
       // Fetch lại dữ liệu sau khi thêm thành công
       fetchData();
       setShowAddForm(false);

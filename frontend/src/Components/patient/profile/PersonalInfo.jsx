@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { AuthContext } from '../../../context/AuthContext';
 import axios from 'axios';
+import { config } from '../../../config/config.js';
 
 const PersonalInfo = ({ userData, isLoading }) => {
   const { user, setUser } = useContext(AuthContext);
@@ -33,7 +34,7 @@ const PersonalInfo = ({ userData, isLoading }) => {
 
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.put("http://localhost:8080/api/user/profile/update", formData, {
+      const res = await axios.put(`${config.API_BASE_URL}/user/profile/update`, formData, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ' + token

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import axios from 'axios';
+import { config } from '../config/config.js';
 import ProfileSidebar from '../Components/patient/profile/ProfileSidebar';
 import PersonalInfo from '../Components/patient/profile/PersonalInfo';
 import HealthRecord from '../Components/patient/profile/HealthRecord';
@@ -22,7 +23,7 @@ const ProfilePage = () => {
     const fetchUserData = async() => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get("http://localhost:8080/api/user/profile", {
+        const response = await axios.get(`${config.API_BASE_URL}/user/profile`, {
           headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + token

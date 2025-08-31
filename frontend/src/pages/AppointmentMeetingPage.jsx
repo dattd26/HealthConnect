@@ -5,6 +5,7 @@ import { getSignature } from '../services/zoomService';
 import { useAuth } from '../context/AuthContext';
 import LoadingSpinner from '../Components/common/LoadingSpinner';
 import axios from 'axios';
+import { config } from '../config/config.js';
 
 import '../styles/zoom.css';
 
@@ -29,7 +30,7 @@ const AppointmentMeetingPage = () => {
 
   useEffect(() => {
     const fetchAppointmentInfo = async () => {
-      const response = await axios.get(`http://localhost:8080/api/appointments/${appointmentId}`,
+      const response = await axios.get(`${config.API_BASE_URL}/appointments/${appointmentId}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { appointmentService } from "../../services/appointmentService";
 import AppointmentCard from "./AppointmentCard";
 import axios from "axios";
+import { config } from "../../config/config.js";
 
 const AppointmentsList = ({ userId, role }) => {
   const [appointments, setAppointments] = useState([]);
@@ -26,7 +27,7 @@ const AppointmentsList = ({ userId, role }) => {
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        `http://localhost:8080/api/appointments/${appointmentId}/cancel`,
+        `${config.API_BASE_URL}/appointments/${appointmentId}/cancel`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -44,7 +45,7 @@ const AppointmentsList = ({ userId, role }) => {
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        `http://localhost:8080/api/appointments/${appointmentId}/confirm`,
+        `${config.API_BASE_URL}/appointments/${appointmentId}/confirm`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -62,7 +63,7 @@ const AppointmentsList = ({ userId, role }) => {
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        `http://localhost:8080/api/appointments/${appointmentId}/start`,
+        `${config.API_BASE_URL}/appointments/${appointmentId}/start`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -80,7 +81,7 @@ const AppointmentsList = ({ userId, role }) => {
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        `http://localhost:8080/api/appointments/${appointmentId}/complete`,
+        `${config.API_BASE_URL}/appointments/${appointmentId}/complete`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );

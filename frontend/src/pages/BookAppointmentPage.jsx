@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { config } from "../config/config.js";
 import AppointmentsList from "../Components/appointment/AppointmentsList";
 import CreateAppointment from "../Components/appointment/CreateAppointment";
 import LoadingOverlay from "../Components/common/LoadingOverlay";
@@ -16,7 +17,7 @@ const BookAppointmentPage = () => {
     const fetchUserData = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await axios.get("http://localhost:8080/api/user/me", {
+        const response = await axios.get(`${config.API_BASE_URL}/user/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUserId(response.data.id);
@@ -24,7 +25,7 @@ const BookAppointmentPage = () => {
 
         if (response.data.role === "PATIENT") {
           const doctorsResponse = await axios.get(
-            "http://localhost:8080/api/user/doctors",
+            `${config.API_BASE_URL}/user/doctors`,
             { headers: { Authorization: `Bearer ${token}` } }
           );
           setDoctors(doctorsResponse.data || []);

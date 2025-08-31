@@ -1,7 +1,9 @@
 import api from '../config/api';
 import { getAuthHeader } from '../utils/getAuthHeader';
 
-const PATIENT_API_BASE = 'http://localhost:8080/api/user';
+import { config } from '../config/config.js';
+
+const PATIENT_API_BASE = `${config.API_BASE_URL}/user`;
 
 export const patientService = {
   // Get patient profile
@@ -63,7 +65,7 @@ export const patientService = {
       if (startDate) params.start = startDate;
       if (endDate) params.end = endDate;
       
-      const response = await api.get('http://localhost:8080/api/health-data', {
+              const response = await api.get(`${config.API_BASE_URL}/health-data`, {
         headers: getAuthHeader(),
         params
       });
@@ -77,7 +79,7 @@ export const patientService = {
   // Add new health data
   addHealthData: async (healthData) => {
     try {
-      const response = await api.post('http://localhost:8080/api/health-data', healthData, {
+              const response = await api.post(`${config.API_BASE_URL}/health-data`, healthData, {
         headers: getAuthHeader()
       });
       return response;

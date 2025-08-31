@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { paymentService } from '../../services/paymentService';
+import { config } from '../../config/config.js';
 import './PaymentForm.css';
 
 const PaymentForm = ({ appointment, onPaymentSuccess, onPaymentCancel }) => {
@@ -23,7 +24,7 @@ const PaymentForm = ({ appointment, onPaymentSuccess, onPaymentCancel }) => {
         const returnUrl = `${window.location.origin}/payment-success`;
         const cancelUrl = `${window.location.origin}/payment-cancel`;
         
-        const response = await fetch(`http://localhost:8080/api/payments/vnpay/appointment/${appointmentId}?returnUrl=${encodeURIComponent(returnUrl)}&cancelUrl=${encodeURIComponent(cancelUrl)}`, {
+        const response = await fetch(`${config.API_BASE_URL}/payments/vnpay/appointment/${appointmentId}?returnUrl=${encodeURIComponent(returnUrl)}&cancelUrl=${encodeURIComponent(cancelUrl)}`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -46,7 +47,7 @@ const PaymentForm = ({ appointment, onPaymentSuccess, onPaymentCancel }) => {
       } else if (paymentMethod === 'CASH') {
         // Handle cash payment using new API
         const appointmentId = appointment.appointmentId || appointment.id;
-        const response = await fetch(`http://localhost:8080/api/payments/appointment/${appointmentId}/create?method=CASH`, {
+        const response = await fetch(`${config.API_BASE_URL}/payments/appointment/${appointmentId}/create?method=CASH`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -63,7 +64,7 @@ const PaymentForm = ({ appointment, onPaymentSuccess, onPaymentCancel }) => {
       } else if (paymentMethod === 'BANK_TRANSFER') {
         // Handle bank transfer using new API
         const appointmentId = appointment.appointmentId || appointment.id;
-        const response = await fetch(`http://localhost:8080/api/payments/appointment/${appointmentId}/create?method=BANK_TRANSFER`, {
+        const response = await fetch(`${config.API_BASE_URL}/payments/appointment/${appointmentId}/create?method=BANK_TRANSFER`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,

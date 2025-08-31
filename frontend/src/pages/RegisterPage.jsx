@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Heart, User, Mail, Phone, Lock, Eye, EyeOff, UserPlus, Stethoscope, FileText } from "lucide-react";
 import medicalSpecialtyService from "../services/medicalSpecialtyService";
+import { config } from "../config/config.js";
 import "./RegisterPage.css";
 
 const RegisterPage = () => {
@@ -47,7 +48,7 @@ const RegisterPage = () => {
       };
       
       console.log("Submitting data:", submitData);
-      const response = await axios.post("http://localhost:8080/api/auth/register", submitData);
+      const response = await axios.post(`${config.API_BASE_URL}/auth/register`, submitData);
       
       if (formData.role === "DOCTOR") {
         alert("Đăng ký thành công! Vui lòng chờ Admin xác thực.");
