@@ -37,6 +37,61 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  
+  /* Additional variables for DoctorDashboard */
+  --primary-50: oklch(0.98 0.01 240);
+  --primary-100: oklch(0.95 0.02 240);
+  --primary-200: oklch(0.9 0.04 240);
+  --primary-300: oklch(0.8 0.08 240);
+  --primary-500: oklch(0.6 0.15 240);
+  --primary-600: oklch(0.5 0.2 240);
+  --primary-700: oklch(0.4 0.25 240);
+  
+  --secondary-50: oklch(0.98 0.01 280);
+  --secondary-100: oklch(0.95 0.02 280);
+  --secondary-200: oklch(0.9 0.04 280);
+  --secondary-500: oklch(0.6 0.15 280);
+  --secondary-600: oklch(0.5 0.2 280);
+  
+  --success-100: oklch(0.95 0.02 120);
+  --success-200: oklch(0.9 0.04 120);
+  --success-700: oklch(0.4 0.25 120);
+  
+  --warning-100: oklch(0.95 0.02 60);
+  --warning-200: oklch(0.9 0.04 60);
+  --warning-700: oklch(0.4 0.25 60);
+  
+  --error-100: oklch(0.95 0.02 0);
+  --error-700: oklch(0.4 0.25 0);
+  
+  --surface: oklch(1 0 0);
+  --text-primary: oklch(0.145 0 0);
+  --text-secondary: oklch(0.4 0 0);
+  --text-muted: oklch(0.6 0 0);
+  
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s ease;
 }
 
 .dark {
@@ -72,6 +127,37 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.269 0 0);
   --sidebar-ring: oklch(0.439 0 0);
+  
+  /* Dark mode overrides for DoctorDashboard */
+  --primary-50: oklch(0.1 0.01 240);
+  --primary-100: oklch(0.15 0.02 240);
+  --primary-200: oklch(0.2 0.04 240);
+  --primary-300: oklch(0.25 0.08 240);
+  --primary-500: oklch(0.4 0.15 240);
+  --primary-600: oklch(0.5 0.2 240);
+  --primary-700: oklch(0.6 0.25 240);
+  
+  --secondary-50: oklch(0.1 0.01 280);
+  --secondary-100: oklch(0.15 0.02 280);
+  --secondary-200: oklch(0.2 0.04 280);
+  --secondary-500: oklch(0.4 0.15 280);
+  --secondary-600: oklch(0.5 0.2 280);
+  
+  --success-100: oklch(0.15 0.02 120);
+  --success-200: oklch(0.2 0.04 120);
+  --success-700: oklch(0.6 0.25 120);
+  
+  --warning-100: oklch(0.15 0.02 60);
+  --warning-200: oklch(0.2 0.04 60);
+  --warning-700: oklch(0.6 0.25 60);
+  
+  --error-100: oklch(0.15 0.02 0);
+  --error-700: oklch(0.6 0.25 0);
+  
+  --surface: oklch(0.145 0 0);
+  --text-primary: oklch(0.985 0 0);
+  --text-secondary: oklch(0.7 0 0);
+  --text-muted: oklch(0.5 0 0);
 }
 
 @theme inline {

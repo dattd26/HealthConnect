@@ -27,13 +27,13 @@ const Footer = () => {
             <h3 className="text-lg font-semibold mb-4">Liên hệ</h3>
             <ul className="space-y-2">
               <li className="flex items-start">
-                <span className="text-gray-400 text-sm">Email: support@healthconnect.vn</span>
+                <span className="text-gray-400 text-sm">Email: 22t1020063@husc.edu.vn</span>
               </li>
               <li className="flex items-start">
-                <span className="text-gray-400 text-sm">Hotline: 1900-6789</span>
+                <span className="text-gray-400 text-sm">Hotline: XXXX-6789</span>
               </li>
               <li className="flex items-start">
-                <span className="text-gray-400 text-sm">Địa chỉ: Tầng 8, Tòa nhà ABC, Quận 1, TP.HCM</span>
+                <span className="text-gray-400 text-sm">Địa chỉ: ABC</span>
               </li>
             </ul>
           </div>
