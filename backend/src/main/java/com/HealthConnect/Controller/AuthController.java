@@ -18,7 +18,7 @@ import org.springframework.security.core.AuthenticationException;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.mail.MailException;
 import java.util.Map;
 
 @RestController
@@ -82,7 +82,7 @@ public class AuthController {
             
             if (!user.isVerified()) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(new LoginResponse(null, userDTORes));
+                        .body("Account not verified");
             }
 
             String token = jwtTokenProvider.genarateTokens(request.getUsername());
