@@ -235,6 +235,10 @@ const DoctorCardContent = memo(function DoctorCardContent({ doctor, onSelect, is
             <p className="text-sm text-gray-600 leading-relaxed">
               gioi thieu...
             </p>
+            {/* <div className="mt-2 flex items-center gap-2">
+              <span className="text-sm text-gray-500">Phí khám:</span>
+              <span className="text-lg font-bold text-green-600">200.000 VNĐ</span>
+            </div> */}
           </div>
         </div>
 

@@ -193,7 +193,7 @@ const CreateAppointment = ({ doctors }) => {
         </li>
         <li>
           <span className="font-medium">Bác sĩ:</span>{" "}
-          {selectedDoctor ? selectedDoctor.name : "—"}
+          {selectedDoctor ? selectedDoctor.fullName : "—"}
         </li>
         <li>
           <span className="font-medium">Thời gian:</span>{" "}
@@ -204,6 +204,10 @@ const CreateAppointment = ({ doctors }) => {
         <li>
           <span className="font-medium">Hình thức:</span>{" "}
           {consultationType === "online" ? "Khám online" : "Khám trực tiếp"}
+        </li>
+        <li>
+          <span className="font-medium">Phí khám:</span>{" "}
+          <span className="text-green-600 font-semibold">200.000 VNĐ</span>
         </li>
       </ul>
     </div>
@@ -325,6 +329,26 @@ const CreateAppointment = ({ doctors }) => {
         {/* Appointment info */}
         <section className="space-y-4">
           <h3 className="text-base font-semibold text-gray-800">Thông tin khám bệnh</h3>
+
+          {/* Price Information */}
+          <div className="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="text-sm font-semibold text-gray-800 mb-1">Phí khám bệnh</h4>
+                <p className="text-xs text-gray-600">Phí khám online chuẩn</p>
+              </div>
+              <div className="text-right">
+                <div className="text-2xl font-bold text-green-600">200.000</div>
+                <div className="text-xs text-gray-500">VNĐ</div>
+              </div>
+            </div>
+            <div className="mt-2 text-xs text-gray-600">
+              <span className="inline-flex items-center gap-1">
+                <span className="w-2 h-2 bg-green-400 rounded-full"></span>
+                Bao gồm: Tư vấn trực tuyến, hỗ trợ sau khám
+              </span>
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Specialty */}
@@ -505,6 +529,23 @@ const CreateAppointment = ({ doctors }) => {
             </span>
           </label>
         </section>
+
+        {/* Price Confirmation */}
+        {selectedDoctor && preferredTimeSlot && (
+          <section className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-2">
+              {/* <span className="text-yellow-600 text-lg">💰</span> */}
+              <h4 className="text-sm font-semibold text-yellow-800">Xác nhận thanh toán</h4>
+            </div>
+            <div className="text-sm text-yellow-700">
+              <p>Bạn sẽ được chuyển đến trang thanh toán sau khi đặt lịch thành công.</p>
+              <div className="mt-2 flex items-center justify-between">
+                <span>Tổng phí khám:</span>
+                <span className="font-bold text-green-600">200.000 VNĐ</span>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Submit */}
         <div className="pt-2">
