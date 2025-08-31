@@ -25,10 +25,21 @@ const DoctorAppointments = () => {
     const fetchAppointments = async () => {
         try {
             const data = await doctorService.getAppointments(user.id, filter);
-            setAppointments(data);
+            if (Array.isArray(data)) {
+                setAppointments(data);
+            } else if (data && Array.isArray(data.content)) {
+                setAppointments(data.content);
+            } else if (data && Array.isArray(data.appointments)) {
+                // Handle nested appointments
+                setAppointments(data.appointments);
+            } else {
+                console.warn('Unexpected appointments data structure:', data);
+                setAppointments([]);
+            }
         } catch (err) {
             setError(err.message);
             console.error('Error fetching appointments:', err);
+            setAppointments([]);
         } finally {
             setLoading(false);
         }
@@ -41,17 +52,18 @@ const DoctorAppointments = () => {
         }));
     };
 
-    const filteredAppointments = appointments.filter(appointment => {
+    // Ensure appointments is always an array before filtering
+    const filteredAppointments = Array.isArray(appointments) ? appointments.filter(appointment => {
         if (filter.search) {
             const searchTerm = filter.search.toLowerCase();
             return (
-                appointment.patient.fullName.toLowerCase().includes(searchTerm) ||
-                appointment.patient.phone.includes(searchTerm) ||
+                appointment.patient?.fullName?.toLowerCase().includes(searchTerm) ||
+                appointment.patient?.phone?.includes(searchTerm) ||
                 appointment.notes?.toLowerCase().includes(searchTerm)
             );
         }
         return true;
-    });
+    }) : [];
 
     const formatTime = (timeString) => {
         return new Date(`2000-01-01T${timeString}`).toLocaleTimeString('vi-VN', {
@@ -207,8 +219,8 @@ const DoctorAppointments = () => {
                                 
                                 <div className="col-type">
                                     <span className={`consultation-type type-${appointment.consultationType?.toLowerCase()}`}>
-                                        {appointment.consultationType === 'online' ? 'Trực tuyến' : 'Tại phòng khám'}
-                                    </span>
+                                        online
+                                     </span>
                                 </div>
                                 
                                 <div className="col-status">
