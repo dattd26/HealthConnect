@@ -372,8 +372,10 @@ public class PaymentService {
     }
     
     public List<Payment> getPaymentsByStatus(PaymentStatus status) {
-        // Implementation to get payments by status
-        return paymentRepository.findAll(); // Simplified for now
+        if (status == null) {
+            return paymentRepository.findAll();
+        }
+        return paymentRepository.findByStatus(status);
     }
     
     public Payment updatePaymentStatus(Long paymentId, PaymentStatus status) {

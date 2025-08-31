@@ -4,11 +4,13 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.Data;
 
-@Data
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter @Setter
 @Entity
 @Table(name = "payments",
        indexes = {
@@ -23,7 +25,7 @@ public class Payment {
     // 1-1: Payment là "owner", giữ khóa ngoại, unique để đảm bảo 1 cuộc hẹn chỉ có 1 payment
     @OneToOne
     @JoinColumn(name = "appointment_id", nullable = false, unique = true)
-    @JsonManagedReference(value = "appointment-payment")
+    @JsonBackReference(value = "appointment-payment")
     private Appointment appointment;
 
     @Column(nullable = false, unique = true, length = 64)

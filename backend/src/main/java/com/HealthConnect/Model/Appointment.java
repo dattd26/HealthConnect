@@ -4,11 +4,13 @@ import java.time.LocalDateTime;
 import java.math.BigDecimal;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter @Setter
 @Entity
 @Table(name = "appointments")
 public class Appointment {
@@ -19,7 +21,7 @@ public class Appointment {
 
     @ManyToOne
     @JoinColumn(name = "patient_id", nullable = false)
-    @JsonBackReference(value = "patient-appointments")
+    @JsonManagedReference(value = "patient-appointments")
     private Patient patient;
 
     @ManyToOne
@@ -29,6 +31,7 @@ public class Appointment {
 
     @ManyToOne
     @JoinColumn(name = "doctor_slot_id", nullable = false)
+    @JsonManagedReference(value = "doctor-slot-appointments")
     private DoctorSlot doctorSlot;
 
     @Enumerated(EnumType.ORDINAL)

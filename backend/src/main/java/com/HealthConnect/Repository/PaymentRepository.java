@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.HealthConnect.Model.Payment;
+import com.HealthConnect.Model.Payment.PaymentStatus;
 
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
@@ -14,4 +15,5 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     Optional<Payment> findByOrderId(String orderId);
     Optional<Payment> findByAppointmentId(Long appointmentId);
     List<Payment> findAllByOrderId(String orderId);
+    List<Payment> findByStatus(PaymentStatus status);
 }

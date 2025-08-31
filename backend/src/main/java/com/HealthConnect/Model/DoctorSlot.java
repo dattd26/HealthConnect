@@ -23,6 +23,7 @@ import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Data
 @AllArgsConstructor
@@ -63,5 +64,6 @@ public class DoctorSlot {
     }
     
     @OneToMany(mappedBy = "doctorSlot")
+    @JsonBackReference(value = "doctor-slot-appointments")
     private Set<Appointment> appointments;
 }
