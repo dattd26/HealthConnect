@@ -2,16 +2,18 @@
 FROM eclipse-temurin:17-jdk AS builder
 WORKDIR /app
 
-# copy wrapper + make it executable (fix Windows CRLF too)
-COPY mvnw ./
+# copy wrapper & .mvn
+COPY mvnw .
 COPY .mvn .mvn
+
+# fix line endings (Windows CRLF) & cấp quyền chạy
 RUN sed -i 's/\r$//' mvnw && chmod +x mvnw
 
-# build deps offline first (cache tốt hơn)
+# copy pom.xml rồi tải deps
 COPY pom.xml .
 RUN ./mvnw -q -DskipTests dependency:go-offline
 
-# build app
+# copy code src và build
 COPY src src
 RUN ./mvnw -q -DskipTests package
 
