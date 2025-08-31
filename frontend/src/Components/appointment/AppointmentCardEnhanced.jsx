@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { appointmentService } from '../../services/appointmentService';
 import './AppointmentCardEnhanced.css';
@@ -42,9 +42,11 @@ const AppointmentCardEnhanced = ({ appointment, onCancel, onConfirm, onStart, on
     const minutesDiff = timeDiff / (1000 * 60);
     
     if (minutesDiff < 0) {
-      if (minutesDiff > -120) {
+      if (minutesDiff > -120 || !isAppointmentExpired()) {
         return `Đang diễn ra (${Math.abs(Math.floor(minutesDiff))} phút trước)`;
-      } else {
+
+      } 
+      else {
         return `Đã kết thúc (${Math.abs(Math.floor(minutesDiff))} phút trước)`;
       }
     } else if (minutesDiff < 60) {
@@ -59,15 +61,7 @@ const AppointmentCardEnhanced = ({ appointment, onCancel, onConfirm, onStart, on
     }
   };
 
-  useEffect(() => {
-    if (appointment.id && isNearAppointmentTime() && !isDoctorJoined) {
-      checkDoctorStatus();
-      const interval = setInterval(checkDoctorStatus, 5000);
-      return () => clearInterval(interval);
-    }
-  }, [appointment.id, isNearAppointmentTime()]);
-
-  const checkDoctorStatus = async () => {
+  const checkDoctorStatus = useCallback(async () => {
     if (!appointment.id) return;
     setIsCheckingStatus(true);
     try {
@@ -80,7 +74,60 @@ const AppointmentCardEnhanced = ({ appointment, onCancel, onConfirm, onStart, on
     } finally {
       setIsCheckingStatus(false);
     }
-  };
+  }, [appointment.id]);
+
+  useEffect(() => {
+    let interval = null;
+    
+    if (appointment.id && isNearAppointmentTime() && !isDoctorJoined) {
+      checkDoctorStatus();
+      interval = setInterval(checkDoctorStatus, 5000);
+    }
+    
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+        interval = null;
+      }
+    };
+  }, [appointment.id, appointment.date, appointment.time, isDoctorJoined, checkDoctorStatus]);
+
+  useEffect(() => {
+    let isMounted = true;
+    
+    const updateStatus = async () => {
+      if (appointment.id && appointment.status === 'CONFIRMED' && isNearAppointmentTime()) {
+        try {
+          if (isMounted) {
+            const res = await appointmentService.updateAppointmentStatus(appointment.id, 'IN_PROGRESS');
+            console.log(res);
+          }
+        } catch (error) {
+          if (isMounted) {
+            console.error('Error updating appointment status:', error);
+          }
+        }
+      }
+      if (appointment.id && appointment.status === 'IN_PROGRESS' && isAppointmentExpired() && !isNearAppointmentTime()) {
+        try {
+          if (isMounted) {
+            const res = await appointmentService.updateAppointmentStatus(appointment.id, 'COMPLETED');
+            console.log(res);
+          }
+        } catch (error) {
+          if (isMounted) {
+            console.error('Error updating appointment status:', error);
+          }
+        }
+      }
+    };
+    
+    updateStatus();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [appointment.id, appointment.status, appointment.date, appointment.time]);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -325,7 +372,7 @@ const AppointmentCardEnhanced = ({ appointment, onCancel, onConfirm, onStart, on
           </button>
         )}
 
-        {canConfirm && (
+        {/* {canConfirm && (
           <button
             onClick={() => onConfirm(appointment.id)}
             className="action-btn confirm-btn"
@@ -335,7 +382,7 @@ const AppointmentCardEnhanced = ({ appointment, onCancel, onConfirm, onStart, on
             </svg>
             Xác nhận
           </button>
-        )}
+        )} */}
 
         {/* {canStart && (
           <button

@@ -119,11 +119,7 @@ const AllAppointmentsPage = () => {
   const handleComplete = async (appointmentId) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.put(
-        `http://localhost:8080/api/appointments/${appointmentId}/complete`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await appointmentService.updateAppointmentStatus(appointmentId, 'COMPLETED');
       alert("Lịch hẹn đã hoàn thành.");
       fetchAppointments();
     } catch (err) {
