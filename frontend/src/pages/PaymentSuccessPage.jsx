@@ -141,10 +141,10 @@ const PaymentSuccessPage = () => {
       }
       
       // 2. Cập nhật appointment status thành PAYMENT_PENDING nếu có appointment
-      if (paymentData.appointment && paymentData.appointment.id) {
+      if (paymentData.orderId) {
         try {
           // Sử dụng appointmentService để cập nhật trạng thái
-          await appointmentService.updateAppointmentStatus(paymentData.appointment.id, 'CONFIRMED');
+          await appointmentService.updateAppointmentStatus(paymentData.orderId.split('_')[1], 'CONFIRMED');
           console.log('Appointment status updated to CONFIRMED');
         } catch (error) {
           console.warn('Failed to update appointment status:', error);
