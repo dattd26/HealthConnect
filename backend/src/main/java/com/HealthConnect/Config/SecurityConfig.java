@@ -16,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.List;
 
@@ -24,12 +25,15 @@ import java.util.List;
 public class SecurityConfig {
     @Autowired
     private JwtTokenFilter jwtTokenFilter;
+    @Value("${frontend.url}")
+    private String frontendUrl;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable());
         http.cors(cors -> cors.configurationSource(request -> {
             CorsConfiguration configuration = new CorsConfiguration();
-            configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:3001", "http://localhost:5173/")); // Cho phép từ frontend
+            configuration.setAllowedOrigins(List.of(frontendUrl)); // Cho phép từ frontend
             configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Phương thức HTTP
             configuration.setAllowedHeaders(List.of("*"));
             configuration.setAllowCredentials(true);
