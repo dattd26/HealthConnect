@@ -203,9 +203,9 @@ const AppointmentMeetingPage = () => {
   if (isLoading) {
     return (
       <div className="zoom-loading">
-        <div className="zoom-loading-spinner"></div>
-        <p className="mt-4 text-lg">Initializing Zoom meeting...</p>
-        <p className="text-sm opacity-75">Please wait while we connect you to the meeting</p>
+        <LoadingSpinner size="large" color="blue" />
+        <p className="zoom-loading-message">Đang khởi tạo cuộc họp Zoom...</p>
+        <p className="text-sm text-gray-500 mt-2">Vui lòng chờ trong khi chúng tôi kết nối bạn đến cuộc họp</p>
       </div>
     );
   }
@@ -214,13 +214,13 @@ const AppointmentMeetingPage = () => {
     return (
       <div className="zoom-error">
         <div className="zoom-error-icon">⚠️</div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">Meeting Error</h2>
-        <p className="text-gray-600 mb-6 text-center max-w-md">{error}</p>
+        <h2 className="text-2xl font-bold mb-4">Lỗi Cuộc Họp</h2>
+        <p className="zoom-error-message">{error}</p>
         <button
           onClick={() => navigate('/appointments')}
-          className="zoom-control-btn bg-blue-600 text-white hover:bg-blue-700"
+          className="zoom-retry-button"
         >
-          Back to Appointments
+          Quay Lại Lịch Hẹn
         </button>
       </div>
     );
