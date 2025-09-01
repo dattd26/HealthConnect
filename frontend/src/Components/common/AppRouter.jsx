@@ -4,6 +4,8 @@ import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import Homepage from "../../pages/Homepage";
 import { LoginPage } from "../../pages/LoginPage";
 import RegisterPage from "../../pages/RegisterPage";
+import EmailVerificationPage from "../../pages/EmailVerificationPage";
+import EmailVerificationSentPage from "../../pages/EmailVerificationSentPage";
 import { ProtectedRoute } from "../auth/ProtectedRoute";
 import PatientDashboard from "../patient/PatientDashboard";
 import BookAppointmentPage from "../../pages/BookAppointmentPage";
@@ -44,6 +46,8 @@ const AppRouter = () => {
             <Route path="/" element={<Homepage/>}/>
             <Route path="/login" element={<LoginPage/>}/>
             <Route path="/register" element={<RegisterPage/>}/>
+            <Route path="/verify-email" element={<EmailVerificationPage/>}/>
+            <Route path="/email-verification-sent" element={<EmailVerificationSentPage/>}/>
             <Route path="/test" element={<ZoomMeeting/>}/>
             <Route path="/appointments/:appointmentId/meeting" element={<AppointmentMeetingPage/>}/>
             

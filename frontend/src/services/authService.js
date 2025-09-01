@@ -16,6 +16,26 @@ export const authService = {
     validate: async (token) => {
         const response = await axios.post(API_ENDPOINTS.AUTH.VALIDATE, { token });
         return response.data;
-    }
+    },
 
+    verifyEmail: async (token) => {
+        const response = await fetch(`${API_ENDPOINTS.BASE_URL}/api/auth/verify?token=${token}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        return response;
+    },
+
+    resendVerification: async (email) => {
+        const response = await fetch(`${API_ENDPOINTS.BASE_URL}/api/auth/resend-verification`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email }),
+        });
+        return response;
+    }
 }

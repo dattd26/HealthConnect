@@ -53,10 +53,13 @@ const RegisterPage = () => {
       
       if (formData.role === "DOCTOR") {
         alert("Đăng ký thành công! Vui lòng chờ Admin xác thực.");
+        navigate("/login");
       } else {
-        alert("Đăng ký thành công! check email để xác thực");
+        // Chuyển hướng đến trang thông báo đã gửi email xác thực
+        navigate("/email-verification-sent", { 
+          state: { email: formData.email } 
+        });
       }
-      navigate("/login");
     } catch (err) {
       setError(err.response?.data?.message || "Đăng ký thất bại!");
       setIsRegistered(false);
