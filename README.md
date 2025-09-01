@@ -1,10 +1,20 @@
-website: healthconnect-5zg3.onrender.com/
-(user|pass)
-Tài khoản patient: tranvana|123
-Tài khoản bacsi: lethib|123
-Tài khoản admin: admin|Admin@123
+## 🌐 Demo Website
 
-test zoom meeting qua tai khoan benh nhan va bac si: healthconnect-5zg3.onrender.com/appointments/1/meeting 
+**Website chính thức**: [healthconnect-5zg3.onrender.com](https://healthconnect-5zg3.onrender.com/)
+
+## 🔑 Tài khoản Test
+
+| Vai trò | Tài khoản | Mật khẩu |
+|---------|-----------|-----------|
+| **👨‍🦱 Bệnh nhân** | `tranvana` | `123` |
+| **👨‍⚕️ Bác sĩ** | `lethib` | `123` |
+| **👨‍💼 Admin** | `admin` | `Admin@123` |
+
+## 🧪 Test Zoom Meeting
+
+**Test cuộc họp trực tuyến**: [healthconnect-5zg3.onrender.com/appointments/1/meeting](https://healthconnect-5zg3.onrender.com/appointments/1/meeting)
+
+> 💡 **Lưu ý**: Sử dụng tài khoản bac si de host truoc
 
 
 # 🏥 HealthConnect
