@@ -2,7 +2,8 @@ import React, { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import getDefaultRoute from "../Components/common/getDefaultRoute";
-import { Heart, Lock, User, Eye, EyeOff } from "lucide-react";
+import { Heart, Lock, User, Eye, EyeOff, AlertCircle, Clock } from "lucide-react";
+import { ServerWakeupNotice } from "../Components/common";
 
 export const LoginPage = () => {
     const { login, user } = useContext(AuthContext);
@@ -71,6 +72,9 @@ export const LoginPage = () => {
                     <h1 className="text-3xl font-bold text-primary mb-2">HealthConnect</h1>
                     <p className="text-secondary">Đăng nhập vào tài khoản của bạn</p>
                 </div>
+
+                {/* Server Wakeup Notice */}
+                <ServerWakeupNotice />
 
                 {/* Error Message */}
                 {error && (

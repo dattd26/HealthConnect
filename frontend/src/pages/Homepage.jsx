@@ -17,6 +17,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import telemedicineImage from "../assets/images/telemedicine-7520691_1280.jpg";
 import { AuthContext } from '../context/AuthContext';
 import VideoDemoModal from '../Components/home/VideoDemoModal';
+import { ServerWakeupNotice } from '../Components/common';
 
 /**
  * Design goals
@@ -200,6 +201,11 @@ const Homepage = () => {
           </div>
         </div>
       </section>
+
+      {/* Server Wakeup Notice */}
+      <div className="container mx-auto px-4 mb-8">
+        <ServerWakeupNotice />
+      </div>
 
       {/* Stats */}
       <section className="py-14 px-4">

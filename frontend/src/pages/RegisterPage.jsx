@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { Heart, User, Mail, Phone, Lock, Eye, EyeOff, UserPlus, Stethoscope, FileText } from "lucide-react";
+import { Heart, User, Mail, Phone, Lock, Eye, EyeOff, UserPlus, Stethoscope, FileText, Clock } from "lucide-react";
 import medicalSpecialtyService from "../services/medicalSpecialtyService";
 import { config } from "../config/config.js";
 import "./RegisterPage.css";
+import { ServerWakeupNotice } from "../Components/common";
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -89,6 +90,9 @@ const RegisterPage = () => {
           <h1>HealthConnect</h1>
           <p>Tạo tài khoản mới</p>
         </div>
+
+        {/* Server Wakeup Notice */}
+        <ServerWakeupNotice />
 
         {/* Error Message */}
         {error && (
