@@ -28,6 +28,7 @@ import com.HealthConnect.Repository.PaymentRepository;
 import com.HealthConnect.Model.Appointment;
 import com.HealthConnect.Repository.AppointmentRepository;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -43,7 +44,7 @@ public class VNPayService {
     @Autowired
     private AppointmentRepository appointmentRepository;
     
-    public VNPayPaymentResponse createPaymentUrl(VNPayPaymentRequest request) {
+    public VNPayPaymentResponse createPaymentUrl(VNPayPaymentRequest request, HttpServletRequest httpRequest) {
         try {
             log.info("Creating VNPay payment URL for request: {}", request);
             
@@ -71,11 +72,11 @@ public class VNPayService {
             String vnp_Amount    = String.valueOf(request.getAmount().longValue() * 100); // VND * 100
             String vnp_Locale    = vnpayConfig.getLocale();       // vn
             String vnp_CurrCode  = vnpayConfig.getCurrencyCode(); // VND
-            // String vnp_IpAddr    = "127.0.0.1";
+            String vnp_IpAddr    = getClientIp(httpRequest);
             String vnp_CreateDate= LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
     
-            log.info("VNPay parameters - TmnCode: {}, ReturnUrl: {}, Amount: {}, OrderInfo: {}, TxnRef: {}", 
-                    vnp_TmnCode, vnp_ReturnUrl, vnp_Amount, vnp_OrderInfo, vnp_TxnRef);
+            log.info("VNPay parameters - TmnCode: {}, ReturnUrl: {}, Amount: {}, OrderInfo: {}, TxnRef: {}, IpAddr: {}", 
+                    vnp_TmnCode, vnp_ReturnUrl, vnp_Amount, vnp_OrderInfo, vnp_TxnRef, vnp_IpAddr);
     
             // Dùng TreeMap để tự sort key tăng dần
             Map<String, String> vnp_Params = new TreeMap<>();
@@ -88,7 +89,7 @@ public class VNPayService {
             vnp_Params.put("vnp_OrderInfo", vnp_OrderInfo);
             vnp_Params.put("vnp_OrderType", vnp_OrderType);
             vnp_Params.put("vnp_ReturnUrl", vnp_ReturnUrl);
-            // vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
+            vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
             vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
             vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
             
@@ -132,6 +133,22 @@ public class VNPayService {
             res.setMessage("Failed to create payment URL: " + e.getMessage());
             return res;
         }
+    }
+    
+    public String getClientIp(HttpServletRequest request) {
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip != null && !ip.isEmpty() && !"unknown".equalsIgnoreCase(ip)) {
+            // Nếu có nhiều IP (qua nhiều proxy), lấy cái đầu tiên
+            return ip.split(",")[0].trim();
+        }
+        ip = request.getHeader("Proxy-Client-IP");
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("WL-Proxy-Client-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+        }
+        return ip;
     }
     
     
