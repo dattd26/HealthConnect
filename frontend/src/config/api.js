@@ -123,7 +123,9 @@ export const API_ENDPOINTS = {
     AUTH: {
         LOGIN: `${API_BASE_URL}/auth/login`,
         REGISTER: `${API_BASE_URL}/auth/register`,
-        VALIDATE: `${API_BASE_URL}/auth/validate`
+        VALIDATE: `${API_BASE_URL}/auth/validate`,
+        VERIFY: `${API_BASE_URL}/auth/verify`,
+        RESEND_VERIFICATION: `${API_BASE_URL}/auth/resend-verification`
     },
     
     // Appointment endpoints

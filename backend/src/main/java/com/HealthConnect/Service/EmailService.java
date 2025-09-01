@@ -17,7 +17,8 @@ public class EmailService {
     private String frontendUrl;
     
     public void sendVerificationEmail(String email, String token)  {
-        String verificationUrl = frontendUrl + "/verify-email?token=" + token;
+        // Use hash-based route because frontend uses HashRouter
+        String verificationUrl = frontendUrl + "/#/verify-email?token=" + token;
         String subject = "Xác thực tài khoản HealthConnect";
         String content = "Vui lòng nhấp vào link sau để xác thực tài khoản: " + verificationUrl;
         try {

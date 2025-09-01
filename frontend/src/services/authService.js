@@ -19,21 +19,19 @@ export const authService = {
     },
 
     verifyEmail: async (token) => {
-        const response = await fetch(`${API_ENDPOINTS.BASE_URL}/verify-email?token=${token}`, {
+        // Backend endpoint: GET /api/auth/verify?token=...
+        const url = `${API_ENDPOINTS.AUTH.VERIFY}?token=${encodeURIComponent(token)}`;
+        const response = await fetch(url, {
             method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
         });
         return response;
     },
 
     resendVerification: async (email) => {
-        const response = await fetch(`${API_ENDPOINTS.BASE_URL}/api/auth/resend-verification`, {
+        const response = await fetch(API_ENDPOINTS.AUTH.RESEND_VERIFICATION, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email }),
         });
         return response;
