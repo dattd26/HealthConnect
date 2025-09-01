@@ -135,7 +135,7 @@ public class PaymentService {
         }
     }
 
-    public VNPayPaymentResponse createVNPayPaymentForAppointment(Long appointmentId, String returnUrl, String cancelUrl) {
+    public VNPayPaymentResponse createVNPayPaymentForAppointment(Long appointmentId, String returnUrl, String cancelUrl, jakarta.servlet.http.HttpServletRequest httpRequest) {
         try {
             log.info("Creating VNPay payment for appointment: {}", appointmentId);
             
@@ -220,7 +220,7 @@ public class PaymentService {
             vnpayRequest.setCancelUrl(finalCancelUrl);
             
             // Tạo VNPay payment URL
-            VNPayPaymentResponse vnpayResponse = vnpayService.createPaymentUrl(vnpayRequest);
+            VNPayPaymentResponse vnpayResponse = vnpayService.createPaymentUrl(vnpayRequest, httpRequest);
             
             log.info("VNPay response: {}", vnpayResponse);
             
@@ -245,7 +245,7 @@ public class PaymentService {
         }
     }
     
-    public VNPayPaymentResponse createVNPayPayment(VNPayPaymentRequest request) {
+    public VNPayPaymentResponse createVNPayPayment(VNPayPaymentRequest request, jakarta.servlet.http.HttpServletRequest httpRequest) {
         try {
             log.info("Creating VNPay payment for appointment: {}, amount: {}", request.getAppointmentId(), request.getAmount());
             
@@ -293,7 +293,7 @@ public class PaymentService {
             request.setOrderId(savedPayment.getOrderId());
             
             // Tạo VNPay payment URL
-            VNPayPaymentResponse vnpayResponse = vnpayService.createPaymentUrl(request);
+            VNPayPaymentResponse vnpayResponse = vnpayService.createPaymentUrl(request, httpRequest);
             
             log.info("VNPay response: {}", vnpayResponse);
             

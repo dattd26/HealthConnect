@@ -40,11 +40,11 @@ public class PaymentController {
     }
     
     @PostMapping("/vnpay/create")
-    public ResponseEntity<VNPayPaymentResponse> createVNPayPayment(@RequestBody VNPayPaymentRequest request) {
+    public ResponseEntity<VNPayPaymentResponse> createVNPayPayment(@RequestBody VNPayPaymentRequest request, jakarta.servlet.http.HttpServletRequest httpRequest) {
         try {
             log.info("Received VNPay payment request: {}", request);
             
-            VNPayPaymentResponse response = paymentService.createVNPayPayment(request);
+            VNPayPaymentResponse response = paymentService.createVNPayPayment(request, httpRequest);
             
             log.info("VNPay payment response: {}", response);
             
@@ -80,12 +80,13 @@ public class PaymentController {
     public ResponseEntity<VNPayPaymentResponse> createVNPayPaymentForAppointment(
             @PathVariable Long appointmentId,
             @RequestParam String returnUrl,
-            @RequestParam String cancelUrl) {
+            @RequestParam String cancelUrl,
+            jakarta.servlet.http.HttpServletRequest httpRequest) {
         try {
             log.info("Creating VNPay payment for appointment: {}", appointmentId);
             
             VNPayPaymentResponse response = paymentService.createVNPayPaymentForAppointment(
-                appointmentId, returnUrl, cancelUrl);
+                appointmentId, returnUrl, cancelUrl, httpRequest);
             
             log.info("VNPay payment response: {}", response);
             
