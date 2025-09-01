@@ -5,8 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Page Not Found</title>
     <script>
-        // Redirect to index.html for client-side routing
-        window.location.href = '/';
+        // Redirect về trang chủ với hash routing
+        const currentPath = window.location.pathname;
+        if (currentPath !== '/') {
+            // Chuyển đổi path thành hash
+            const pathWithoutSlash = currentPath.substring(1);
+            window.location.replace('/#' + pathWithoutSlash);
+        } else {
+            window.location.replace('/');
+        }
     </script>
 </head>
 <body>
