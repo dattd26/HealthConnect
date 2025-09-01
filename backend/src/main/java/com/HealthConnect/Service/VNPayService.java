@@ -74,8 +74,8 @@ public class VNPayService {
             String vnp_IpAddr    = getClientIp(httpRequest);
             String vnp_CreateDate= LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
     
-            log.info("VNPay parameters - TmnCode: {}, ReturnUrl: {}, Amount: {}, OrderInfo: {}, TxnRef: {}", 
-                    vnp_TmnCode, vnp_ReturnUrl, vnp_Amount, vnp_OrderInfo, vnp_TxnRef);
+            log.info("VNPay parameters - TmnCode: {}, ReturnUrl: {}, Amount: {}, OrderInfo: {}, TxnRef: {}, IpAddr: {}", 
+                    vnp_TmnCode, vnp_ReturnUrl, vnp_Amount, vnp_OrderInfo, vnp_TxnRef, vnp_IpAddr);
     
             // Dùng TreeMap để tự sort key tăng dần
             Map<String, String> vnp_Params = new TreeMap<>();
@@ -133,15 +133,21 @@ public class VNPayService {
             return res;
         }
     }
-    private String getClientIp(HttpServletRequest request) {
-        String ipAddress = request.getHeader("X-Forwarded-For");
-        if (ipAddress == null || ipAddress.isEmpty()) {
-            ipAddress = request.getRemoteAddr();
-        } else {
-            // trường hợp có nhiều IP, lấy IP đầu tiên
-            ipAddress = ipAddress.split(",")[0];
+    
+    public String getClientIp(HttpServletRequest request) {
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip != null && !ip.isEmpty() && !"unknown".equalsIgnoreCase(ip)) {
+            // Nếu có nhiều IP (qua nhiều proxy), lấy cái đầu tiên
+            return ip.split(",")[0].trim();
         }
-        return ipAddress;
+        ip = request.getHeader("Proxy-Client-IP");
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("WL-Proxy-Client-IP");
+        }
+        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+        }
+        return ip;
     }
     
     
