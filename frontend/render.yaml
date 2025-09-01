@@ -1,0 +1,8 @@
+services:
+  - type: static
+    name: healthconnect-frontend
+    buildCommand: npm run build:prod
+    staticPublishPath: ./build
+    envVars:
+      - key: NODE_VERSION
+        value: 20
