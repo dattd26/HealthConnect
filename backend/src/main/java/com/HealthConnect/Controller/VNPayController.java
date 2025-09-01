@@ -10,7 +10,7 @@ import com.HealthConnect.Dto.VNPay.VNPayCallbackRequest;
 import com.HealthConnect.Dto.VNPay.VNPayCallbackResponse;
 import com.HealthConnect.Service.VNPayService;
 
-
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -23,10 +23,10 @@ public class VNPayController {
     private VNPayService vnpayService;
     
     @PostMapping("/create-payment")
-    public ResponseEntity<VNPayPaymentResponse> createPayment(@RequestBody VNPayPaymentRequest request) {
+    public ResponseEntity<VNPayPaymentResponse> createPayment(@RequestBody VNPayPaymentRequest request, HttpServletRequest httpRequest) {
         try {
             log.info("Creating VNPay payment for appointment: {}", request.getAppointmentId());
-            VNPayPaymentResponse response = vnpayService.createPaymentUrl(request);
+            VNPayPaymentResponse response = vnpayService.createPaymentUrl(request, httpRequest);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error creating VNPay payment: ", e);
