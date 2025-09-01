@@ -41,7 +41,7 @@ public class SecurityConfig {
         }));
         http.authorizeHttpRequests((auth) -> auth
                 .requestMatchers(HttpMethod.POST,"/api/auth/**", "/api/zoom/**").permitAll()
-                .requestMatchers("/", "/error/**", "/api/auth/**", "/zoom", "/zoom/callback", "/api/auth/verify", "/api/specialties/**").permitAll()
+                .requestMatchers("/", "/error/**", "/api/auth/**", "/zoom", "/zoom/callback", "/api/auth/verify", "/api/auth/resend-verification", "/api/specialties/**").permitAll()
                 // Admin endpoints - chỉ ADMIN mới truy cập được
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated())

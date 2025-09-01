@@ -96,14 +96,52 @@ public class AuthController {
     }
     @GetMapping("/verify")
     public ResponseEntity<String> verifyEmail(@RequestParam String token) {
-        String username = jwtTokenProvider.getUserFromJWT(token);
+        try {
+            String username = jwtTokenProvider.getUserFromJWT(token);
 
-        User user = userService.getUserByUsername(username);
-        user.setVerified(true);
-        userService.saveUser(user);
+            User user = userService.getUserByUsername(username);
+            if (user == null) {
+                return ResponseEntity.badRequest().body("Người dùng không tồn tại");
+            }
+            
+            if (user.isVerified()) {
+                return ResponseEntity.ok("Tài khoản đã được xác thực trước đó");
+            }
+            
+            user.setVerified(true);
+            userService.saveUser(user);
 
-        return ResponseEntity.ok("Xác thực thành công!");
+            return ResponseEntity.ok("Xác thực thành công!");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Token không hợp lệ hoặc đã hết hạn");
+        }
+    }
 
+    @PostMapping("/resend-verification")
+    public ResponseEntity<String> resendVerificationEmail(@RequestBody Map<String, String> request) {
+        try {
+            String email = request.get("email");
+            if (email == null || email.isEmpty()) {
+                return ResponseEntity.badRequest().body("Email không được cung cấp");
+            }
+
+            User user = userService.getUserByEmail(email);
+            if (user == null) {
+                return ResponseEntity.badRequest().body("Email không tồn tại trong hệ thống");
+            }
+
+            if (user.isVerified()) {
+                return ResponseEntity.badRequest().body("Tài khoản đã được xác thực");
+            }
+
+            // Tạo token mới và gửi email
+            String token = jwtTokenProvider.genarateTokens(user.getUsername());
+            emailService.sendVerificationEmail(user.getEmail(), token);
+
+            return ResponseEntity.ok("Email xác thực đã được gửi lại");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Không thể gửi email xác thực: " + e.getMessage());
+        }
     }
     @PostMapping("/validate")
     public ResponseEntity<?> validateToken(@RequestBody Map<String, String> request) {
