@@ -19,7 +19,7 @@ export const authService = {
     },
 
     verifyEmail: async (token) => {
-        const response = await fetch(`${API_ENDPOINTS.BASE_URL}/api/auth/verify?token=${token}`, {
+        const response = await fetch(`${API_ENDPOINTS.BASE_URL}/verify-email?token=${token}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
