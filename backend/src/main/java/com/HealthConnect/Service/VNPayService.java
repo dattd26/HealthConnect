@@ -71,7 +71,7 @@ public class VNPayService {
             String vnp_Amount    = String.valueOf(request.getAmount().longValue() * 100); // VND * 100
             String vnp_Locale    = vnpayConfig.getLocale();       // vn
             String vnp_CurrCode  = vnpayConfig.getCurrencyCode(); // VND
-            String vnp_IpAddr    = "127.0.0.1";
+            // String vnp_IpAddr    = "127.0.0.1";
             String vnp_CreateDate= LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
     
             log.info("VNPay parameters - TmnCode: {}, ReturnUrl: {}, Amount: {}, OrderInfo: {}, TxnRef: {}", 
@@ -88,7 +88,7 @@ public class VNPayService {
             vnp_Params.put("vnp_OrderInfo", vnp_OrderInfo);
             vnp_Params.put("vnp_OrderType", vnp_OrderType);
             vnp_Params.put("vnp_ReturnUrl", vnp_ReturnUrl);
-            vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
+            // vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
             vnp_Params.put("vnp_CreateDate", vnp_CreateDate);
             vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
             
