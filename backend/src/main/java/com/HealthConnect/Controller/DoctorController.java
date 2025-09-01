@@ -92,7 +92,7 @@ public class DoctorController {
                 "message", "Failed to update doctor availability: " + e.getMessage()
             ));
         }
-        // slotService.regenerateSlots(id);
+        slotService.regenerateSlots(id);
         return ResponseEntity.ok(result);
     }
     

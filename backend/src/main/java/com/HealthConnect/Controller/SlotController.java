@@ -100,4 +100,26 @@ public class SlotController {
                     ));
         }
     }
+
+    /**
+     * Regenerate slots for a doctor after availability changes
+     */
+    @PostMapping("/doctor/{doctorId}/regenerate")
+    public ResponseEntity<Map<String, String>> regenerateSlots(
+            @PathVariable @Positive(message = "Doctor ID must be positive") Long doctorId) {
+        
+        try {
+            slotService.regenerateSlots(doctorId);
+            return ResponseEntity.ok(Map.of(
+                "message", "Slots regenerated successfully",
+                "doctorId", doctorId.toString()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                        "error", "Failed to regenerate slots",
+                        "message", e.getMessage()
+                    ));
+        }
+    }
 }

@@ -187,8 +187,21 @@ const DoctorAvailabilityPage = () => {
             
             setMessage({ type: 'success', text: 'Đã lưu lịch làm việc thành công!' });
             
-            // Clear cache for this doctor to refresh data
-            slotService.clearDoctorCache(user.id);
+            // Regenerate slots based on new availability
+            try {
+                setMessage({ type: 'info', text: 'Đang tạo lại các slot thời gian dựa trên lịch làm việc mới...' });
+                await slotService.regenerateSlots(user.id);
+                setMessage({ 
+                    type: 'success', 
+                    text: 'Đã lưu lịch làm việc và tạo lại slot thời gian thành công! Các slot mới sẽ có sẵn trong vài giây.' 
+                });
+            } catch (error) {
+                console.error('Error regenerating slots:', error);
+                setMessage({ 
+                    type: 'warning', 
+                    text: 'Đã lưu lịch làm việc nhưng có lỗi khi tạo slot thời gian. Vui lòng thử lại hoặc liên hệ admin.' 
+                });
+            }
             
             // Refresh availability data
             await fetchAvailabilityData();

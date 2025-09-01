@@ -269,6 +269,33 @@ class SlotService {
   }
 
   /**
+   * Regenerate slots for a doctor (useful after availability changes)
+   */
+  static async regenerateSlots(doctorId) {
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/slots/doctor/${doctorId}/regenerate`,
+        {},
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeader()
+          },
+          timeout: 15000 // 15 second timeout for regeneration
+        }
+      );
+
+      // Clear cache for this doctor after regeneration
+      this.clearDoctorCache(doctorId);
+      
+      return response.data;
+    } catch (error) {
+      console.error('Error regenerating slots:', error);
+      throw this.handleError(error);
+    }
+  }
+
+  /**
    * Handle API errors consistently
    */
   static handleError(error) {
@@ -317,6 +344,20 @@ class SlotService {
   static hasCachedSlots(doctorId) {
     const cacheKey = `doctor_${doctorId}_available_slots`;
     return slotCache.get(cacheKey) !== null;
+  }
+
+  /**
+   * Test method to check if regeneration endpoint is working
+   */
+  static async testRegeneration(doctorId) {
+    try {
+      const result = await this.regenerateSlots(doctorId);
+      console.log('Slot regeneration test successful:', result);
+      return result;
+    } catch (error) {
+      console.error('Slot regeneration test failed:', error);
+      throw error;
+    }
   }
 }
 

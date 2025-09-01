@@ -115,6 +115,14 @@ export const useSlots = (doctorId, options = {}) => {
     fetchSlots(true);
   }, [fetchSlots]);
 
+  const forceRefreshSlots = useCallback(() => {
+    // Clear cache and force refresh
+    if (doctorId) {
+      SlotService.clearDoctorCache(doctorId);
+    }
+    fetchSlots(true);
+  }, [doctorId, fetchSlots]);
+
   const clearCache = useCallback(() => {
     if (doctorId) {
       SlotService.clearDoctorCache(doctorId);
@@ -128,6 +136,7 @@ export const useSlots = (doctorId, options = {}) => {
     error,
     lastFetch,
     refreshSlots,
+    forceRefreshSlots,
     clearCache,
     hasCachedData: enableCache && SlotService.hasCachedSlots(doctorId)
   };

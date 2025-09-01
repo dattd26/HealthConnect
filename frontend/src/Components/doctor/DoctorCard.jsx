@@ -112,6 +112,7 @@ const DoctorCardContent = memo(function DoctorCardContent({ doctor, onSelect, is
     loading,
     error,
     refreshSlots,
+    forceRefreshSlots,
     hasCachedData
   } = useSlots(doctor?.id, {
     enableCache: true,
@@ -186,6 +187,12 @@ const DoctorCardContent = memo(function DoctorCardContent({ doctor, onSelect, is
     setSelectedSlot(null);
     toast.info("Đang làm mới lịch khám...");
   }, [refreshSlots, toast]);
+
+  const handleForceRefresh = useCallback(() => {
+    forceRefreshSlots();
+    setSelectedSlot(null);
+    toast.info("Đang làm mới lịch khám (không dùng cache)...");
+  }, [forceRefreshSlots, toast]);
 
   // Memoized date selection handler to prevent recreating on every render
   const handleDateSelect = useCallback((date) => {
@@ -264,6 +271,14 @@ const DoctorCardContent = memo(function DoctorCardContent({ doctor, onSelect, is
                 title="Làm mới lịch khám"
               >
                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              </button>
+              <button
+                onClick={handleForceRefresh}
+                disabled={loading}
+                className="text-gray-500 hover:text-blue-600 transition-colors p-1 rounded-full hover:bg-blue-50"
+                title="Làm mới lịch khám (không dùng cache)"
+              >
+                <RefreshCw className="w-4 h-4" />
               </button>
             </div>
           </div>
